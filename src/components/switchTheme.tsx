@@ -18,8 +18,9 @@ export const SwitchTheme = () => {
 	useEffect(() => {
 		if (theme === "dark") {
 			document.documentElement.classList.add("dark");
+		} else {
+			document.documentElement.classList.remove("dark");
 		}
-		document.documentElement.classList.remove("dark");
 
 		localStorage.setItem(THEME_STORAGE_KEY, theme); // Guardar la preferencia actual
 	}, [theme]);

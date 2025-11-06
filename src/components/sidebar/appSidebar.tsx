@@ -1,5 +1,3 @@
-"use client"
-
 import {
 	AudioWaveform,
 	BookOpen,
@@ -15,7 +13,7 @@ import {
 import * as React from "react"
 
 import { NavMain } from "@/components/sidebar/navMain"
-import { NavProjects } from "@/components/sidebar/navprojects"
+import { NavProjects } from "@/components/sidebar/navProjects"
 import { NavUser } from "@/components/sidebar/navUser"
 import { TeamSwitcher } from "@/components/sidebar/teamSwitcher"
 import {

@@ -1,24 +1,15 @@
+/*
 import { Button } from "@/components/ui/button";
+import { useMessage } from "@/hooks/common/use-sendMessage";
 import { logoutResponse } from "@/lib/auth/authUsersApi";
-import { Toaster, toast } from "sonner";
+import type { responseMessage } from "@/utils/types/user";
 import { ImExit } from "react-icons/im";
-import { ResponseMessage } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { Toaster, toast } from "sonner";
+import { useRedirigir } from "@/hooks/common/use-redirigirUser";
 
 export const LogoutButton = () => {
-	const [message, setMessage] = useState<Error | ResponseMessage>();
-	const [user, setUser] = useState<ResponseMessage>();
-
-	useEffect(() => {
-		const redirigirUser = () => {
-			if (user) {
-				// Solo dispara el evento si no hay error y se realizo el cambio
-				window.location.reload();
-			}
-		};
-
-		redirigirUser();
-	}, [user]);
+	const { message,setMessage } = useMessage(null);
+	const { setUser } = useRedirigir<responseMessage>();
 
 	const handleClick = async () => {
 		const [err, message] = await logoutResponse();
@@ -38,7 +29,7 @@ export const LogoutButton = () => {
 					toast.promise(handleClick, {
 						success: "has cerrado la sesión",
 						loading: "cerrando sesión ...",
-						error: "no se pudo cerrar la sesión",
+						error: message,
 					});
 				}}
 				type="button"
@@ -52,3 +43,4 @@ export const LogoutButton = () => {
 		</div>
 	);
 };
+*/

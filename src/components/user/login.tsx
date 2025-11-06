@@ -88,7 +88,7 @@ export const LoginForm = () => {
 							resetPassword={true}
 						/>
 						<div className="flex justify-center">
-							<Button className="py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all">
+							<Button className="py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all hover:cursor-pointer">
 								Enviar
 							</Button>
 						</div>

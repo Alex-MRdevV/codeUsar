@@ -1,121 +1,101 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ViewPasswordInput } from "@/components/viewPassword";
 import { loginSchema } from "@/lib/schemas/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
-
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { useForm } from "react-hook-form";
+import { Toaster } from "sonner";
 import { Input } from "@/components/ui/input";
-import { loginResponse } from "@/lib/auth/authUsersApi";
-import { rolesUtilizar } from "@/schemas/auth/roles";
-import { useEffect, useState } from "react";
-import { Label } from "../ui/label";
-import { userLogin } from "@/lib/typesForAuth";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { Toaster, toast } from "sonner";
-import type { InputEmailProps } from "@/utils/types/common";
-import { useRedirigir } from "@/hooks/common/use-redirigir";
-import {ViewPasswordInput} from "@/"
+import { Label } from "@/components/ui/label";
+import { useMessage } from "@/hooks/common/use-sendMessage";
+import type { LoginFormData } from "@/utils/types/user";
+import LogoUsar from "@/assets/logito (1).png";
 
-export function LoginForm() {
+export const LoginForm = () => {
+	const { message } = useMessage<Error | null>(null);
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<InputEmailProps>({
-		resolver: zodResolver(loginSchema),
+	} = useForm<LoginFormData>({
+		resolver: valibotResolver(loginSchema),
 		defaultValues: {
 			email: "",
 			password: "",
-			rol: "",
+			rol: "user",
 		},
 	});
 
-	const [isVisible, setIsVisible] = useState(false);
-	const toggleVisibility = () => setIsVisible(!isVisible);
-
-	const roles = Object.entries(rolesUtilizar).map(([key, value]) => (
-		<option key={key} value={value}>
-
-		</option>
-	));
-
-	// Usar el hook para redirigir al usuario
-
-
-	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		const loadingToast = toast.loading("Iniciando sesión...");
-		const [err, userAccess] = await loginResponse(data);
-
-		toast.dismiss(loadingToast);
-
-		if (err) {
-			setMessage(err);
-			toast.error(err.message);
-		} else if (userAccess) {
-			setUser(userAccess);
-			setMessage(userAccess);
-			toast.success("Inicio de sesión exitoso!");
-		}
+	const onSubmit = (data: LoginFormData) => {
+		// Simulación de inicio de sesión exitoso
+		console.log("Datos enviados:", data);
 	};
 
 	return (
-		<div className="flex justify-center p-4 flex-row min-h-[90vh] mx-auto px-[100px] pt-[550px] space-x-16 items-center">
-			<Card className="shadow-2xl max-w-md w-full">
-				{ }
+		<div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+			<Card className="shadow-2xl max-w-md w-full mt-[-50px] bg-white dark:bg-gray-800">
 				<CardHeader className="text-center">
+					{/* Espacio para el logo */}
+					<div className="mb-4">
+						<img
+							src={LogoUsar.src}
+							alt="Logo"
+							className="mx-auto h-16 w-16"
+						/>
+					</div>
+					{/* Mensaje de error o éxito */}
 					{message && (
 						<div
 							className={`p-4 mb-4 rounded text-center max-w-md w-full ${message instanceof Error
-									? "bg-red-100 text-red-700"
-									: "bg-green-100 text-green-700"
+								? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+								: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
 								}`}
 						>
-							{message instanceof Error
-								? message.message
-								: "Inicio de sesión exitoso!"}
+							{message.message}
 						</div>
 					)}
-					<CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
+					<CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+						Iniciar Sesión
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 						<div>
-							<Label htmlFor="email">Correo electrónico</Label>
+							<Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
+								Correo electrónico
+							</Label>
 							<Input
 								type="email"
 								placeholder="Escribe tu correo"
 								id="email"
 								{...register("email")}
-								className="w-full mt-1"
+								className="w-full mt-1 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
 							/>
 							{errors.email?.message && (
-								<p className="text-sm text-red-600 max-w-xs overflow-hidden text-ellipsis">
+								<p className="text-sm text-red-600 dark:text-red-400 max-w-xs overflow-hidden text-ellipsis">
 									{errors.email.message}
 								</p>
 							)}
 						</div>
-						<ViewPasswordInput />
-						<Button className="w-full py-2 mt-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-all">
-							Enviar
-						</Button>
+						<ViewPasswordInput
+							htmlForNombre="password"
+							labelNombre="Contraseña"
+							placeholder="Escribe tu contraseña"
+							register={register}
+							errors={errors}
+							valueRegister="password"
+							resetPassword={true}
+						/>
+						<div className="flex justify-center">
+							<Button className="py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all">
+								Enviar
+							</Button>
+						</div>
 					</form>
 				</CardContent>
-				<CardFooter>
-					<p className="flex justify-center text-slate-950">
-						¿No tienes cuenta?&nbsp;
-						<a href="/register" className="text-sky-700">
-							Regístrate
-						</a>
-					</p>
-				</CardFooter>
 			</Card>
 			<Toaster theme="system" richColors position="top-right" />
 		</div>
 	);
-}
+};

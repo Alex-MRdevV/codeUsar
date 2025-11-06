@@ -1,34 +1,21 @@
 import { roles } from "@/utils/types/message";
-import { z } from "zod";
+import * as v from "valibot";
 
-export const loginSchema = z.object({
-	email: z
-		.email({
-			message: "Debe ser un correo valido",
-		})
-		.min(6),
-	password: z
-		.string()
-		.min(6, {
-			message: "La contraseña no es valida",
-		})
-		.max(35, {
-			message: "La contraseña supera el máximo de 35 caracteres",
-		})
-		.regex(
-			new RegExp(/(?=(?:.*[A-Z]){1})(?=(?:.*[a-z]){1})(?=(?:.*[@$?¡\-_]){1})/),
-			{
-				//expresiones regulares
-				//(?=(?:.*[A-Z]){1}) --> valida que hay mínimo una letra mayúscula
-				//(?=(?:.*[a-z]){1}) --> valida que hay mínimo una letra minúscula
-				//(?=(?:.*[@$?¡\-_]){1}) --> valida que hay mínimo un carácter especial
-				message:
-					"La contraseña debe contener letras mayúsculas, minúsculas, números y caracteres especiales (@,_,$,etc)",
-			}
-		),
-	rol: z.enum(roles, {
-		error: () => ({
-			message: "Seleccione un rol valido.",
-		}),
-	}),
+export const loginSchema = v.object({
+	email: v.pipe(
+		v.string("El correo debe ser un tipo texto"),
+		v.nonEmpty("No puede estar vació"),
+		v.email("Debe ser un correo valido")
+	),
+	password: v.pipe(
+		v.string("Debe ser un tipo string"),
+		v.nonEmpty("No puede estar vació"),
+		v.minLength(8, "Debe tener como mínimo 8 caracteres"),
+		v.maxLength(40, "No puede tener más de 40 caracteres"),
+		v.regex(
+			/(?=(?:.*[A-Z]){1})(?=(?:.*[a-z]){1})(?=(?:.*[@$?¡\-_]){1})/,
+			"La contraseña debe contener letras mayúsculas, minúsculas, números y caracteres especiales (@,_,$,etc)"
+		)
+	),
+	rol: v.picklist(roles, "Seleccione un rol válido."),
 });

@@ -1,0 +1,12 @@
+---
+import { LoginForm } from "@/components/users/login";
+import Layout from "@/layouts/Layout.astro";
+
+const token = Astro.cookies.get("tokenacceso");
+---
+
+<Layout title="login">
+	<main>
+		<LoginForm client:visible />
+	</main>
+</Layout>

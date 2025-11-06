@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { userLogin } from "@/lib/typesForAuth";
+import { useEffect, useState } from "react";
 
 export function useRedirigir<T = null>(initialState: T = null as T) {
 	const [user, setUser] = useState<T>(initialState);

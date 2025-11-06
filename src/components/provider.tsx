@@ -1,4 +1,4 @@
-import { useThemeSync } from "@/hooks/use-themeSync";
+import { useThemeSync } from "@/hooks/common/use-themeSync";
 import { themeStore } from "@/stores/themes";
 import { tourActiveStore } from '@/stores/tourActive';
 import { TOUR_STORAGE_KEY } from "@/utils/types/const";

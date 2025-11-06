@@ -34,7 +34,7 @@ export const ViewPasswordInput = ({ register,
 						onClick={toggleVisibility}
 						className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-700"
 					>
-						{visible ? <Eye /> : <EyeClosed />}
+						{visible ? <Eye className="dark:text-blue-50" /> : <EyeClosed className="dark:text-blue-50" />}
 					</button>
 				</div>
 				{typeof errors[valueRegister]?.message === "string" && (
@@ -46,8 +46,8 @@ export const ViewPasswordInput = ({ register,
 			{resetPassword && ( // Solo mostrar si se quiere recuperar la contraseña
 				<section>
 					<div className="flex justify-between text-xs">
-						<p className="text-slate-950">¿Olvidaste tu contraseña?</p>
-						<a href="/resetPassword" className="text-red-600 ">
+						<p className="text-slate-950 dark:text-gray-300">¿Olvidaste tu contraseña?</p>
+						<a href="/resetPassword" className="text-red-600">
 							Restablecer
 						</a>
 					</div>

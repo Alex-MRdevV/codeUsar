@@ -1,4 +1,4 @@
-import { roles } from "@/utils/types/message";
+import { roles } from "@/utils/types/user";
 import * as v from "valibot";
 
 export const loginSchema = v.object({

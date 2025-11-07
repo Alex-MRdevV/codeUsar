@@ -1,15 +1,15 @@
+import LogoUsar from "@/assets/logito (1).png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ViewPasswordInput } from "@/components/viewPassword";
+import { useMessage } from "@/hooks/common/use-sendMessage";
 import { loginSchema } from "@/lib/schemas/auth";
+import type { userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useForm } from "react-hook-form";
 import { Toaster } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useMessage } from "@/hooks/common/use-sendMessage";
-import type { LoginFormData } from "@/utils/types/user";
-import LogoUsar from "@/assets/logito (1).png";
 
 export const LoginForm = () => {
 	const { message } = useMessage<Error | null>(null);
@@ -18,7 +18,7 @@ export const LoginForm = () => {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<LoginFormData>({
+	} = useForm<userDataLogin>({
 		resolver: valibotResolver(loginSchema),
 		defaultValues: {
 			email: "",
@@ -27,7 +27,7 @@ export const LoginForm = () => {
 		},
 	});
 
-	const onSubmit = (data: LoginFormData) => {
+	const onSubmit = (data: userDataLogin) => {
 		// Simulación de inicio de sesión exitoso
 		console.log("Datos enviados:", data);
 	};
@@ -36,7 +36,6 @@ export const LoginForm = () => {
 		<div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
 			<Card className="shadow-2xl max-w-md w-full mt-[-50px] bg-white dark:bg-gray-800">
 				<CardHeader className="text-center">
-					{/* Espacio para el logo */}
 					<div className="mb-4">
 						<img
 							src={LogoUsar.src}

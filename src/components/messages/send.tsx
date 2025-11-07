@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { useState } from "react";
 
-export const SendMessages = () => {
+interface Props {
+	templates: {
+		id: string
+		name: string
+	}[]
+	messages: string
+}
+
+export const SendMessages = ({templates,messages}: Props) => {
 	const [recipients, setRecipients] = useState<string[]>([]);
 	const [selectedTemplate, setSelectedTemplate] = useState("");
 	const [message, setMessage] = useState("");
@@ -50,6 +58,7 @@ export const SendMessages = () => {
 				<div className="lg:col-span-2 space-y-6">
 					<TemplateSelector
 						value={selectedTemplate}
+						templates={templates}
 						onChange={(templateId) => {
 							setSelectedTemplate(templateId);
 							// Si se selecciona un template, puedes generar un mensaje predeterminado

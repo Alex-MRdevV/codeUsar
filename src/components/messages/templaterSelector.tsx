@@ -1,17 +1,13 @@
-
-const templates = [
-	{ id: "custom", name: "Personalizado" },
-	{ id: "promo", name: "Promoción" },
-	{ id: "reminder", name: "Recordatorio" },
-	{ id: "welcome", name: "Bienvenida" },
-];
-
 interface TemplateSelectorProps {
 	value: string;
 	onChange: (templateId: string) => void;
+	templates: {
+		id: string
+		name: string
+	}[]
 }
 
-export const TemplateSelector = ({ value, onChange }: TemplateSelectorProps) => {
+export const TemplateSelector = ({ value, onChange, templates }: TemplateSelectorProps) => {
 	return (
 		<article>
 			<label className="text-sm font-semibold text-foreground mb-3 block">

@@ -30,10 +30,6 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({ message, recipients })
 						<span>Caracteres:</span>
 						<span className="font-semibold">{message.length}</span>
 					</li>
-					<li className="flex justify-between">
-						<span>Costo estimado:</span>
-						<span className="font-semibold text-primary">${(recipients.length * 0.5).toFixed(2)}</span>
-					</li>
 				</ul>
 			</div>
 		</div>

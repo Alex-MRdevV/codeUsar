@@ -6,7 +6,14 @@
 		"dev": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
-		"astro": "astro"
+		"astro": "astro",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate:local": "wrangler d1 migrations apply d1-demo-prod-db --local",
+		"db:migrate:prod": "wrangler d1 migrations apply d1-demo-prod-db --remote",
+		"db:migrate:preview": "wrangler d1 migrations apply --env preview d1-demo-preview-db --remote",
+		"db:studio:local": "LOCAL_DB_PATH=$(find .wrangler/state/v3/d1/miniflare-D1DatabaseObject -type f -name '*.sqlite' -print -quit) drizzle-kit studio",
+		"db:studio:preview": "source .drizzle.env && DB_ID='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' drizzle-kit studio",
+		"db:studio:prod": "source .drizzle.env && DB_ID='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' drizzle-kit studio"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^12.6.10",
@@ -40,6 +47,7 @@
 		"tailwind-merge": "^3.3.1",
 		"tailwindcss": "^4.1.16",
 		"valibot": "^1.1.0",
+		"xlsx": "^0.18.5",
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {

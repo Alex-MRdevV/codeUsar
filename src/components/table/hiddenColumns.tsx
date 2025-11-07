@@ -1,11 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import type { ColumnDef } from "@/utils/types/table";
-
-interface ColumnVisibilityToggleProps<T> {
-	columns: ColumnDef<T>[];
-	hiddenColumns: Set<keyof T>;
-	setHiddenColumns: React.Dispatch<React.SetStateAction<Set<keyof T>>>;
-}
+import type { ColumnVisibilityToggleProps } from "@/utils/types/table";
+import { useEffect, useRef, useState } from "react";
 
 export function ColumnVisibilityToggle<T>({
 	columns,
@@ -60,8 +54,8 @@ export function ColumnVisibilityToggle<T>({
 							Mostrar/Ocultar Columnas
 						</div>
 						{columns.map((column) => {
-							const isVisible = !hiddenColumns.has(column.accessorKey);
-							const headerText = typeof column.header === 'string'
+							const isVisible = !hiddenColumns.has(column.accessorKey as keyof T);
+							const headerText = typeof column.header === "string"
 								? column.header
 								: String(column.accessorKey);
 
@@ -73,7 +67,7 @@ export function ColumnVisibilityToggle<T>({
 									<input
 										type="checkbox"
 										checked={isVisible}
-										onChange={() => toggleColumn(column.accessorKey)}
+										onChange={() => toggleColumn(column.accessorKey as keyof T)}
 										className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
 									/>
 									<span className="ml-2 text-sm text-gray-700 dark:text-gray-300">

@@ -1,14 +1,6 @@
+import type { ActionBarProps } from "@/utils/types/table";
 import { Search } from "lucide-react";
 import React from "react";
-
-interface ActionBarProps {
-	showActions: boolean;
-	searchColumn?: boolean;
-	searchTerm?: string;
-	setSearchTerm?: (value: string) => void;
-	setCurrentPage?: (page: number) => void;
-	searchPlaceholder?: string;
-}
 
 export const ActionBar: React.FC<ActionBarProps> = ({
 	showActions,

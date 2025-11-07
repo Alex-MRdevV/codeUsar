@@ -1,46 +1,54 @@
-import type { ColumnDef } from "@/utils/types/table";
-import type { ReactNode } from "react";
-
-interface TableDataProps<T> {
-	visibleColumns: ColumnDef<T>[];
-	paginatedData: T[];
-	renderHeader: (column: ColumnDef<T>) => ReactNode;
-	renderCell: (row: T, column: ColumnDef<T>) => ReactNode;
-}
+import { ALIGN_CLASSES, type ColumnDef, DEFAULT_CLASSES, type TableDataProps } from "@/utils/types/table";
 
 export const TableData = <T extends { id?: string | number }>({
-	visibleColumns,
-	paginatedData,
-	renderHeader,
+	columns,
+	data,
 	renderCell,
+	renderHeader,
+	enableHiddenColumns = false,
+	classNames = {},
+	emptyStateMessage = 'No se encontraron resultados.',
 }: TableDataProps<T>) => {
+	const visibleColumns = enableHiddenColumns
+		? columns.filter(col => !col.hidden)
+		: columns;
+
+	const getClassName = (key: keyof typeof DEFAULT_CLASSES) =>
+		classNames[key] || DEFAULT_CLASSES[key];
+
+	const getAlignClass = (align: ColumnDef<T>['align'] = 'left') =>
+		ALIGN_CLASSES[align];
+
+	const renderHeaderContent = (column: ColumnDef<T>) =>
+		renderHeader ? renderHeader(column) : column.header;
+
 	return (
-		<div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
-			<div className="overflow-x-auto">
-				<table className="w-full">
+		<div className={getClassName('container')}>
+			<div className={getClassName('wrapper')}>
+				<table className={getClassName('table')}>
 					<thead>
-						<tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-							{visibleColumns.map((column) => (
+						<tr className={getClassName('theadRow')}>
+							{visibleColumns.map(column => (
 								<th
-									key={column.accessorKey as string}
-									className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+									key={column.accessorKey}
+									className={`${getClassName('th')} ${getAlignClass(column.align)}`}
 								>
-									{renderHeader(column)}
+									{renderHeaderContent(column)}
 								</th>
 							))}
 						</tr>
 					</thead>
-					<tbody>
-						{paginatedData.length > 0 ? (
-							paginatedData.map((row, idx) => (
+					<tbody className={classNames.tbody}>
+						{data.length > 0 ? (
+							data.map((row, idx) => (
 								<tr
-									key={row.id || idx}
-									className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+									key={row.id ?? idx}
+									className={getClassName('tbodyRow')}
 								>
-									{visibleColumns.map((column) => (
+									{visibleColumns.map(column => (
 										<td
-											key={column.accessorKey as string}
-											className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
+											key={column.accessorKey as keyof T}
+											className={`${getClassName('td')} ${getAlignClass(column.align)}`}
 										>
 											{renderCell(row, column)}
 										</td>
@@ -51,9 +59,9 @@ export const TableData = <T extends { id?: string | number }>({
 							<tr>
 								<td
 									colSpan={visibleColumns.length}
-									className="h-24 text-center text-gray-500 dark:text-gray-400"
+									className={getClassName('emptyState')}
 								>
-									No se encontraron resultados.
+									{emptyStateMessage}
 								</td>
 							</tr>
 						)}

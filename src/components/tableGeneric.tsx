@@ -1,11 +1,17 @@
+import { PaginationAplicada } from "@/components/paginar";
 import { ActionBar } from "@/components/table/actionBar";
 import { ActionsButtons } from "@/components/table/actionButtons";
+import { ColumnVisibilityToggle } from "@/components/table/hiddenColumns";
 import { TableData } from "@/components/table/tableData";
-import type { ColumnDef, GenericDataTableProps } from "@/utils/types/table";
-import { useCallback, useMemo, useState } from "react";
-import { PaginationAplicada } from "@/components/paginar";
 import { useSearchWithDebounce } from "@/hooks/common/use-searchDebounce";
 import type { SearchableItem } from "@/utils/types/common";
+import type { ColumnDef, GenericDataTableProps } from "@/utils/types/table";
+import { useCallback, useMemo, useState } from "react";
+
+interface Prev<T> {
+	key: keyof T | null;
+	direction: "asc" | "desc" | null;
+}
 
 export function GenericDataTable<T extends SearchableItem>({
 	data = [],
@@ -21,14 +27,12 @@ export function GenericDataTable<T extends SearchableItem>({
 	pageSize = 10,
 }: GenericDataTableProps<T>) {
 	const [searchTerm, setSearchTerm] = useState<string>("");
-	const [sortConfig, setSortConfig] = useState<{
-		key: string | null;
-		direction: "asc" | "desc" | null;
-	}>({ key: null, direction: null });
+	const [sortConfig, setSortConfig] = useState<Prev<T>>({
+		key: null,
+		direction: null,
+	});
 	const [currentPage, setCurrentPage] = useState<number>(0);
 	const [hiddenColumns, setHiddenColumns] = useState<Set<keyof T>>(new Set());
-
-	// Usar el hook de búsqueda con debounce
 	const searchResults = useSearchWithDebounce(
 		searchTerm,
 		data,
@@ -36,25 +40,19 @@ export function GenericDataTable<T extends SearchableItem>({
 		300
 	);
 
-	// Filtrar datos: usa searchResults si hay término de búsqueda, sino usa todos los datos
-	const filteredData = useMemo(() => {
-		if (!searchTerm || !searchColumn) return data;
-		return searchResults;
-	}, [data, searchTerm, searchColumn, searchResults]);
-
-	// Ordenar datos
+	const dataToSort = (searchTerm && searchColumn) ? searchResults : data;
 	const sortedData = useMemo(() => {
-		if (!sortConfig.key) return filteredData;
+		if (!sortConfig.key) return dataToSort;
 
-		return [...filteredData].sort((a, b) => {
-			const aValue = a[sortConfig.key];
-			const bValue = b[sortConfig.key];
+		return [...dataToSort].sort((a, b) => {
+			const aValue = a[sortConfig.key!];
+			const bValue = b[sortConfig.key!];
 
 			if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
 			if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
 			return 0;
 		});
-	}, [filteredData, sortConfig]);
+	}, [dataToSort, sortConfig]);
 
 	// Paginar datos
 	const paginatedData = useMemo(() => {
@@ -68,7 +66,7 @@ export function GenericDataTable<T extends SearchableItem>({
 	// Manejar ordenamiento
 	const handleSort = useCallback(
 		(key: keyof T) => {
-			setSortConfig((prev) => {
+			setSortConfig((prev: Prev<T>) => {
 				if (prev.key === key) {
 					if (prev.direction === "asc") return { key, direction: "desc" };
 					if (prev.direction === "desc") return { key: null, direction: null };
@@ -125,20 +123,28 @@ export function GenericDataTable<T extends SearchableItem>({
 				</div>
 			)}
 
-			{/* Actions Bar */}
-			<ActionBar
-				showActions={showActions}
-				searchColumn={!!searchColumn}
-				searchTerm={searchTerm}
-				setSearchTerm={setSearchTerm}
-				setCurrentPage={setCurrentPage}
-				searchPlaceholder={searchPlaceholder}
-			/>
+			{/* Actions Bar con el nuevo componente */}
+			<div className="flex items-center justify-between gap-4">
+				<ActionBar
+					showActions={showActions}
+					searchColumn={!!searchColumn}
+					searchTerm={searchTerm}
+					setSearchTerm={setSearchTerm}
+					setCurrentPage={setCurrentPage}
+					searchPlaceholder={searchPlaceholder}
+				/>
 
-			{/* Action Buttons */}
+				{/* ✅ AGREGAR: Toggle de visibilidad de columnas */}
+				<ColumnVisibilityToggle
+					columns={columns}
+					hiddenColumns={hiddenColumns}
+					setHiddenColumns={setHiddenColumns}
+				/>
+			</div>
+
 			<ActionsButtons onAdd={onAdd} onImport={onImport} onExport={onExport} />
 
-			{/* Table */}
+			{/* ✅ USAR visibleColumns */}
 			<TableData
 				visibleColumns={visibleColumns}
 				paginatedData={paginatedData}
@@ -146,11 +152,10 @@ export function GenericDataTable<T extends SearchableItem>({
 				renderCell={renderCell}
 			/>
 
-			{/* Pagination */}
 			<PaginationAplicada
-				currentPage={currentPage + 1} // Ajustar para que sea 1-based
+				currentPage={currentPage + 1}
 				totalPages={totalPages}
-				onPageChange={(page) => setCurrentPage(page - 1)} // Ajustar para que sea 0-based
+				onPageChange={(page) => setCurrentPage(page - 1)}
 			/>
 		</div>
 	);

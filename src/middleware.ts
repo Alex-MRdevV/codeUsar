@@ -1,4 +1,4 @@
-import { routeRoles } from "@/utils/types/message";
+import { routeRoles } from "@/utils/types/user";
 import { defineMiddleware } from "astro/middleware";
 import { jwtVerify } from "jose";
 

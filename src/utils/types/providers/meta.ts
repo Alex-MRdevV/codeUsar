@@ -1,3 +1,12 @@
+export interface SendMessageRequest {
+	recipients: string[]; // Array de números de teléfono
+	messageType: "text" | "template";
+	content?: string; // Para mensajes de texto
+	templateName?: string; // Para mensajes de plantilla
+	templateLanguage?: string; // Código de idioma (ej: "es", "en_US")
+	templateParams?: string[]; // Parámetros para la plantilla
+}
+
 export interface MetaRequest {
 	messaging_product: "whatsapp";
 	recipient_type: "individual";

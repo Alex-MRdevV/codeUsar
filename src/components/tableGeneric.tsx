@@ -13,7 +13,7 @@ interface Prev<T> {
 	direction: "asc" | "desc" | null;
 }
 
-export function GenericDataTable<T extends SearchableItem>({
+export function GenericDataTable<T extends SearchableItem & { id?: string | number }>({
 	data = [],
 	columns = [],
 	searchColumn,
@@ -33,6 +33,7 @@ export function GenericDataTable<T extends SearchableItem>({
 	});
 	const [currentPage, setCurrentPage] = useState<number>(0);
 	const [hiddenColumns, setHiddenColumns] = useState<Set<keyof T>>(new Set());
+
 	const searchResults = useSearchWithDebounce(
 		searchTerm,
 		data,
@@ -40,7 +41,8 @@ export function GenericDataTable<T extends SearchableItem>({
 		300
 	);
 
-	const dataToSort = (searchTerm && searchColumn) ? searchResults : data;
+	const dataToSort = searchTerm && searchColumn ? searchResults : data;
+
 	const sortedData = useMemo(() => {
 		if (!sortConfig.key) return dataToSort;
 
@@ -74,7 +76,7 @@ export function GenericDataTable<T extends SearchableItem>({
 				return { key, direction: "asc" };
 			});
 		},
-		[setSortConfig]
+		[]
 	);
 
 	// Columnas visibles
@@ -83,11 +85,16 @@ export function GenericDataTable<T extends SearchableItem>({
 		[columns, hiddenColumns]
 	);
 
-	// Renderizar celda
+	// ✅ FIX: Renderizar celda con tipos correctos
 	const renderCell = useCallback(
 		(row: T, column: ColumnDef<T>) => {
 			if (column.cell) {
-				return column.cell({ row: { getValue: (key) => row[key], original: row } });
+				return column.cell({
+					row: {
+						getValue: (key: keyof T) => row[key],
+						original: row,
+					},
+				});
 			}
 			return String(row[column.accessorKey] ?? "");
 		},
@@ -123,7 +130,7 @@ export function GenericDataTable<T extends SearchableItem>({
 				</div>
 			)}
 
-			{/* Actions Bar con el nuevo componente */}
+			{/* Actions Bar */}
 			<div className="flex items-center justify-between gap-4">
 				<ActionBar
 					showActions={showActions}
@@ -134,7 +141,7 @@ export function GenericDataTable<T extends SearchableItem>({
 					searchPlaceholder={searchPlaceholder}
 				/>
 
-				{/* ✅ AGREGAR: Toggle de visibilidad de columnas */}
+				{/* Toggle de visibilidad de columnas */}
 				<ColumnVisibilityToggle
 					columns={columns}
 					hiddenColumns={hiddenColumns}
@@ -144,10 +151,9 @@ export function GenericDataTable<T extends SearchableItem>({
 
 			<ActionsButtons onAdd={onAdd} onImport={onImport} onExport={onExport} />
 
-			{/* ✅ USAR visibleColumns */}
 			<TableData
-				visibleColumns={visibleColumns}
-				paginatedData={paginatedData}
+				columns={visibleColumns}
+				data={paginatedData}
 				renderHeader={renderHeader}
 				renderCell={renderCell}
 			/>

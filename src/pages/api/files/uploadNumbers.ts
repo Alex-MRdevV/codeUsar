@@ -28,7 +28,6 @@ export const POST: APIRoute = async ({ request }) => {
 		const worksheet = workbook.Sheets[sheetName];
 		const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-		// Validar los datos con el esquema
 		const {
 			success,
 			data: validatedData,

@@ -30,7 +30,6 @@ export const PaginatedTable = <T extends { id?: string | number }>({
 		return Math.ceil(data.length / itemsPerPage);
 	}, [data.length, itemsPerPage]);
 
-	// Resetear a página 1 cuando cambian los datos
 	useMemo(() => {
 		setCurrentPage(1);
 	}, [data.length]);

@@ -1,0 +1,40 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { SiAdblock } from "react-icons/si";
+---
+
+<Layout title="Acceso no autorizado">
+	<div
+		class="flex items-center justify-center bg-gray-100 dark:bg-gray-900 min-h-[90vh] mx-auto px-[100px] pt-[350px]"
+	>
+		<div
+			class="bg-white dark:bg-gray-800 p-10 rounded-lg shadow-lg dark:shadow-gray-900/50 text-center"
+		>
+			<header class="flex justify-center items-center mb-6">
+				<h1
+					class="text-6xl font-bold text-red-600 dark:text-red-500 flex items-center"
+				>
+					403
+					<span class="ml-4 text-5xl">
+						<SiAdblock style={{ color: "#dc3545", fontSize: "3rem" }} />
+					</span>
+				</h1>
+			</header>
+			<p class="text-xl text-gray-700 dark:text-gray-200 mb-4">
+				Acceso No Autorizado
+			</p>
+			<p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+				No tienes permiso para acceder a esta página.
+			</p>
+
+			<a
+				href="/"
+				class="bg-blue-600 dark:bg-blue-700 text-white py-3 px-6
+			rounded-md text-lg hover:bg-blue-700 dark:hover:bg-blue-600
+			hover:text-white transition duration-300"
+			>
+				Volver al Inicio></a
+			>
+		</div>
+	</div>
+</Layout>

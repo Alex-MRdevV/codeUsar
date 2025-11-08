@@ -1,5 +1,4 @@
 ---
-import { SendMessages } from "@/components/messages/send";
 import { LoginForm } from "@/components/user/login";
 
 import Layout from "@/layouts/Layout.astro";
@@ -9,6 +8,6 @@ const token = Astro.cookies.get("tokenacceso");
 
 <Layout title="login">
 	<main>
-		<SendMessages client:visible />
+		<LoginForm client:visible />
 	</main>
 </Layout>

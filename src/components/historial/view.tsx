@@ -1,6 +1,6 @@
+import { StatsOverview } from "@/components/historial/statsOverview";
 import { TemplateCard } from "@/components/historial/templateCard";
 import type { HistorialAplicadoProps } from "@/utils/types/historial";
-import { StatsOverview } from "./statsOverview";
 
 export const HistorialAplicado = ({ templates, statsConfig }: HistorialAplicadoProps) => {
 	const totalMessages = templates.reduce((sum, t) => sum + t.count, 0);

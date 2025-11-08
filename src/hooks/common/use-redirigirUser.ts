@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useRedirigir<T = null>(initialState: T = null as T) {
+export function useRedirigir<T = null>(initialState: T = null as T,event: string) {
 	const [user, setUser] = useState<T>(initialState);
 
 	useEffect(() => {
@@ -8,7 +8,7 @@ export function useRedirigir<T = null>(initialState: T = null as T) {
 			if (user) {
 				// Dispara el evento solo si hay datos de usuario
 				window.dispatchEvent(
-					new CustomEvent("userAuthenticate", { detail: user })
+					new CustomEvent(event, { detail: user })
 				);
 			}
 		};

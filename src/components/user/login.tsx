@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfigurarInicio } from "@/components/user/configurarInicio";
 import { ViewPasswordInput } from "@/components/viewPassword";
+import { useRedirigir } from "@/hooks/common/use-redirigirUser";
 import { useMessage } from "@/hooks/common/use-sendMessage";
 import { loginSchema } from "@/lib/schemas/auth";
+import { loginResponse } from "@/utils/services/user/loginResponse";
 import type { userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useForm } from "react-hook-form";
@@ -13,6 +16,8 @@ import { Toaster } from "sonner";
 
 export const LoginForm = () => {
 	const { message } = useMessage<Error | null>(null);
+	const { createHandler } = ConfigurarInicio();
+	const { setUser } = useRedirigir<userDataLogin | null>(null, "user-logged-in");
 
 	const {
 		register,
@@ -27,10 +32,16 @@ export const LoginForm = () => {
 		},
 	});
 
-	const onSubmit = (data: userDataLogin) => {
-		// Simulación de inicio de sesión exitoso
-		console.log("Datos enviados:", data);
-	};
+	const onSubmit = createHandler(async (data: userDataLogin) => {
+		const response = await loginResponse(data);
+
+		// Si el inicio de sesión es exitoso, guarda los datos del usuario
+		if (response) {
+			setUser(errors); // Actualiza el estado del usuario
+		}
+
+		return response;
+	});
 
 	return (
 		<div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">

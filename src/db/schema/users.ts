@@ -7,7 +7,6 @@ export const User = sqliteTable(
 		email: text("correo").notNull().unique(),
 		password: text("password").notNull(),
 		nombre: text("primerNombre").notNull(),
-		apellido: text("primerApellido").notNull(),
 		estado: text("estado", { enum: ["activo", "retirado"] }).default("activo"),
 		rol: text("rol", { enum: ["admin", "user"] }).notNull(),
 		secretUserJWT: text("secretUserJWT").notNull(),

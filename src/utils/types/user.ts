@@ -2,9 +2,16 @@ export interface responseMessage {
 	message: string;
 }
 
+export interface userDevolver {
+  id: string;
+  rol: "admin" | "user" | "normal";
+  nombre: string;
+  userSecretJWT: string;
+}
+
 export const routeRoles: Record<string, string> = {
 	"/admin": "admin",
-	"/user": "usuario",
+	"/user": "user",
 };
 
 export const roles = ["admin", "user"] as const;

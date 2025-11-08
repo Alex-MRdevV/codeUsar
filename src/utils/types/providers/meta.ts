@@ -1,3 +1,20 @@
+export interface ApiResponse {
+	message: string;
+	data?: {
+		results: MessageResult[];
+		summary: { total: number; success: number; failed: number };
+	} | null;
+	error?: string;
+}
+
+export interface MessageResult {
+	recipient: string;
+	messageId?: string;
+	status: "success" | "error";
+	errorCode?: number;
+	errorMessage?: string;
+}
+
 export interface SendMessageRequest {
 	recipients: string[]; // Array de números de teléfono
 	messageType: "text" | "template";

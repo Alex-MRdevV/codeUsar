@@ -1,4 +1,4 @@
-import { sendWhatsAppMessages } from "@/lib/providersMensajes/sendMessages";
+import { sendMessagesToAPI } from "@/lib/providersMensajes/callApi/send";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { APIRoute } from "astro";
@@ -21,11 +21,65 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	const jsonData: SendMessageRequest = await request.json();
 
+	// ✅ VALIDACIONES AGREGADAS
+	// Validar que haya destinatarios
+	if (!jsonData.recipients || jsonData.recipients.length === 0) {
+		return res(
+			{
+				message: "No hay destinatarios en la solicitud",
+			},
+			{
+				status: 400,
+			}
+		);
+	}
+
+	// Validar uso correcto de messageType
+	if (jsonData.recipients.length > 1 && jsonData.messageType === "text") {
+		return res(
+			{
+				message:
+					"Para envíos masivos debes usar messageType: 'template'. Los mensajes de texto solo funcionan en conversaciones activas.",
+			},
+			{
+				status: 400,
+			}
+		);
+	}
+
+	// Validar campos requeridos para templates
+	if (jsonData.messageType === "template") {
+		if (!jsonData.templateName || !jsonData.templateLanguage) {
+			return res(
+				{
+					message:
+						"templateName y templateLanguage son requeridos para messageType: 'template'",
+				},
+				{
+					status: 400,
+				}
+			);
+		}
+	}
+
+	// Validar campos requeridos para text
+	if (jsonData.messageType === "text" && !jsonData.content) {
+		return res(
+			{
+				message: "content es requerido para messageType: 'text'",
+			},
+			{
+				status: 400,
+			}
+		);
+	}
+
 	try {
-		const [error, result] = await sendWhatsAppMessages(
+		const [error, result] = await sendMessagesToAPI(
 			jsonData,
 			ACCESS_TOKEN,
-			PHONE_NUMBER_ID
+			PHONE_NUMBER_ID,
+			10 // batchSize explícito
 		);
 
 		if (error) {

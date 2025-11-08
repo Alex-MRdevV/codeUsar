@@ -1,9 +1,6 @@
 ---
 import { LoginForm } from "@/components/user/login";
-
 import Layout from "@/layouts/Layout.astro";
-
-const token = Astro.cookies.get("tokenacceso");
 ---
 
 <Layout title="login">
@@ -11,3 +8,23 @@ const token = Astro.cookies.get("tokenacceso");
 		<LoginForm client:visible />
 	</main>
 </Layout>
+
+<script>
+	import { type userDevolver } from "@/utils/types/user";
+
+	const routes: Record<userDevolver["rol"], string> = {
+		admin: "admin",
+		user: "user",
+		normal: "/",
+	};
+
+	window.addEventListener("userAuthenticate", (event) => {
+		const user = (event as CustomEvent<userDevolver>).detail;
+
+		if (!user?.rol) return;
+
+		const target = routes[user.rol] || "/";
+		// Redirección segura y más clara
+		window.location.assign(target);
+	});
+</script>

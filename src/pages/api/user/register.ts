@@ -2,14 +2,14 @@ import { User } from "@/db/schema/users";
 import { accessToken } from "@/lib/accessTokens";
 import { existsUser } from "@/lib/drizzle/auth/existsUsers";
 import { registerSchema } from "@/lib/schemas/user/register";
-import { db } from "@/utils/db";
+import { getDb } from "@/utils/db";
 import { passwordGenerate } from "@/utils/password/generate";
 import { hashPassword } from "@/utils/password/hashPassword";
 import { res } from "@/utils/responseAstro";
 import { uuid } from "@/utils/uuid";
 import { type APIRoute } from "astro";
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, locals }) => {
 	const { success, data, error } = registerSchema.safeParse(
 		await request.json()
 	);
@@ -19,7 +19,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 	const { email, rol, confirmPassword, nombre } = data;
 
 	try {
-		const [user] = await existsUser.execute({
+		const db = getDb(locals.runtime.env.DB);
+
+		const [user] = await existsUser(db).execute({
 			email: email,
 			estado: "activo",
 		});

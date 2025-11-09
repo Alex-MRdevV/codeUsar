@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 
-// ✅ Verificación del webhook (Meta/WhatsApp)
 export const GET: APIRoute = async ({ url, locals }) => {
 	const { env } = locals.runtime;
 	const VERIFY_TOKEN = env.VERIFY_TOKEN;
@@ -10,26 +9,18 @@ export const GET: APIRoute = async ({ url, locals }) => {
 	const token = url.searchParams.get("hub.verify_token");
 
 	if (mode === "subscribe" && token === VERIFY_TOKEN) {
-		console.log("✅ WEBHOOK VERIFIED");
 		return new Response(challenge, { status: 200 });
 	}
-
-	console.warn("❌ WEBHOOK VERIFICATION FAILED");
 	return new Response("Forbidden", { status: 403 });
 };
 
 // ✅ Recepción de eventos de WhatsApp (mensajes, estados, errores, etc.)
 export const POST: APIRoute = async ({ request }) => {
 	try {
-		const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
 		const body = await request.json();
-
-		console.log(`\n📩 Webhook recibido a las ${timestamp}`);
-		console.log(JSON.stringify(body, null, 2));
 
 		// 1️⃣ Validar que sea de WhatsApp
 		if (body.object !== "whatsapp_business_account") {
-			console.warn("⚠️ Objeto no reconocido:", body.object);
 			return new Response("Ignored", { status: 200 });
 		}
 
@@ -69,7 +60,6 @@ export const POST: APIRoute = async ({ request }) => {
 
 		return new Response("EVENT_RECEIVED", { status: 200 });
 	} catch (error) {
-		console.error("❌ Error procesando el webhook:", error);
 		return new Response("Error", { status: 500 });
 	}
 };

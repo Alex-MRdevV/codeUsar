@@ -1,14 +1,15 @@
 import { Clients } from "@/db/schema/clients";
 import { sheetSchema } from "@/lib/schemas/files/validarNumeros";
-import { db } from "@/utils/db";
+import { getDb } from "@/utils/db";
 import { res } from "@/utils/responseAstro";
 import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 import XLSX from "xlsx";
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
 	const data = await request.formData();
 	const file = data.get("file") as File;
+	const db = getDb(locals.runtime.env.DB);
 
 	if (!file) {
 		return res(

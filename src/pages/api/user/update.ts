@@ -1,0 +1,106 @@
+import { User } from "@/db/schema/users";
+import { accessToken } from "@/lib/accessTokens";
+import { existsUser, existUserById } from "@/lib/drizzle/auth/existsUsers";
+import { updateSchema } from "@/lib/schemas/user/register";
+import { getDb } from "@/utils/db";
+import { passwordGenerate } from "@/utils/password/generate";
+import { hashPassword } from "@/utils/password/hashPassword";
+import { res } from "@/utils/responseAstro";
+import { type APIRoute } from "astro";
+import { eq } from "drizzle-orm";
+
+export const POST: APIRoute = async ({ request, cookies, locals }) => {
+	const { success, data, error } = updateSchema.safeParse(await request.json());
+	if (!success) return res(error.message, { status: 400 });
+
+	const { email, rol, id, confirmPassword, nombre } = data;
+
+	try {
+		const db = getDb(locals.runtime.env.DB);
+		// Verificar que el usuario a actualizar existe
+		const [user] = await existUserById(db).execute({
+			id: id,
+		});
+
+		if (!user)
+			return res({ message: "Usuario no encontrado" }, { status: 404 });
+
+		// Si se proporciona un email, verificar que no esté en uso
+		if (email) {
+			const [existingUserByEmail] = await existsUser(db).execute({
+				email: email,
+				estado: "activo",
+			});
+
+			// Si existe un usuario con ese email Y no es el mismo usuario que estamos actualizando
+			if (existingUserByEmail && existingUserByEmail.id !== id)
+				return res({ message: "El email ya está en uso" }, { status: 400 });
+		}
+
+		// Preparar los datos a actualizar
+		const updateData: any = {};
+
+		if (nombre) updateData.nombre = nombre;
+		if (email) updateData.email = email;
+		if (rol) updateData.rol = rol;
+
+		// Si se proporciona nueva contraseña, hashearla
+		if (confirmPassword) {
+			const { hash, salt } = await hashPassword(confirmPassword);
+			updateData.password = `${salt}:${hash}`;
+
+			// Generar nuevo secret para invalidar tokens anteriores
+			const userSecret = passwordGenerate();
+			const { hash: secretHash, salt: secretSalt } = await hashPassword(
+				userSecret
+			);
+			updateData.secretUserJWT = `${secretSalt}:${secretHash}`;
+		}
+
+		// Actualizar el usuario
+		const [updatedUser] = await db
+			.update(User)
+			.set(updateData)
+			.where(eq(User.id, id))
+			.returning({
+				id: User.id,
+				rol: User.rol,
+				nombre: User.nombre,
+				email: User.email,
+				userSecretJWT: User.secretUserJWT,
+			});
+
+		if (!updatedUser)
+			return res({ message: "Error al actualizar usuario" }, { status: 500 });
+
+		// Generar nuevo token con los datos actualizados
+		const token = await accessToken({
+			id: updatedUser.id,
+			rol: updatedUser.rol,
+			nombre: updatedUser.nombre,
+			userSecretJWT: updatedUser.userSecretJWT,
+		});
+
+		cookies.set("tokenAcceso", token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: "strict",
+		});
+
+		return res(
+			{
+				message: "Usuario actualizado exitosamente",
+				user: {
+					id: updatedUser.id,
+					email: updatedUser.email,
+					nombre: updatedUser.nombre,
+					rol: updatedUser.rol,
+				},
+			},
+			{ status: 200 }
+		);
+	} catch (error) {
+		console.error("Error al actualizar usuario:", error);
+		return res({ message: "Algo ha salido mal" }, { status: 500 });
+	}
+};

@@ -21,7 +21,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	const jsonData: SendMessageRequest = await request.json();
 
-	// ✅ VALIDACIONES AGREGADAS
 	// Validar que haya destinatarios
 	if (!jsonData.recipients || jsonData.recipients.length === 0) {
 		return res(

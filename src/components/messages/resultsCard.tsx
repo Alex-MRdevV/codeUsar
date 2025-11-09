@@ -1,14 +1,24 @@
-import type { SendMessagesResponse } from "@/utils/types/providers/meta";
+import type { ApiResponse } from "@/utils/types/providers/meta";
 import { AlertCircle, Check, CheckCircle2, Copy, XCircle } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
-	resultados: SendMessagesResponse;
+	resultados: ApiResponse | null; // Permitir que `resultados` sea null
 	onClose: () => void;
 }
 
 export const ResultsCard = ({ resultados, onClose }: Props) => {
-	const { summary, results } = resultados;
+	// Validar que `resultados` y `resultados.data` existan
+	if (!resultados || !resultados.data) {
+		return (
+			<div className="bg-card border border-border rounded-lg p-6 text-center">
+				<p className="text-muted-foreground">No hay datos disponibles</p>
+			</div>
+		);
+	}
+
+	const { data } = resultados;
+	const { summary, results } = data;
 	const [copiedId, setCopiedId] = useState<string | null>(null);
 
 	const copyToClipboard = (text: string, id: string) => {
@@ -17,9 +27,10 @@ export const ResultsCard = ({ resultados, onClose }: Props) => {
 		setTimeout(() => setCopiedId(null), 2000);
 	};
 
-	const successRate = summary.total > 0
-		? ((summary.success / summary.total) * 100).toFixed(1)
-		: "0";
+	const successRate =
+		summary.total > 0
+			? ((summary.success / summary.total) * 100).toFixed(1)
+			: "0";
 
 	return (
 		<div className="bg-card border border-border rounded-lg p-6 space-y-6">
@@ -74,14 +85,14 @@ export const ResultsCard = ({ resultados, onClose }: Props) => {
 				{results.map((result, index) => (
 					<div
 						key={index}
-						className={`p-3 rounded-lg border ${result.status === 'success'
-								? 'bg-green-50 border-green-200'
-								: 'bg-red-50 border-red-200'
+						className={`p-3 rounded-lg border ${result.status === "success"
+							? "bg-green-50 border-green-200"
+							: "bg-red-50 border-red-200"
 							}`}
 					>
 						<div className="flex items-start justify-between gap-2">
 							<div className="flex items-start gap-2 flex-1 min-w-0">
-								{result.status === 'success' ? (
+								{result.status === "success" ? (
 									<CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
 								) : (
 									<XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
@@ -90,13 +101,15 @@ export const ResultsCard = ({ resultados, onClose }: Props) => {
 									<p className="text-sm font-medium text-foreground truncate">
 										{result.recipient}
 									</p>
-									{result.status === 'success' && result.messageId && (
+									{result.status === "success" && result.messageId && (
 										<div className="flex items-center gap-1 mt-1">
 											<code className="text-xs text-muted-foreground bg-muted px-1 rounded">
 												{result.messageId.slice(0, 20)}...
 											</code>
 											<button
-												onClick={() => copyToClipboard(result.messageId!, result.messageId!)}
+												onClick={() =>
+													copyToClipboard(result.messageId!, result.messageId!)
+												}
 												className="p-1 hover:bg-muted rounded"
 											>
 												{copiedId === result.messageId ? (
@@ -107,7 +120,7 @@ export const ResultsCard = ({ resultados, onClose }: Props) => {
 											</button>
 										</div>
 									)}
-									{result.status === 'error' && (
+									{result.status === "error" && (
 										<div className="mt-1 text-xs text-red-700">
 											{result.errorCode && (
 												<span className="font-mono">#{result.errorCode} - </span>

@@ -10,11 +10,11 @@
 	"observability": {
 		"enabled": true
 	},
-	"database": [
-		{
-			"binding": "DB",
-			"database_name": "my-worker-db",
-			"database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-		}
-	]
+	"d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bavaria-now",
+      "database_id": "6ee3ee61-f73a-4614-8245-22d031b5bad5"
+    }
+  ]
 }

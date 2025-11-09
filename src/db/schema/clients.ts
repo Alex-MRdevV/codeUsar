@@ -13,7 +13,7 @@ export const Clients = sqliteTable(
 	},
 	(table) => [
 		index("estado_cliente_idx").on(table.estado),
-		check("telefono_length_check", sql`LENGTH(${table.telefono}) 10`),
+		check("telefono_length_check", sql`LENGTH(${table.telefono}) = 10`),
 		check(
 			"documento_length_check",
 			sql`LENGTH(${table.documento}) BETWEEN 7 AND 10`

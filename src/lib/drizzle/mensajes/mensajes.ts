@@ -1,20 +1,22 @@
 import { Messages } from "@/db/schema/messages";
+import { User } from "@/db/schema/users";
 import type { Database } from "@/utils/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 
 // Crear mensaje
-export const createMessage = (db: Database) => db
-	.insert(Messages)
-	.values({
-		id: sql.placeholder("id"),
-		userId: sql.placeholder("userId"),
-		templateId: sql.placeholder("templateId"),
-		clientId: sql.placeholder("clientId"),
-		status: sql.placeholder("status"),
-		sentAt: sql.placeholder("sentAt"),
-		readAt: sql.placeholder("readAt"),
-	})
-	.prepare();
+export const createMessage = (db: Database) =>
+	db
+		.insert(Messages)
+		.values({
+			id: sql.placeholder("id"),
+			userId: sql.placeholder("userId"),
+			templateId: sql.placeholder("templateId"),
+			clientId: sql.placeholder("clientId"),
+			status: sql.placeholder("status"),
+			sentAt: sql.placeholder("sentAt"),
+			readAt: sql.placeholder("readAt"),
+		})
+		.prepare();
 
 // Actualizar mensaje
 export const updateMessage = (
@@ -37,7 +39,16 @@ export const updateMessage = (
 // Obtener mensajes por usuario
 export const getMessagesByUser = (db: Database) =>
 	db
-		.select()
+		.select({
+			message: Messages,
+			user: User,
+		})
 		.from(Messages)
-		.where(eq(Messages.userId, sql.placeholder("userId")))
+		.innerJoin(User, eq(Messages.userId, User.id))
+		.where(
+			and(
+				eq(Messages.userId, sql.placeholder("userId")),
+				ne(User.estado, "retirado")
+			)
+		)
 		.prepare();

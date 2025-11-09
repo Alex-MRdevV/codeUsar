@@ -9,15 +9,15 @@ import { useRedirigir } from "@/hooks/common/use-redirigirUser";
 import { useMessage } from "@/hooks/common/use-sendMessage";
 import { loginSchema } from "@/lib/schemas/auth";
 import { loginResponse } from "@/utils/services/user/loginResponse";
-import type { userDataLogin } from "@/utils/types/user";
+import type { responseMessage, userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useForm } from "react-hook-form";
 import { Toaster } from "sonner";
 
 export const LoginForm = () => {
-	const { message } = useMessage<Error | null>(null);
+	const { message, setMessage } = useMessage<Error | null>(null);
 	const { createHandler } = ConfigurarInicio();
-	const { setUser } = useRedirigir<userDataLogin | null>(null, "user-logged-in");
+	const { setUser } = useRedirigir<responseMessage | null>(null, "userAuthenticate");
 
 	const {
 		register,
@@ -34,12 +34,8 @@ export const LoginForm = () => {
 
 	const onSubmit = createHandler(async (data: userDataLogin) => {
 		const response = await loginResponse(data);
-
-		// Si el inicio de sesión es exitoso, guarda los datos del usuario
-		if (response) {
-			setUser(errors); // Actualiza el estado del usuario
-		}
-
+		if (response[0]) setMessage(response[0])
+		if (response[1]) setUser(response[1]);
 		return response;
 	});
 

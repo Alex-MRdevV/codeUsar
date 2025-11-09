@@ -4,29 +4,27 @@ export interface responseMessage {
 
 export interface userDevolver {
   id: string;
-  rol: "admin" | "user" | "normal";
+  rol: "user"
   nombre: string;
   userSecretJWT: string;
 }
 
 export const routeRoles: Record<string, string> = {
-	"/admin": "admin",
 	"/user": "user",
 };
 
-export const roles = ["admin", "user"] as const;
+export const roles = ["user"] as const;
 
 export type Roles = (typeof roles)[number];
 
 export const rolesUtilizar: { [key in Roles]: string } = {
-	admin: "admin",
 	user: "user",
 };
 
 export type userDataLogin = {
 	email: string;
 	password: string;
-	rol: "user" | "admin";
+	rol: "user";
 };
 
 export type updateUser = Partial<userDataLogin>;

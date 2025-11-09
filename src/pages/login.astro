@@ -13,9 +13,7 @@ import Layout from "@/layouts/Layout.astro";
 	import { type userDevolver } from "@/utils/types/user";
 
 	const routes: Record<userDevolver["rol"], string> = {
-		admin: "admin",
 		user: "user",
-		normal: "/",
 	};
 
 	window.addEventListener("userAuthenticate", (event) => {
@@ -24,7 +22,6 @@ import Layout from "@/layouts/Layout.astro";
 		if (!user?.rol) return;
 
 		const target = routes[user.rol] || "/";
-		// Redirección segura y más clara
 		window.location.assign(target);
 	});
 </script>

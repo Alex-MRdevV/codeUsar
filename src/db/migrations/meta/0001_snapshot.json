@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e2133ef6-92a2-4153-b48c-ec3f17b40ffe",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "03988d40-0370-475c-b53a-b56fd9ad3ae3",
+  "prevId": "e2133ef6-92a2-4153-b48c-ec3f17b40ffe",
   "tables": {
     "Cliente": {
       "name": "Cliente",
@@ -126,6 +126,87 @@
           ],
           "onDelete": "no action",
           "onUpdate": "set null"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "WhatsAppConfig": {
+      "name": "WhatsAppConfig",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "productionPhoneNumberId": {
+          "name": "productionPhoneNumberId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "productionPhoneNumber": {
+          "name": "productionPhoneNumber",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "testPhoneNumberId": {
+          "name": "testPhoneNumberId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "testPhoneNumber": {
+          "name": "testPhoneNumber",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "wabaId": {
+          "name": "wabaId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "userId_whatsapp_idx": {
+          "name": "userId_whatsapp_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "WhatsAppConfig_userId_User_id_fk": {
+          "name": "WhatsAppConfig_userId_User_id_fk",
+          "tableFrom": "WhatsAppConfig",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},

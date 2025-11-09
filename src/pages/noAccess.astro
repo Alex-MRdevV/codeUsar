@@ -1,14 +1,14 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { SiAdblock } from "react-icons/si";
+import { ShieldX } from "lucide-react";
 ---
 
 <Layout title="Acceso no autorizado">
 	<div
-		class="flex items-center justify-center bg-gray-100 dark:bg-gray-900 min-h-[90vh] mx-auto px-[100px] pt-[350px]"
+		class="flex items-center justify-center bg-gray-100 dark:bg-gray-900 min-h-screen"
 	>
 		<div
-			class="bg-white dark:bg-gray-800 p-10 rounded-lg shadow-lg dark:shadow-gray-900/50 text-center"
+			class="bg-white dark:bg-gray-800 p-10 rounded-lg shadow-lg dark:shadow-gray-900/50 text-center max-w-lg mx-auto"
 		>
 			<header class="flex justify-center items-center mb-6">
 				<h1
@@ -16,7 +16,7 @@ import { SiAdblock } from "react-icons/si";
 				>
 					403
 					<span class="ml-4 text-5xl">
-						<SiAdblock style={{ color: "#dc3545", fontSize: "3rem" }} />
+						<ShieldX style={{ color: "#dc3545", fontSize: "3rem" }} />
 					</span>
 				</h1>
 			</header>
@@ -30,10 +30,10 @@ import { SiAdblock } from "react-icons/si";
 			<a
 				href="/"
 				class="bg-blue-600 dark:bg-blue-700 text-white py-3 px-6
-			rounded-md text-lg hover:bg-blue-700 dark:hover:bg-blue-600
-			hover:text-white transition duration-300"
+            rounded-md text-lg hover:bg-blue-700 dark:hover:bg-blue-600
+            hover:text-white transition duration-300"
 			>
-				Volver al Inicio></a
+				Volver al Inicio</a
 			>
 		</div>
 	</div>

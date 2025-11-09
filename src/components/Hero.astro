@@ -1,0 +1,137 @@
+---
+import { MessageCircle, Clock, Users, TrendingUp } from "lucide-react";
+
+const {
+	title = "Automatiza la comunicación con WhatsApp",
+	subtitle = "Reduce tiempo en confirmaciones de pedidos y mejora la coordinación operativa con mensajes masivos a través de la API de Meta",
+} = Astro.props;
+---
+
+<section class="w-full py-12 md:py-16 lg:py-20 bg-background">
+	<div class="container px-4 md:px-6">
+		<div class="grid gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 items-center">
+			<div class="flex flex-col justify-center space-y-4">
+				<div class="space-y-2">
+					<h1
+						class="text-3xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none text-foreground"
+					>
+						{title}
+					</h1>
+					<p class="max-w-[600px] text-muted-foreground md:text-xl">
+						{subtitle}
+					</p>
+				</div>
+
+				{/* Key Statistics Cards */}
+				<div class="grid grid-cols-2 gap-4 mt-6 sm:grid-cols-4">
+					<div
+						class="border border-border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-card hover:bg-muted/50 transition-colors"
+					>
+						<MessageCircle className="h-8 w-8 text-primary mb-2" />
+						<h3 class="text-2xl font-bold text-foreground">50%</h3>
+						<p class="text-xs text-muted-foreground">Menos llamadas</p>
+					</div>
+					<div
+						class="border border-border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-card hover:bg-muted/50 transition-colors"
+					>
+						<Clock className="h-8 w-8 text-primary mb-2" />
+						<h3 class="text-2xl font-bold text-foreground">9h/mes</h3>
+						<p class="text-xs text-muted-foreground">Tiempo ahorrado</p>
+					</div>
+					<div
+						class="border border-border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-card hover:bg-muted/50 transition-colors"
+					>
+						<Users className="h-8 w-8 text-primary mb-2" />
+						<h3 class="text-2xl font-bold text-foreground">1000k+</h3>
+						<p class="text-xs text-muted-foreground">Mensajes/día</p>
+					</div>
+					<div
+						class="border border-border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-card hover:bg-muted/50 transition-colors"
+					>
+						<TrendingUp className="h-8 w-8 text-primary mb-2" />
+						<h3 class="text-2xl font-bold text-foreground">60%</h3>
+						<p class="text-xs text-muted-foreground">Tasa lectura</p>
+					</div>
+				</div>
+
+				{/* CTA Buttons */}
+				<section class="flex gap-3 pt-4">
+					<button
+						class="px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity"
+					>
+						<a href="/login">Empezar a usar</a>
+					</button>
+				</section>
+			</div>
+
+			{/* Message Preview Card */}
+			<article class="flex items-center justify-center">
+				<div
+					class="w-full max-w-md border-2 border-border rounded-2xl overflow-hidden bg-card"
+				>
+					<div class="bg-primary/10 p-4 border-b border-border">
+						<h3 class="font-medium text-foreground flex items-center gap-2">
+							<MessageCircle className="h-4 w-4 text-primary" />
+							Confirmación de entrega
+						</h3>
+					</div>
+					<div class="p-4 space-y-4">
+						<div class="space-y-2">
+							<p class="text-sm text-muted-foreground font-medium">
+								Ejemplo de mensaje automatizado:
+							</p>
+							<div class="bg-muted rounded-lg p-3 text-sm text-foreground">
+								Tu pedido está en camino 🚛 y será entregado entre las 6:00 am y
+								6:30 am.
+							</div>
+						</div>
+						<section class="grid grid-cols-2 gap-3 pt-2 border-t border-border">
+							<div class="text-center">
+								<p class="text-xs text-muted-foreground mb-1">Enviados</p>
+								<p class="text-xl font-bold text-foreground">700</p>
+							</div>
+							<section class="text-center">
+								<p class="text-xs text-muted-foreground mb-1">Leídos</p>
+								<p class="text-xl font-bold text-primary">420</p>
+							</section>
+						</section>
+					</div>
+				</div>
+			</article>
+		</div>
+	</div>
+</section>
+
+<style>
+	:root {
+		color-scheme: light dark;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--background: oklch(0.145 0 0);
+			--foreground: oklch(0.985 0 0);
+			--card: oklch(0.145 0 0);
+			--card-foreground: oklch(0.985 0 0);
+			--primary: oklch(0.488 0.243 264.376);
+			--primary-foreground: oklch(0.985 0 0);
+			--muted: oklch(0.269 0 0);
+			--muted-foreground: oklch(0.708 0 0);
+			--border: oklch(0.269 0 0);
+		}
+	}
+
+	@media (prefers-color-scheme: light) {
+		:root {
+			--background: oklch(1 0 0);
+			--foreground: oklch(0.145 0 0);
+			--card: oklch(1 0 0);
+			--card-foreground: oklch(0.145 0 0);
+			--primary: oklch(0.205 0 0);
+			--primary-foreground: oklch(0.985 0 0);
+			--muted: oklch(0.97 0 0);
+			--muted-foreground: oklch(0.556 0 0);
+			--border: oklch(0.922 0 0);
+		}
+	}
+</style>

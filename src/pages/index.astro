@@ -1,9 +1,13 @@
 ---
-import Welcome from '../components/Welcome.astro';
-
-import Layout from '../layouts/Layout.astro';
+import Beneficios from "@/components/Beneficios.astro";
+import Hero from "@/components/Hero.astro";
+import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+	title="WhatsApp Messaging"
+	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
+>
+	<Hero />
+	<Beneficios />
 </Layout>

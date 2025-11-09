@@ -21,7 +21,7 @@ import Layout from "@/layouts/Layout.astro";
 
 		if (!user?.rol) return;
 
-		const target = routes[user.rol] || "/";
+		const target = routes[user.rol] || "/user/index";
 		window.location.assign(target);
 	});
 </script>

@@ -8,6 +8,36 @@ export const Templates = sqliteTable("Templates", {
 	color: text("color"),
 	content: text("content").notNull(), // Contenido del mensaje
 	metaTemplateId: text("metaTemplateId"),
-	variables: text("variables"),
+	structure: text("structure", { mode: "json" }).$type<{
+		header?: {
+			type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+			text?: string;
+			example?: string;
+		};
+		body: {
+			text: string;
+			example?: string[];
+		};
+		footer?: {
+			text: string;
+		};
+		buttons?: Array<{
+			type: 'QUICK_REPLY' | 'URL' | 'PHONE_NUMBER';
+			text: string;
+			url?: string;
+			phone_number?: string;
+		}>;
+	}>().notNull(),
+	// Metadata de variables
+	variables: text("variables", { mode: "json" }).$type<{
+		format: 'named' | 'positional';
+		params: Array<{
+			name: string; // Para named: "first_name", para positional: "1", "2", etc.
+			placeholder: string; // Texto descriptivo: "Nombre del cliente"
+			example: string; // Ejemplo: "Pablo"
+			component: 'header' | 'body' | 'footer';
+		}>;
+	}>(),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
+	status: text("status", {enum: ["PENDING","APPROVED","REJECTED"]}).default("PENDING")
 });

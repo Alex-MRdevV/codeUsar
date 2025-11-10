@@ -1,39 +1,69 @@
 import { MOBILE_ACTIVE } from "@/utils/types/const";
-import { atom } from "nanostores";
+import { atom, map } from "nanostores";
 
-export interface PhoneNumber {
+export type PhoneNumber = {
 	id: string;
 	number: string;
+};
+
+function loadActivePhoneId(): string | null {
+	if (typeof window === "undefined") return null;
+	return localStorage.getItem(MOBILE_ACTIVE);
 }
 
-const getStoredPhone = atom<PhoneNumber | null>(
-	(localStorage.getItem(MOBILE_ACTIVE) as guardar)
-) {
-  try {
-    const stored = localStorage.getItem();
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-};
+function saveActivePhoneId(id: string | null) {
+	if (typeof window === "undefined") return;
+	if (id) {
+		localStorage.setItem(MOBILE_ACTIVE, id);
+	} else {
+		localStorage.removeItem(MOBILE_ACTIVE);
+	}
+}
 
-// Store para la lista de teléfonos
-export const phonesStore = atom<PhoneNumber[]>([]);
+export const phoneItems = map<Record<string, PhoneNumber>>({});
+export const activePhoneId = atom<string | null>(loadActivePhoneId());
 
-// Acciones
-export const setPhones = (phones: PhoneNumber[]) => {
-	phonesStore.set(phones);
-};
+export function addPhone({ id, number }: PhoneNumber) {
+	const existingEntry = phoneItems.get()[id];
+	if (!existingEntry) {
+		phoneItems.setKey(id, { id, number });
+		if (!activePhoneId.get()) {
+			setActivePhone(id);
+		}
+	}
+}
 
-export const selectPhone = (id: string) => {
-	selectedPhoneId.set(id);
-};
+export function setActivePhone(id: string) {
+	const phone = phoneItems.get()[id];
+	if (phone) {
+		activePhoneId.set(id);
+		saveActivePhoneId(id); // Persistir en localStorage
+	}
+}
 
-export const getSelectedPhone = (): PhoneNumber | null => {
-	const phones = phonesStore.get();
-	const selectedId = selectedPhoneId.get();
+export function getActivePhone(): PhoneNumber | null {
+	const id = activePhoneId.get();
+	if (!id) return null;
+	return phoneItems.get()[id] || null;
+}
 
-	if (!selectedId) return null;
+export function getActivePhoneId(): string | null {
+	return activePhoneId.get();
+}
 
-	return phones.find((p) => p.id === selectedId) || null;
-};
+export function removePhone(id: string) {
+	const phones = { ...phoneItems.get() };
+	delete phones[id];
+	phoneItems.set(phones);
+
+	if (activePhoneId.get() === id) {
+		activePhoneId.set(null);
+		saveActivePhoneId(null); // Limpiar localStorage
+	}
+}
+
+export function clearPhones() {
+	phoneItems.set({});
+	activePhoneId.set(null);
+	saveActivePhoneId(null); // Limpiar localStorage
+}

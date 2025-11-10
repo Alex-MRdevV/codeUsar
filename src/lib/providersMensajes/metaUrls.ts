@@ -1,2 +1,2 @@
-export const urlEnviarMensajeTexto = (numberPhone: string) =>
-	`https://graph.facebook.com/v24.0/${numberPhone}/messages`;
+export const urlEnviarMensajeTexto = (numberPhoneId: string) =>
+	`https://graph.facebook.com/v24.0/${numberPhoneId}/messages`;

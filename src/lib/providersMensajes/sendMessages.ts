@@ -24,9 +24,43 @@ export const buildMetaRequest = (
 	} else if (request.messageType === "template" && request.templateName) {
 		const components: Component[] = [];
 
-		// Si hay parámetros de plantilla, agregarlos al componente body
-		if (request.templateParams && request.templateParams.length > 0) {
-			const parameters: TextParameter[] = request.templateParams.map(
+		// Determinar el formato (por defecto "positional" como indica Meta)
+		const paramFormat = request.parameterFormat || "positional";
+
+		// Si hay parámetros de plantilla
+		if (
+			request.templateParams &&
+			Object.keys(request.templateParams).length > 0
+		) {
+			let parameters: TextParameter[];
+
+			if (paramFormat === "named") {
+				// Formato con nombre: incluir parameter_name
+				parameters = Object.entries(request.templateParams).map(
+					([paramName, paramValue]) => ({
+						type: "text",
+						parameter_name: paramName,
+						text: paramValue,
+					})
+				);
+			} else {
+				// Formato posicional: mantener el orden, sin parameter_name
+				parameters = Object.values(request.templateParams).map((param) => ({
+					type: "text",
+					text: param,
+				}));
+			}
+
+			components.push({
+				type: "body",
+				parameters,
+			});
+		} else if (
+			request.templateParamsPositional &&
+			request.templateParamsPositional.length > 0
+		) {
+			// Soporte alternativo para array directo (siempre posicional)
+			const parameters: TextParameter[] = request.templateParamsPositional.map(
 				(param) => ({
 					type: "text",
 					text: param,

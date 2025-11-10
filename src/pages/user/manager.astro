@@ -1,7 +1,8 @@
 ---
 import Layout from "@/layouts/LayoutUsers.astro";
+import { UserForms } from "@/components/user/manager";
 ---
 
 <Layout>
-	<h1>Manager Page</h1>
+	<UserForms client:visible />
 </Layout>

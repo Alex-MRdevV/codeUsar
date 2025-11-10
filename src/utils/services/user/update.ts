@@ -1,7 +1,8 @@
-import type { responseMessage, userDevolver } from "@/utils/types/user";
+import type { FormValuesUpdate } from "@/lib/schemas/user/register";
+import type { responseMessage } from "@/utils/types/user";
 
 export const updateResponse = async (
-	user: userDevolver
+	user: FormValuesUpdate
 ): Promise<[Error | null, responseMessage | null]> => {
 	try {
 		const response = await fetch(`/api/user/update`, {

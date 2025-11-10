@@ -8,15 +8,17 @@ import { hashPassword } from "@/utils/password/hashPassword";
 import { res } from "@/utils/responseAstro";
 import { uuid } from "@/utils/uuid";
 import { type APIRoute } from "astro";
+import { safeParse } from "valibot";
 
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
-	const { success, data, error } = registerSchema.safeParse(
+	const { success, issues, output } = safeParse(
+		registerSchema,
 		await request.json()
 	);
 
-	if (!success) return res(error.message, { status: 400 });
+	if (!success) return res(issues[0].message, { status: 400 });
 
-	const { email, rol, confirmPassword, nombre } = data;
+	const { email, rol, confirmPassword, nombre } = output;
 
 	try {
 		const db = getDb(locals.runtime.env.DB);

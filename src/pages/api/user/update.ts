@@ -8,12 +8,16 @@ import { hashPassword } from "@/utils/password/hashPassword";
 import { res } from "@/utils/responseAstro";
 import { type APIRoute } from "astro";
 import { eq } from "drizzle-orm";
+import { safeParse } from "valibot";
 
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
-	const { success, data, error } = updateSchema.safeParse(await request.json());
-	if (!success) return res(error.message, { status: 400 });
+	const { success, issues, output } = safeParse(
+		updateSchema,
+		await request.json()
+	);
+	if (!success) return res(issues[0].message, { status: 400 });
 
-	const { email, rol, id, confirmPassword, nombre } = data;
+	const { email, id, password, nombre } = output;
 
 	try {
 		const db = getDb(locals.runtime.env.DB);
@@ -42,11 +46,10 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
 		if (nombre) updateData.nombre = nombre;
 		if (email) updateData.email = email;
-		if (rol) updateData.rol = rol;
 
 		// Si se proporciona nueva contraseña, hashearla
-		if (confirmPassword) {
-			const { hash, salt } = await hashPassword(confirmPassword);
+		if (password) {
+			const { hash, salt } = await hashPassword(password);
 			updateData.password = `${salt}:${hash}`;
 
 			// Generar nuevo secret para invalidar tokens anteriores

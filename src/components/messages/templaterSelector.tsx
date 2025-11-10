@@ -1,11 +1,4 @@
-interface TemplateSelectorProps {
-	value: string;
-	onChange: (templateId: string) => void;
-	templates: {
-		id: string
-		name: string
-	}[]
-}
+import type { TemplateSelectorProps } from "@/utils/types/templates";
 
 export const TemplateSelector = ({ value, onChange, templates }: TemplateSelectorProps) => {
 	return (

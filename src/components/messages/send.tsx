@@ -1,27 +1,27 @@
+import { ButtonEnvio } from "@/components/messages/buttonEnvio";
 import { ConfigurarSend } from "@/components/messages/configurarEnvio";
-import { MessageInput } from "@/components/messages/input";
+import { VariableEditor } from "@/components/messages/phoneConfig/variableEditor";
 import { PreviewCard } from "@/components/messages/previewCard";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { TemplateSelector } from "@/components/messages/templaterSelector";
 import { Button } from "@/components/ui/button";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
-import { Send } from "lucide-react";
+import type { Template } from "@/utils/types/templates";
 import { useState } from "react";
 
 interface Props {
-	templates: {
-		id: string;
-		name: string;
-	}[];
-	data: SendMessageRequest;
+	templates: Template[];
 }
 
-export const SendMessages = ({ templates, data }: Props) => {
+export const SendMessages = ({ templates }: Props) => {
 	const [recipients, setRecipients] = useState<string[]>([]);
 	const [selectedTemplate, setSelectedTemplate] = useState("");
-	const [message, setMessage] = useState("");
+	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
 	const { createHandler, resultados, resetResultados, isSubmitting } = ConfigurarSend();
+
+	// Obtener template seleccionado
+	const currentTemplate = templates.find(t => t.id === selectedTemplate);
 
 	const onSubmit = createHandler(async (formData: SendMessageRequest) => {
 		const response = await sendWhatsAppMessage(formData);
@@ -44,8 +44,43 @@ export const SendMessages = ({ templates, data }: Props) => {
 	const handleNewSend = () => {
 		resetResultados();
 		setRecipients([]);
-		setMessage("");
 		setSelectedTemplate("");
+		setVariableValues({});
+	};
+
+	const handleTemplateChange = (templateId: string) => {
+		setSelectedTemplate(templateId);
+		setVariableValues({}); // Reset variables al cambiar template
+	};
+
+	const handleSendMessage = () => {
+		if (!currentTemplate) return;
+
+		const datos: SendMessageRequest = {
+			recipients: recipients,
+			messageType: 'template',
+			templateName: currentTemplate.metaTemplateName,
+			templateParams: variableValues,
+			templateLanguage: currentTemplate.language || 'es',
+		};
+
+		onSubmit(datos);
+	};
+
+	// Validar si se puede enviar
+	const canSend = () => {
+		if (!selectedTemplate || recipients.length === 0 || isSubmitting) {
+			return false;
+		}
+
+		// Verificar que todas las variables requeridas tengan valor
+		if (currentTemplate?.variables) {
+			return currentTemplate.variables.params.every(
+				param => variableValues[param.name]?.trim()
+			);
+		}
+
+		return true;
 	};
 
 	return (
@@ -54,11 +89,10 @@ export const SendMessages = ({ templates, data }: Props) => {
 				<h1 className="text-3xl font-bold text-foreground mb-2">Enviar Mensajes</h1>
 				<p className="text-muted-foreground">Crea y envía mensajes masivos a tus contactos</p>
 			</div>
-
+		
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Main Form */}
 				<div className="lg:col-span-2 space-y-6">
-					{/* Mostrar resultados si existen */}
 					{resultados ? (
 						<div className="space-y-4">
 							<ResultsCard
@@ -74,74 +108,79 @@ export const SendMessages = ({ templates, data }: Props) => {
 						</div>
 					) : (
 						<>
+							{/* Selector de Template */}
 							<TemplateSelector
 								value={selectedTemplate}
 								templates={templates}
-								onChange={(templateId) => {
-									setSelectedTemplate(templateId);
-									if (templateId === "welcome") {
-										setMessage("¡Bienvenido a nuestro servicio! Estamos aquí para ayudarte.");
-									} else if (templateId === "promo") {
-										setMessage("¡Aprovecha nuestra promoción especial! Solo por tiempo limitado.");
-									} else if (templateId === "reminder") {
-										setMessage("Este es un recordatorio para tu próxima cita.");
-									} else {
-										setMessage("");
-									}
-								}}
+								onChange={handleTemplateChange}
 							/>
 
-							<MessageInput message={message} onMessageChange={setMessage} />
+							{/* Editor de Variables */}
+							{currentTemplate?.variables && currentTemplate.variables.params.length > 0 && (
+								<div className="bg-card border border-border rounded-lg p-6">
+									<VariableEditor
+										variables={currentTemplate.variables}
+										values={variableValues}
+										onChange={setVariableValues}
+									/>
+								</div>
+							)}
 
-							<div className="flex items-center gap-4">
-								<label className="text-sm font-semibold text-foreground">
-									Importar destinatarios:
-								</label>
-								<input
-									type="file"
-									accept=".csv,.txt"
-									onChange={(e) => {
-										if (e.target.files?.[0]) {
-											handleImportRecipients(e.target.files[0]);
-										}
-									}}
-									className="text-sm"
-								/>
+							{/* Gestión de Destinatarios */}
+							<div className="bg-card border border-border rounded-lg p-6">
+								<h3 className="text-sm font-semibold text-foreground mb-4">
+									Destinatarios
+								</h3>
+
+								<div className="space-y-4">
+									<div className="flex items-center gap-4">
+										<label className="text-sm font-medium text-foreground">
+											Importar desde archivo:
+										</label>
+										<input
+											type="file"
+											accept=".csv,.txt"
+											onChange={(e) => {
+												if (e.target.files?.[0]) {
+													handleImportRecipients(e.target.files[0]);
+												}
+											}}
+											className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+										/>
+									</div>
+
+									{recipients.length > 0 && (
+										<div className="p-3 bg-muted/20 rounded-lg">
+											<p className="text-sm text-foreground">
+												<span className="font-semibold">{recipients.length}</span> destinatario{recipients.length !== 1 ? 's' : ''} agregado{recipients.length !== 1 ? 's' : ''}
+											</p>
+										</div>
+									)}
+								</div>
 							</div>
 
-							<Button
-								onClick={() => {
-									const datos: SendMessageRequest = {
-										recipients: data.recipients,
-										messageType: data.messageType,
-										content: data.content as string,
-										templateName: data.templateName,
-										templateParams: data.templateParams,
-									};
-									onSubmit(datos);
-								}}
-								disabled={!message.trim() || recipients.length === 0 || isSubmitting}
-								className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-							>
-								{isSubmitting ? (
-									<>
-										<div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-										Enviando...
-									</>
-								) : (
-									<>
-										<Send className="w-5 h-5" />
-										{`Enviar a ${recipients.length} contacto${recipients.length !== 1 ? "s" : ""}`}
-									</>
-								)}
-							</Button>
+							{/* Botón de Envío */}
+							<ButtonEnvio canSend={canSend} handleSendMessage={handleSendMessage} isSubmitting={isSubmitting} recipients={recipients} />
+
+							{/* Mensaje de advertencia si faltan variables */}
+							{!canSend() && selectedTemplate && recipients.length > 0 && currentTemplate?.variables && (
+								<div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+									<p className="text-sm text-yellow-600 dark:text-yellow-400">
+										⚠️ Completa todas las variables requeridas antes de enviar
+									</p>
+								</div>
+							)}
 						</>
 					)}
 				</div>
 
 				{/* Preview Card - Solo mostrar si no hay resultados */}
-				{!resultados && (
-					<PreviewCard message={message} recipients={recipients} />
+				{!resultados && currentTemplate && (
+					<PreviewCard
+						template={currentTemplate}
+						variableValues={variableValues}
+						recipients={recipients}
+					/>
 				)}
 			</div>
 		</div>

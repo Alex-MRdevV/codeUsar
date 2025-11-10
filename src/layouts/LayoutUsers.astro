@@ -4,7 +4,7 @@ import { SidebarLayout } from "@/components/sidebar/provider";
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 
-const { title, description } = Astro.props;
+const { title, description, data } = Astro.props;
 ---
 
 <!doctype html>
@@ -20,7 +20,7 @@ const { title, description } = Astro.props;
 	<body>
 		<div class="flex-container">
 			<TourWrapper client:only>
-				<SidebarLayout client:only>
+				<SidebarLayout data={data} client:only>
 					<slot />
 				</SidebarLayout>
 			</TourWrapper>

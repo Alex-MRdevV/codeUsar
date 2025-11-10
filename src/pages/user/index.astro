@@ -1,12 +1,15 @@
 ---
 import Layout from "@/layouts/LayoutUsers.astro";
 import { WelcomeCard } from "@/components/welcome/welcome";
+
+const user = Astro.locals.user;
+const nombre = typeof user.name === "string" ? user.name : "Usuario";
 ---
 
 <Layout>
 	<main class="min-h-screen bg-background">
 		<div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-			<WelcomeCard nombre={} client:visible />
+			<WelcomeCard nombre={nombre} stats={} client:visible />
 		</div>
 	</main>
 </Layout>

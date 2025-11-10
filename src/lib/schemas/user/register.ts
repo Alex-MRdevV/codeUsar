@@ -71,3 +71,10 @@ export const removeSchema = z.object({
 		message: "El id debe ser un texto",
 	}),
 });
+
+export const regenerateTokenSchema = z.object({
+	id: z.uuid("ID de usuario inválido"),
+	email: z.email({
+		message: "Debe ser un correo valido",
+	}),
+});

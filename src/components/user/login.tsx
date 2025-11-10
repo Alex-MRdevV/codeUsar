@@ -7,7 +7,7 @@ import { ConfigurarInicio } from "@/components/user/configurarInicio";
 import { ViewPasswordInput } from "@/components/viewPassword";
 import { useRedirigir } from "@/hooks/common/use-redirigirUser";
 import { useMessage } from "@/hooks/common/use-sendMessage";
-import { loginSchema } from "@/lib/schemas/auth";
+import { loginSchema } from "@/lib/schemas/user/auth";
 import { loginResponse } from "@/utils/services/user/loginResponse";
 import type { responseMessage, userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";

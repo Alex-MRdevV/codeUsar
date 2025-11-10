@@ -6,7 +6,11 @@ const user = Astro.locals.user;
 const nombre = typeof user.name === "string" ? user.name : "Usuario";
 ---
 
-<Layout>
+<Layout 
+	title="Bienvenido Usuario"
+	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
+	data={}
+>
 	<main class="min-h-screen bg-background">
 		<div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
 			<WelcomeCard nombre={nombre} stats={} client:visible />

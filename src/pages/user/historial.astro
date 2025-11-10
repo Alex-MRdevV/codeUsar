@@ -3,6 +3,10 @@ import { HistorialAplicado } from "@/components/historial/view";
 import Layout from "@/layouts/LayoutUsers.astro";
 ---
 
-<Layout title="Historial de Aplicados">
+<Layout
+	title="Historial de Aplicados"
+	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
+	data={}
+>
 	<HistorialAplicado statsConfig={} templates={} client:visible />
 </Layout>

@@ -16,12 +16,15 @@ export interface MessageResult {
 }
 
 export interface SendMessageRequest {
-	recipients: string[]; // Array de números de teléfono
+	recipients: string[];
 	messageType: "text" | "template";
-	content?: string; // Para mensajes de texto
-	templateName?: string; // Para mensajes de plantilla
-	templateLanguage?: string; // Código de idioma (ej: "es", "en_US")
-	templateParams?: string[]; // Parámetros para la plantilla
+	content?: string;
+	templateName?: string;
+	templateLanguage?: string;
+	// Cambia esto para soportar ambos formatos
+	templateParams?: Record<string, string>; // Para parámetros con nombre
+	templateParamsPositional?: string[]; // Para parámetros posicionales (opcional)
+	parameterFormat?: "named" | "positional"; // Nuevo: especificar el formato
 }
 
 export interface MetaRequest {

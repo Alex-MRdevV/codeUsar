@@ -28,7 +28,7 @@ export const sendMessagesToAPI = async (
 			const lote = datos.recipients.slice(i, i + batchSize);
 
 			// Crear promesas para el lote actual
-			const promesasLote = lote.map(recipient =>
+			const promesasLote = lote.map((recipient) =>
 				enviarMensajeIndividual(recipient, datos, accessToken, phoneNumberId)
 			);
 
@@ -45,14 +45,15 @@ export const sendMessagesToAPI = async (
 					results.push({
 						recipient,
 						status: "error",
-						errorMessage: resultado.reason?.message || "Error desconocido en el envío",
+						errorMessage:
+							resultado.reason?.message || "Error desconocido en el envío",
 					});
 				}
 			});
 
 			// Pausa entre lotes para respetar rate limits (excepto en el último lote)
 			if (i + batchSize < totalRecipients) {
-				await new Promise(resolve => setTimeout(resolve, 1000)); // 1 segundo entre lotes
+				await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 segundo entre lotes
 			}
 		}
 
@@ -68,7 +69,7 @@ export const sendMessagesToAPI = async (
 	}
 };
 
-const enviarMensajeIndividual = async (
+export const enviarMensajeIndividual = async (
 	recipient: string,
 	datos: SendMessageRequest,
 	accessToken: string,

@@ -1,12 +1,47 @@
 ---
 import { HistorialAplicado } from "@/components/historial/view";
 import Layout from "@/layouts/LayoutUsers.astro";
+import { User } from "@/db/schema/users";
+import { sidebarDataItems } from "@/lib/sidebarItems";
+import { getDb } from "@/utils/db";
+import type { dataUserSidebar } from "@/utils/types/sidebar";
+import { eq } from "drizzle-orm";
+
+const { locals } = Astro;
+const db = getDb(locals.runtime.env.DB);
+
+// --- Obtener userId desde la sesión ---
+const sessionUser = locals.user ?? null;
+const userId = (sessionUser?.id as string) ?? null;
+
+if (!userId) {
+	throw new Error("Usuario no autenticado o sin ID válido.");
+}
+
+// --- Obtener email desde la tabla User ---
+const userRow = await db
+	.select({ email: User.email })
+	.from(User)
+	.where(eq(User.id, userId))
+	.get(); // .get() obtiene una sola fila
+
+const email = userRow?.email ?? "usuario@ejemplo.com";
+const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
+
+// --- Construir data para Layout ---
+const data: dataUserSidebar = {
+	items: sidebarDataItems,
+	user: {
+		name: nombreUser,
+		email,
+	},
+};
 ---
 
 <Layout
 	title="Historial de Aplicados"
 	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
-	data={}
+	data={data}
 >
 	<HistorialAplicado statsConfig={} templates={} client:visible />
 </Layout>

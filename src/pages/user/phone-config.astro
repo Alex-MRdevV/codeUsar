@@ -1,8 +1,7 @@
 ---
-import { WelcomeCard } from "@/components/welcome/welcome";
-import { User } from "@/db/schema/users";
 import Layout from "@/layouts/LayoutUsers.astro";
-import { getUserStats } from "@/lib/drizzle/stats/stadistics";
+import { ConfigPhone } from "@/components/messages/phoneConfig/phoneConfig";
+import { User } from "@/db/schema/users";
 import { sidebarDataItems } from "@/lib/sidebarItems";
 import { getDb } from "@/utils/db";
 import type { dataUserSidebar } from "@/utils/types/sidebar";
@@ -20,25 +19,6 @@ if (!userId) {
 	throw new Error("Usuario no autenticado o sin ID válido.");
 }
 
-// --- Ejecutar consulta preparada (solo UserStats) ---
-const stmt = getUserStats(db);
-const result = await stmt.execute({ userId });
-
-// --- Obtener estadísticas ---
-const rawStats = result[0]?.userStats ?? null;
-
-type WelcomeStats = {
-	totalMessagesSent: number;
-	totalTimeSavedHours: number;
-	totalContacts: number;
-};
-
-const userStats: WelcomeStats = {
-	totalMessagesSent: Number(rawStats?.totalMessagesSent ?? 0),
-	totalTimeSavedHours: Number(rawStats?.totalTimeSavedHours ?? 0),
-	totalContacts: Number(rawStats?.totalContacts ?? 0),
-};
-
 // --- Obtener email desde la tabla User ---
 const userRow = await db
 	.select({ email: User.email })
@@ -47,7 +27,6 @@ const userRow = await db
 	.get(); // .get() obtiene una sola fila
 
 const email = userRow?.email ?? "usuario@ejemplo.com";
-
 const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
 
 // --- Construir data para Layout ---
@@ -61,13 +40,9 @@ const data: dataUserSidebar = {
 ---
 
 <Layout
-	title={`Bienvenido ${data.user.name}`}
-	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
+	title="Configurar Teléfono para Responder Mensajes de WhatsApp"
+	description="Gestiona y responde mensajes entrantes de WhatsApp de manera eficiente."
 	data={data}
 >
-	<main class="min-h-screen bg-background">
-		<div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-			<WelcomeCard nombre={data.user.name} stats={userStats} client:visible />
-		</div>
-	</main>
+	<ConfigPhone client:visible />
 </Layout>

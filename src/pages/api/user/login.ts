@@ -14,7 +14,6 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 	);
 
 	if (!success) return res(issues[0].message, { status: 400 });
-
 	const { email, password, rol } = output;
 
 	try {

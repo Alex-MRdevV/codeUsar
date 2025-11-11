@@ -1,15 +1,12 @@
-// src/pages/api/messages/reply.ts
-
-import type { APIRoute } from "astro";
+import { enviarRespuestaIndividual } from "@/lib/providersMensajes/callApi/sendResponse";
 import { res } from "@/utils/responseAstro";
-import { buildMetaRequest } from "@/lib/providersMensajes/sendMessages";
-import { urlEnviarMensajeTexto } from "@/lib/providersMensajes/metaUrls";
-import type { SendMessageRequest } from "@/utils/types/providers/meta";
+import type { ReplyMessageRequest } from "@/utils/types/providers/meta";
+import type { APIRoute } from "astro";
 
-interface ReplyRequest {
-	messageId: string; // ID del mensaje original (para tracking/logs)
-	to: string; // Número del destinatario
-	content: string; // Texto de la respuesta
+export interface ReplyRequest {
+	to: string;
+	content: string;
+	replyToMessageId: string;
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -53,36 +50,40 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
+	if (!jsonData.replyToMessageId) {
+		return res(
+			{
+				message: "El campo 'replyToMessageId' es requerido para responder",
+			},
+			{
+				status: 400,
+			}
+		);
+	}
+
 	try {
-		const sendRequest: SendMessageRequest = {
-			recipients: [jsonData.to],
+		const replyRequest: ReplyMessageRequest = {
 			messageType: "text",
 			content: jsonData.content,
+			replyToMessageId: jsonData.replyToMessageId,
 		};
 
-		const metaRequest = buildMetaRequest(jsonData.to, sendRequest);
-		const url = urlEnviarMensajeTexto(PHONE_NUMBER_ID);
+		const result = await enviarRespuestaIndividual(
+			jsonData.to,
+			replyRequest,
+			ACCESS_TOKEN,
+			PHONE_NUMBER_ID
+		);
 
-		const response = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${ACCESS_TOKEN}`,
-			},
-			body: JSON.stringify(metaRequest),
-		});
-
-		const data = await response.json();
-
-		if (!response.ok) {
+		if (result.status === "error") {
 			return res(
 				{
 					message: "Error al enviar respuesta",
-					error: data.error?.message || "Error desconocido",
-					errorCode: data.error?.code,
+					error: result.errorMessage,
+					errorCode: result.errorCode,
 				},
 				{
-					status: response.status,
+					status: 400,
 				}
 			);
 		}
@@ -92,9 +93,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			{
 				message: "Respuesta enviada exitosamente",
 				data: {
-					messageId: data.messages?.[0]?.id,
-					recipient: jsonData.to,
-					status: "success",
+					messageId: result.messageId,
+					recipient: result.recipient,
+					status: result.status,
 				},
 			},
 			{

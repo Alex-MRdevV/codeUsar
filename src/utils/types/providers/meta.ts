@@ -7,6 +7,17 @@ export interface ApiResponse {
 	error?: string;
 }
 
+export interface ReplyApiResponse {
+	message: string;
+	data?: {
+		messageId: string;
+		recipient: string;
+		status: string;
+	};
+	error?: string;
+	errorCode?: number;
+}
+
 export interface MessageResult {
 	recipient: string;
 	messageId?: string;
@@ -27,6 +38,17 @@ export interface SendMessageRequest {
 	parameterFormat?: "named" | "positional"; // Nuevo: especificar el formato
 }
 
+export interface ReplyMessageRequest {
+	messageType: "text" | "template";
+	replyToMessageId: string; // Obligatorio para replies
+	content?: string;
+	templateName?: string;
+	templateLanguage?: string;
+	templateParams?: Record<string, string>;
+	templateParamsPositional?: string[];
+	parameterFormat?: "positional" | "named";
+}
+
 export interface MetaRequest {
 	messaging_product: "whatsapp";
 	recipient_type: "individual";
@@ -34,6 +56,9 @@ export interface MetaRequest {
 	type: "template" | "text";
 	text?: Text;
 	template?: Template;
+	context?: {
+		message_id: string;
+	};
 }
 
 export interface Text {

@@ -12,7 +12,6 @@ import { loginResponse } from "@/utils/services/user/loginResponse";
 import type { responseMessage, userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useForm } from "react-hook-form";
-import { Toaster } from "sonner";
 
 export const LoginForm = () => {
 	const { message, setMessage } = useMessage<Error | null>(null);
@@ -101,7 +100,6 @@ export const LoginForm = () => {
 					</form>
 				</CardContent>
 			</Card>
-			<Toaster theme="system" richColors position="top-right" />
 		</div>
 	);
 };

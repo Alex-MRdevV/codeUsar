@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { MessageSquare, Phone, Settings } from "lucide-react"
+import { MessageSquare, Settings } from "lucide-react"
 
 interface NavigationProps {
 	currentPath?: string
@@ -11,11 +11,6 @@ export function Navigation({ currentPath = "/" }: NavigationProps) {
 			path: "/user/send",
 			label: "Enviar Mensajes",
 			icon: MessageSquare,
-		},
-		{
-			path: "/user/responder",
-			label: "Configurar Teléfonos",
-			icon: Phone,
 		},
 		{
 			path: "/user/responder",

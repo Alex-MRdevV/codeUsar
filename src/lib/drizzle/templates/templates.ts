@@ -13,8 +13,10 @@ export const createTemplate = (db: Database) =>
 			color: sql.placeholder("color"),
 			content: sql.placeholder("content"),
 			metaTemplateId: sql.placeholder("metaTemplateId"),
+			structure: sql.placeholder("structure"),
 			variables: sql.placeholder("variables"),
 			createdAt: sql.placeholder("createdAt"),
+			status: sql.placeholder("status"), // Añadido también el status
 		})
 		.prepare();
 
@@ -28,7 +30,36 @@ export const updateTemplate = (
 		color: string;
 		content: string;
 		metaTemplateId: string;
-		variables: string;
+		structure: {
+			header?: {
+				type: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT";
+				text?: string;
+				example?: string;
+			};
+			body: {
+				text: string;
+				example?: string[];
+			};
+			footer?: {
+				text: string;
+			};
+			buttons?: Array<{
+				type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
+				text: string;
+				url?: string;
+				phone_number?: string;
+			}>;
+		};
+		variables?: {
+			format: "named" | "positional";
+			params: Array<{
+				name: string;
+				placeholder: string;
+				example: string;
+				component: "header" | "body" | "footer";
+			}>;
+		};
+		status?: "PENDING" | "APPROVED" | "REJECTED";
 	}
 ) =>
 	db
@@ -39,7 +70,9 @@ export const updateTemplate = (
 			color: temp.color,
 			content: temp.content,
 			metaTemplateId: temp.metaTemplateId,
+			structure: temp.structure,
 			variables: temp.variables,
+			...(temp.status && { status: temp.status }),
 		})
 		.where(eq(Templates.id, userId))
 		.prepare();

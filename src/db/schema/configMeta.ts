@@ -6,13 +6,18 @@ export const WhatsAppConfig = sqliteTable(
 	{
 		id: text("id").primaryKey(),
 		userId: text("userId").references(() => User.id, { onDelete: "cascade" }),
-		// Número de producción
-		productionPhoneNumberId: text("productionPhoneNumberId").notNull(),
-		productionPhoneNumber: text("productionPhoneNumber").notNull(), // Ej: +573001234567
-		// Número de prueba
-		testPhoneNumberId: text("testPhoneNumberId").notNull(),
-		testPhoneNumber: text("testPhoneNumber").notNull(),
-		wabaId: text("wabaId").notNull(), // WhatsApp Business Account ID
+		// Números telefónicos por tipo
+		productionPhoneId: text("productionPhoneId").notNull(),
+		productionPhoneNumber: text("productionPhoneNumber").notNull(),
+		productionPhoneName: text("productionPhoneName").notNull(), // Nuevo campo
+
+		previewPhoneId: text("previewPhoneId"), // Cambiado a opcional
+		previewPhoneNumber: text("previewPhoneNumber"), // Cambiado a opcional
+		previewPhoneName: text("previewPhoneName"), // Nuevo campo
+
+		developmentPhoneId: text("developmentPhoneId"), // Cambiado a opcional
+		developmentPhoneNumber: text("developmentPhoneNumber"), // Cambiado a opcional
+		developmentPhoneName: text("developmentPhoneName"), // Nuevo campo
 	},
 	(table) => [index("userId_whatsapp_idx").on(table.userId)]
 );

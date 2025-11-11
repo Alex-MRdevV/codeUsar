@@ -16,6 +16,12 @@ export interface Template {
 		footer?: {
 			text: string;
 		};
+		buttons?: Array<{
+			type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
+			text: string;
+			url?: string;
+			phone_number?: string;
+		}>;
 	};
 	variables?: {
 		format: "named" | "positional";

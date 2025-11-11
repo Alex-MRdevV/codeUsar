@@ -1,7 +1,8 @@
 ---
 import { HistorialAplicado } from "@/components/historial/view";
-import Layout from "@/layouts/LayoutUsers.astro";
 import { User } from "@/db/schema/users";
+import Layout from "@/layouts/LayoutUsers.astro";
+import { getTemplatesForHistory } from "@/lib/drizzle/templates/templates";
 import { sidebarDataItems } from "@/lib/sidebarItems";
 import { getDb } from "@/utils/db";
 import type { dataUserSidebar } from "@/utils/types/sidebar";
@@ -23,10 +24,41 @@ const userRow = await db
 	.select({ email: User.email })
 	.from(User)
 	.where(eq(User.id, userId))
-	.get(); // .get() obtiene una sola fila
+	.get();
 
 const email = userRow?.email ?? "usuario@ejemplo.com";
 const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
+
+// --- Obtener plantillas usando la consulta preparada
+const templatesHistoryConsulta = getTemplatesForHistory(db);
+const templatesHistoryData = await templatesHistoryConsulta.all();
+
+//data para el historial
+// Transformar los datos al formato que espera HistorialAplicadoProps
+const templatesHistory = templatesHistoryData.map(t => ({
+    id: Number(t.id) || 0,
+    name: t.name,
+    icon: t.icon || "📄",
+    count: t.count || 0,
+    color: t.color || "#3b82f6",
+}));
+
+const statsConfig = [
+    {
+        label: "Total Mensajes",
+        value: templatesHistory.reduce((acc, t) => acc + t.count, 0),
+        icon: "📊",
+        trend: "+12%",
+        description: "Mensajes enviados este mes",
+        trendColor: "green"
+    },
+    {
+        label: "Plantillas Activas",
+        value: templatesHistory.length,
+        icon: "📝",
+        description: "Plantillas disponibles"
+    }
+];
 
 // --- Construir data para Layout ---
 const data: dataUserSidebar = {
@@ -43,5 +75,5 @@ const data: dataUserSidebar = {
 	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
 	data={data}
 >
-	<HistorialAplicado statsConfig={} templates={} client:visible />
+	<HistorialAplicado templates={templatesHistory} statsConfig={statsConfig} client:visible />
 </Layout>

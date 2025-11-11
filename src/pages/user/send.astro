@@ -6,7 +6,9 @@ import { User } from "@/db/schema/users";
 import { sidebarDataItems } from "@/lib/sidebarItems";
 import { getDb } from "@/utils/db";
 import type { dataUserSidebar } from "@/utils/types/sidebar";
+import type { Template } from "@/utils/types/templates";
 import { eq } from "drizzle-orm";
+import { getTemplates } from "@/lib/drizzle/templates/templates";
 
 const { locals } = Astro;
 const db = getDb(locals.runtime.env.DB);
@@ -16,34 +18,49 @@ const sessionUser = locals.user ?? null;
 const userId = (sessionUser?.id as string) ?? null;
 
 if (!userId) {
-	throw new Error("Usuario no autenticado o sin ID válido.");
+    throw new Error("Usuario no autenticado o sin ID válido.");
 }
 
-// --- Obtener email desde la tabla User ---
+// --- Obtener email desde la tabla User
 const userRow = await db
-	.select({ email: User.email })
-	.from(User)
-	.where(eq(User.id, userId))
-	.get(); // .get() obtiene una sola fila
+    .select({ email: User.email })
+    .from(User)
+    .where(eq(User.id, userId))
+    .get();
 
 const email = userRow?.email ?? "usuario@ejemplo.com";
 const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
 
-// --- Construir data para Layout ---
+// --- Obtener plantillas usando la consulta preparada
+const templatesStmt = getTemplates(db);
+const templatesData = await templatesStmt.all();
+
+// Transformar los datos al tipo Template correcto
+const templates: Template[] = templatesData
+    .filter(t => t.metaTemplateName !== null)
+    .map(t => ({
+        id: t.id,
+        name: t.name,
+        metaTemplateName: t.metaTemplateName as string,
+        language: t.language,
+        structure: t.structure,
+        variables: t.variables ?? undefined,
+    }));
+
 const data: dataUserSidebar = {
-	items: sidebarDataItems,
-	user: {
-		name: nombreUser,
-		email,
-	},
+    items: sidebarDataItems,
+    user: {
+        name: nombreUser,
+        email,
+    },
 };
 ---
 
 <Layout
-	title="Enviar Mensajes de WhatsApp"
-	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
-	data={data}
+    title="Enviar Mensajes de WhatsApp"
+    description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
+    data={data}
 >
-	<Navigation currentPath={Astro.url.pathname} client:load />
-	<SendMessages templates={} client:visible />
+    <Navigation currentPath={Astro.url.pathname} client:load />
+    <SendMessages templates={templates} client:visible />
 </Layout>

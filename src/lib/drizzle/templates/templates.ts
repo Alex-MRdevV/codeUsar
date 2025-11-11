@@ -20,6 +20,34 @@ export const createTemplate = (db: Database) =>
 		})
 		.prepare();
 
+// Añade esta consulta preparada donde tienes createTemplate
+export const getTemplates = (db: Database) =>
+	db
+		.select({
+			id: Templates.id,
+			name: Templates.name,
+			metaTemplateName: Templates.metaTemplateId, // o el campo correcto si tienes el nombre
+			language: sql<string>`'es'`, // ajusta según tu lógica
+			structure: Templates.structure,
+			variables: Templates.variables,
+		})
+		.from(Templates)
+		.where(eq(Templates.status, "APPROVED"))
+		.prepare();
+
+export const getTemplatesForHistory = (db: Database) =>
+	db
+		.select({
+			id: Templates.id,
+			name: Templates.name,
+			icon: Templates.icon,
+			count: Templates.count,
+			color: Templates.color,
+		})
+		.from(Templates)
+		.where(eq(Templates.status, "APPROVED"))
+		.prepare();
+
 // Actualizar plantilla
 export const updateTemplate = (
 	db: Database,

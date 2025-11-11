@@ -44,10 +44,9 @@ const userRow = await db
 	.select({ email: User.email })
 	.from(User)
 	.where(eq(User.id, userId))
-	.get(); // .get() obtiene una sola fila
+	.get();
 
 const email = userRow?.email ?? "usuario@ejemplo.com";
-
 const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
 
 // --- Construir data para Layout ---

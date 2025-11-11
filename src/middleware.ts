@@ -16,7 +16,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 			const { value } = token;
 			const { payload } = await jwtVerify(
 				value,
-				new TextEncoder().encode(import.meta.env.SECRET_KEY_JWT)
+				new TextEncoder().encode(context.locals.runtime.env.SECRET_KEY_JWT)
 			);
 
 			// Almacenar la información del usuario en el contexto para su uso

@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 			sameSite: "strict",
 		});
 
-		return res(user, { status: 200 });
+		return res({ user }, { status: 200 });
 	} catch (error) {
 		return res("Algo ha salido mal", { status: 500 });
 	}

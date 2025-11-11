@@ -20,7 +20,7 @@ export const loginResponse = async (
 		}
 
 		const data = await response.json();
-		return [null, data.userAccess];
+		return [null, data];
 	} catch (error) {
 		return [error as Error, null];
 	}

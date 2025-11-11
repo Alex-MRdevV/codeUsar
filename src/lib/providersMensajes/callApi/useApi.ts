@@ -5,7 +5,7 @@ export async function sendWhatsAppMessage(
 	messageData: SendMessageRequest
 ): Promise<[Error | null, ApiResponse | null]> {
 	try {
-		const response = await fetch("/api/meta", {
+		const response = await fetch("/api/meta/sendMessages", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

@@ -7,7 +7,7 @@ export async function createWhatsAppTemplate(
 	templateData: CreateTemplateRequest
 ): Promise<[Error | null, CreateTemplateResponse | null]> {
 	try {
-		const response = await fetch("/api/user/addTemplates", {
+		const response = await fetch("/api/meta/addTemplates", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

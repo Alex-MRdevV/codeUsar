@@ -1,10 +1,10 @@
 import type { responseMessage, userDataLogin } from "@/utils/types/user";
 
 export const loginResponse = async (
-	user: userDataLogin,
+	user: userDataLogin
 ): Promise<[Error | null, responseMessage | null]> => {
 	try {
-		const response = await fetch("/api/user/", {
+		const response = await fetch("/api/user/login", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

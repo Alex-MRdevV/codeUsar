@@ -5,7 +5,7 @@ export interface Template {
 	language: string;
 	structure: {
 		header?: {
-			type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+			type: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT";
 			text?: string;
 			example?: string;
 		};
@@ -18,12 +18,12 @@ export interface Template {
 		};
 	};
 	variables?: {
-		format: 'named' | 'positional';
+		format: "named" | "positional";
 		params: Array<{
 			name: string;
 			placeholder: string;
 			example: string;
-			component: 'header' | 'body' | 'footer';
+			component: "header" | "body" | "footer";
 		}>;
 	};
 }
@@ -32,7 +32,7 @@ export interface PreviewCardProps {
 	template: {
 		structure: {
 			header?: {
-				type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+				type: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT";
 				text?: string;
 				example?: string;
 			};
@@ -45,12 +45,12 @@ export interface PreviewCardProps {
 			};
 		};
 		variables?: {
-			format: 'named' | 'positional';
+			format: "named" | "positional";
 			params: Array<{
 				name: string;
 				placeholder: string;
 				example: string;
-				component: 'header' | 'body' | 'footer';
+				component: "header" | "body" | "footer";
 			}>;
 		};
 	};
@@ -60,7 +60,7 @@ export interface PreviewCardProps {
 
 export const replaceVariables = (
 	text: string,
-	variables: PreviewCardProps['template']['variables'],
+	variables: PreviewCardProps["template"]["variables"],
 	values: Record<string, string> = {},
 	useExamples: boolean = false
 ): string => {
@@ -68,14 +68,14 @@ export const replaceVariables = (
 
 	let result = text;
 
-	if (variables.format === 'named') {
+	if (variables.format === "named") {
 		// Formato con nombre: {{first_name}}, {{order_number}}
-		variables.params.forEach(param => {
+		variables.params.forEach((param) => {
 			const placeholder = `{{${param.name}}}`;
 			const value = useExamples
 				? param.example
-				: (values[param.name] || param.placeholder);
-			result = result.replace(new RegExp(placeholder, 'g'), value);
+				: values[param.name] || param.placeholder;
+			result = result.replace(new RegExp(placeholder, "g"), value);
 		});
 	} else {
 		// Formato posicional: {{1}}, {{2}}, {{3}}
@@ -83,8 +83,11 @@ export const replaceVariables = (
 			const placeholder = `{{${index + 1}}}`;
 			const value = useExamples
 				? param.example
-				: (values[param.name] || param.placeholder);
-			result = result.replace(new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), value);
+				: values[param.name] || param.placeholder;
+			result = result.replace(
+				new RegExp(placeholder.replace(/[{}]/g, "\\$&"), "g"),
+				value
+			);
 		});
 	}
 
@@ -95,21 +98,69 @@ export interface TemplateSelectorProps {
 	value: string;
 	onChange: (templateId: string) => void;
 	templates: {
-		id: string
-		name: string
-	}[]
+		id: string;
+		name: string;
+	}[];
 }
 
 export interface VariableEditorProps {
 	variables: {
-		format: 'named' | 'positional';
+		format: "named" | "positional";
 		params: Array<{
 			name: string;
 			placeholder: string;
 			example: string;
-			component: 'header' | 'body' | 'footer';
+			component: "header" | "body" | "footer";
 		}>;
 	};
 	values: Record<string, string>;
 	onChange: (values: Record<string, string>) => void;
+}
+
+export interface MetaTemplateComponent {
+	type: string;
+	format?: string;
+	text?: string;
+	example?: {
+		header_text?: string[];
+		body_text?: string[][];
+	};
+}
+
+export interface MetaTemplateRequest {
+	name: string;
+	category: string;
+	language: string;
+	components: MetaTemplateComponent[];
+}
+
+export interface CreateTemplateResult {
+	status: "success" | "error";
+	templateId?: string;
+	templateName?: string;
+	errorCode?: string | number;
+	errorMessage?: string;
+}
+
+export interface CreateTemplateRequest {
+	name: string;
+	icon: string;
+	color?: string;
+	content: string;
+	metaTemplateName: string;
+	language: string;
+	structure: Template["structure"];
+	variables?: Template["variables"];
+}
+
+export interface CreateTemplateResponse {
+	message: string;
+	data?: {
+		id: string;
+		name: string;
+		metaTemplateId: string;
+		status: string;
+	};
+	error?: string;
+	errorCode?: string | number;
 }

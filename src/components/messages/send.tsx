@@ -1,5 +1,6 @@
 import { ButtonEnvio } from "@/components/messages/buttonEnvio";
 import { ConfigurarSend } from "@/components/messages/configurarEnvio";
+import { CreateTemplateModal } from "@/components/messages/modalTemplates";
 import { VariableEditor } from "@/components/messages/phoneConfig/variableEditor";
 import { PreviewCard } from "@/components/messages/previewCard";
 import { ResultsCard } from "@/components/messages/resultsCard";
@@ -8,16 +9,19 @@ import { Button } from "@/components/ui/button";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
 	templates: Template[];
 }
 
-export const SendMessages = ({ templates }: Props) => {
+export const SendMessages = ({ templates: initialTemplates }: Props) => {
+	const [templates, setTemplates] = useState(initialTemplates);
 	const [recipients, setRecipients] = useState<string[]>([]);
 	const [selectedTemplate, setSelectedTemplate] = useState("");
 	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
+	const [showCreateModal, setShowCreateModal] = useState(false);
 	const { createHandler, resultados, resetResultados, isSubmitting } = ConfigurarSend();
 
 	// Obtener template seleccionado
@@ -67,6 +71,12 @@ export const SendMessages = ({ templates }: Props) => {
 		onSubmit(datos);
 	};
 
+	const handleCreateTemplate = async (newTemplate: Template) => {
+		// Agregar la nueva plantilla a la lista local inmediatamente
+		setTemplates(prev => [...prev, newTemplate]);
+		setShowCreateModal(false);
+	};
+
 	// Validar si se puede enviar
 	const canSend = () => {
 		if (!selectedTemplate || recipients.length === 0 || isSubmitting) {
@@ -85,11 +95,20 @@ export const SendMessages = ({ templates }: Props) => {
 
 	return (
 		<div className="p-8">
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-foreground mb-2">Enviar Mensajes</h1>
-				<p className="text-muted-foreground">Crea y envía mensajes masivos a tus contactos</p>
+			<div className="mb-8 flex items-center justify-between">
+				<div>
+					<h1 className="text-3xl font-bold text-foreground mb-2">Enviar Mensajes</h1>
+					<p className="text-muted-foreground">Crea y envía mensajes masivos a tus contactos</p>
+				</div>
+				<Button
+					onClick={() => setShowCreateModal(true)}
+					className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+				>
+					<Plus size={20} />
+					Nueva Plantilla
+				</Button>
 			</div>
-		
+
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Main Form */}
 				<div className="lg:col-span-2 space-y-6">
@@ -183,6 +202,14 @@ export const SendMessages = ({ templates }: Props) => {
 					/>
 				)}
 			</div>
+
+			{/* Modal para crear plantilla */}
+			{showCreateModal && (
+				<CreateTemplateModal
+					onClose={() => setShowCreateModal(false)}
+					onSuccess={handleCreateTemplate}
+				/>
+			)}
 		</div>
 	);
 };

@@ -13,7 +13,7 @@ export function Navigation({ currentPath = "/" }: NavigationProps) {
 			icon: MessageSquare,
 		},
 		{
-			path: "/user/phone-config",
+			path: "/user/responder",
 			label: "Configurar Teléfonos",
 			icon: Phone,
 		},

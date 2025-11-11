@@ -1,6 +1,6 @@
 import { useSubmitHandler } from "@/hooks/common/use-submit";
 import type { FormValuesUpdate } from "@/lib/schemas/user/register";
-import type { responseMessage, userDevolver } from "@/utils/types/user";
+import type { responseMessage } from "@/utils/types/user";
 import { useState } from "react";
 
 export const ConfigurarUpdate = () => {

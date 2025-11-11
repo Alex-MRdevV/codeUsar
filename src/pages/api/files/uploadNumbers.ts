@@ -1,20 +1,31 @@
-import { Clients } from "@/db/schema/clients";
+import { createClient } from "@/lib/drizzle/clients/clients";
 import { sheetSchema } from "@/lib/schemas/files/validarNumeros";
 import { getDb } from "@/utils/db";
 import { res } from "@/utils/responseAstro";
-import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 import XLSX from "xlsx";
 
 export const POST: APIRoute = async ({ request, locals }) => {
+	const { env } = locals.runtime;
+
+	if (!env.DB) {
+		return res(
+			{
+				message: "La variable de entorno DB no está definida",
+			},
+			{
+				status: 401,
+			}
+		);
+	}
+
 	const data = await request.formData();
 	const file = data.get("file") as File;
-	const db = getDb(locals.runtime.env.DB);
 
 	if (!file) {
 		return res(
 			{
-				error: "No se ha cargado ningún archivo",
+				message: "No se ha cargado ningún archivo",
 			},
 			{
 				status: 400,
@@ -34,34 +45,53 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			data: validatedData,
 			error,
 		} = sheetSchema.safeParse(jsonData);
-		if (!success) return res(error.message, { status: 400 });
 
-		// Mapear los datos para que coincidan con el esquema de la tabla
-		const dataClients = validatedData.map((phone) => ({
-			id: uuid.uuid,
-			numeroCliente: phone.Cliente,
-			nombre: phone.Nombre,
-			telefono: phone.Telefono,
-			documento: phone.Documento,
-		}));
+		if (!success) {
+			return res(
+				{
+					message: "Datos del archivo inválidos",
+					error: error.message,
+				},
+				{
+					status: 400,
+				}
+			);
+		}
 
-		await db.insert(Clients).values(dataClients);
+		const db = getDb(env.DB);
+		const insertClientStmt = createClient(db);
+
+		// Insertar cada cliente usando prepared statement
+		for (const phone of validatedData) {
+			await insertClientStmt.execute({
+				id: crypto.randomUUID(),
+				numeroCliente: phone.Cliente,
+				nombre: phone.Nombre,
+				telefono: phone.Telefono,
+				documento: phone.Documento,
+				createdAt: new Date(),
+			});
+		}
 
 		return res(
 			{
 				message: "Se han agregado correctamente los datos.",
+				data: {
+					count: validatedData.length,
+				},
 			},
 			{
-				status: 200,
+				status: 201,
 			}
 		);
 	} catch (error) {
 		return res(
 			{
-				error: "El archivo no es válido",
+				message: "Error al procesar el archivo",
+				error: (error as Error).message,
 			},
 			{
-				status: 400,
+				status: 500,
 			}
 		);
 	}

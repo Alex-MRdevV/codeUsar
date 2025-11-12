@@ -1,8 +1,8 @@
 import { User } from "@/db/schema/users";
-import { type Database } from "@/utils/db";
+import { db } from "@/lib/db";
 import { and, eq, ne, sql } from "drizzle-orm";
 
-export const existUserById = (db: Database) => db
+export const existUserById = db
 	.select({
 		id: User.id,
 		password: User.password,
@@ -11,15 +11,10 @@ export const existUserById = (db: Database) => db
 		userSecretJWT: User.secretUserJWT,
 	})
 	.from(User)
-	.where(
-		and(
-			eq(User.id, sql.placeholder("id")),
-			ne(User.estado, "retirado"),
-		)
-	)
+	.where(and(eq(User.id, sql.placeholder("id")), ne(User.estado, "retirado")))
 	.prepare();
 
-export const existsUser = (db: Database) => db
+export const existsUser = db
 	.select({
 		id: User.id,
 		password: User.password,

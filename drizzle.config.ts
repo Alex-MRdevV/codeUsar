@@ -1,15 +1,12 @@
 import "dotenv/config";
-import { defineConfig } from "drizzle-kit";
+require("dotenv").config();
 
-export default defineConfig({
+export default {
 	schema: "./src/db/schema/",
 	out: "./src/db/migrations/",
-	dialect: "sqlite",
-	driver: "d1-http",
+	dialect: "turso",
 	dbCredentials: {
-		accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
-		databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-		token: process.env.CLOUDFLARE_D1_TOKEN!,
+		url: process.env.TURSO_DATABASE_URL!,
+		authToken: process.env.TURSO_AUTH_TOKEN,
 	},
-	strict: true,
-});
+};

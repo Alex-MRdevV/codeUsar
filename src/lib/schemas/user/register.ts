@@ -82,16 +82,6 @@ export const updateSchema = v.object({
 
 export type FormValuesUpdate = v.InferOutput<typeof updateSchema>;
 
-// Esquema para eliminar usuario
-export const removeSchema = v.object({
-    id: v.pipe(
-        v.string("El id debe ser un texto"),
-        v.minLength(1, "El id es requerido")
-    ),
-});
-
-export type FormValuesRemove = v.InferOutput<typeof removeSchema>;
-
 // Esquema para regenerar token
 export const regenerateTokenSchema = v.object({
     id: v.pipe(

@@ -1,7 +1,7 @@
 import { validateAndFilterNumbers } from "@/lib/utils";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;

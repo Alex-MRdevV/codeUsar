@@ -11,23 +11,19 @@ import { useState } from "react"
 export function MessageReplies() {
 	const [messages, setMessages] = useState<MessageReplicar[]>([])
 	const [selectedMessage, setSelectedMessage] = useState<string | null>(null)
-	const [replyText, setReplyText] = useState("")
 	const { createHandler, isSubmitting } = ConfigurarSend()
 
 	const selectedMsg = messages.find((m) => m.id === selectedMessage)
 	const unrepliedCount = messages.filter((m) => !m.hasReply).length
 
-	// 👇 Aquí integras la data real al crear el handler
 	const handleSendReply = createHandler(async (data: ReplyMessageRequest) => {
-		if (!data.replyToMessageId || !data.content.trim()) {
-			return [new Error("Datos inválidos"), null];
+		if (!data.replyToMessageId || !data.content?.trim()) {
+			return [new Error("Datos inválidos"), null]
 		}
 
-		// Enviar mensaje a la API con la data real
-		const [error, response] = await sendWhatsAppMessage(data);
-		if (error) return [error, null];
+		const [error, response] = await sendWhatsAppMessage(data)
+		if (error) return [error, null]
 
-		// Actualizar estado de mensajes
 		setMessages((prev) =>
 			prev.map((msg) =>
 				msg.id === data.replyToMessageId
@@ -39,13 +35,11 @@ export function MessageReplies() {
 					}
 					: msg
 			)
-		);
+		)
 
-		setReplyText("");
-		setSelectedMessage(null);
-		return [null, response];
-	});
-
+		setSelectedMessage(null)
+		return [null, response]
+	})
 
 	return (
 		<div className="space-y-6">
@@ -70,14 +64,11 @@ export function MessageReplies() {
 					setSelectedMessage={setSelectedMessage}
 				/>
 
-				{/* Message Detail */}
 				{selectedMsg ? (
 					<MensajeDetalle
 						selectedMsg={selectedMsg}
 						handleSendReply={handleSendReply}
 						setSelectedMessage={setSelectedMessage}
-						setReplyText={setReplyText}
-						replyText={replyText}
 						isSubmitting={isSubmitting}
 					/>
 				) : (
@@ -87,4 +78,3 @@ export function MessageReplies() {
 		</div>
 	)
 }
-

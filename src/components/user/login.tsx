@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfigurarInicio } from "@/components/user/configurarInicio";
 import { ViewPasswordInput } from "@/components/viewPassword";
-import { useRedirigir } from "@/hooks/common/use-redirigirUser";
 import { useMessage } from "@/hooks/common/use-sendMessage";
 import { loginSchema } from "@/lib/schemas/user/auth";
 import { loginResponse } from "@/utils/services/user/loginResponse";

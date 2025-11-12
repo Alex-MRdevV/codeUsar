@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 		cookies.set("tokenAcceso", token, {
 			httpOnly: true,
 			secure: true,
-			sameSite: "strict",
+			sameSite: "lax",
 		});
 
 		return res({ user }, { status: 200 });

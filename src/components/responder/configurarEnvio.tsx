@@ -1,11 +1,11 @@
 import { useSubmitHandler } from "@/hooks/common/use-submit";
-import type { ReplyApiResponse, SendMessageRequest } from "@/utils/types/providers/meta";
+import type { ReplyApiResponse, ReplyMessageRequest } from "@/utils/types/providers/meta";
 import { useState } from "react";
 
 export const ConfigurarSend = () => {
 	const [resultados, setResultados] = useState<ReplyApiResponse | null>(null);
 
-	const { createHandler, isSubmitting } = useSubmitHandler<SendMessageRequest, ReplyApiResponse>({
+	const { createHandler, isSubmitting } = useSubmitHandler<ReplyMessageRequest, ReplyApiResponse>({
 		loadingMessage: "Enviando mensaje...",
 		successMessage: "Mensaje enviado",
 		onSuccess: (data) => setResultados(data)

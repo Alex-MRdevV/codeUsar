@@ -2,15 +2,19 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import type { MessageReplicar } from "@/utils/types/message"
+import type { ReplyMessageRequest } from "@/utils/types/providers/meta"
 import { MessageCircle, Send, User } from "lucide-react"
 import type { SetStateAction } from "react"
+import { useForm } from "react-hook-form"
+
+interface ReplyFormData {
+	content: string
+}
 
 interface Props {
 	selectedMsg: MessageReplicar
-	handleSendReply: (data?: any) => Promise<void>
+	handleSendReply: (data: ReplyMessageRequest) => unknown
 	setSelectedMessage: (value: SetStateAction<string | null>) => void
-	setReplyText: (value: SetStateAction<string>) => void
-	replyText: string
 	isSubmitting: boolean
 }
 
@@ -18,21 +22,42 @@ export const MensajeDetalle = ({
 	selectedMsg,
 	handleSendReply,
 	setSelectedMessage,
-	setReplyText,
-	replyText,
 	isSubmitting
 }: Props) => {
+	const {
+		register,
+		handleSubmit,
+		watch,
+		reset,
+		formState: { errors }
+	} = useForm<ReplyFormData>({
+		defaultValues: {
+			content: ""
+		}
+	})
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault() // ✅ Previene el comportamiento por defecto del formulario
+	const replyText = watch("content")
 
-		if (!replyText.trim()) return // ✅ Valida que no esté vacío
+	const onSubmit = async (formData: ReplyFormData) => {
+		if (!formData.content.trim()) return
+
+		const requestData: ReplyMessageRequest = {
+			replyToMessageId: selectedMsg.id,
+			content: formData.content.trim(),
+			messageType: "text"
+		}
 
 		try {
-			await handleSendReply() // ✅ Ejecuta la función asíncrona
+			await handleSendReply(requestData)
+			reset() // Limpia el formulario después de enviar
 		} catch (error) {
 			console.error("Error al enviar respuesta:", error)
 		}
+	}
+
+	const handleCancel = () => {
+		setSelectedMessage(null)
+		reset()
 	}
 
 	return (
@@ -51,7 +76,9 @@ export const MensajeDetalle = ({
 								<div className="font-semibold text-foreground">{selectedMsg.from}</div>
 								<div className="text-sm text-muted-foreground font-mono">{selectedMsg.fromPhone}</div>
 							</div>
-							<div className="text-xs text-muted-foreground">{selectedMsg.timestamp.toLocaleString("es-ES")}</div>
+							<div className="text-xs text-muted-foreground">
+								{selectedMsg.timestamp.toLocaleString("es-ES")}
+							</div>
 						</div>
 						<p className="text-foreground text-sm leading-relaxed">{selectedMsg.message}</p>
 					</section>
@@ -81,31 +108,34 @@ export const MensajeDetalle = ({
 							Escribir Respuesta
 						</h3>
 
-						{/* ✅ Envolver en un formulario */}
-						<form onSubmit={handleSubmit} className="space-y-3">
-							<Textarea
-								value={replyText}
-								onChange={(e) => setReplyText(e.target.value)}
-								placeholder="Escribe tu respuesta aquí..."
-								className="w-full min-h-32 bg-input border-border text-foreground placeholder-muted-foreground rounded-lg p-4 resize-none"
-								disabled={isSubmitting}
-							/>
+						<form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+							<div>
+								<Textarea
+									{...register("content", {
+										required: "El mensaje es requerido",
+										validate: (value) => value.trim().length > 0 || "El mensaje no puede estar vacío"
+									})}
+									placeholder="Escribe tu respuesta aquí..."
+									className="w-full min-h-32 bg-input border-border text-foreground placeholder-muted-foreground rounded-lg p-4 resize-none"
+									disabled={isSubmitting}
+								/>
+								{errors.content && (
+									<p className="text-sm text-red-500 mt-1">{errors.content.message}</p>
+								)}
+							</div>
 
 							<div className="flex justify-end gap-2">
 								<Button
-									type="button" // ✅ Especificar que no es submit
+									type="button"
 									variant="outline"
-									onClick={() => {
-										setSelectedMessage(null)
-										setReplyText("")
-									}}
+									onClick={handleCancel}
 									disabled={isSubmitting}
 								>
 									Cancelar
 								</Button>
 								<Button
-									type="submit" // ✅ Cambiar a tipo submit
-									disabled={!replyText.trim() || isSubmitting}
+									type="submit"
+									disabled={!replyText?.trim() || isSubmitting}
 									className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
 								>
 									{isSubmitting ? (

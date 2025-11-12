@@ -29,14 +29,14 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 	// Calcular caracteres totales
 	const getTotalCharacters = () => {
 		let total = 0;
-		if (structure.header?.text) {
+		if (structure?.header?.text) {
 			total += processText(structure.header.text, 'header').length;
 		}
-		if (structure.body.text) {
+		if (structure?.body.text) {
 			total += processText(structure.body.text, 'body').length;
 		}
-		if (structure.footer?.text) {
-			total += processText(structure.footer.text, 'footer').length;
+		if (structure?.footer?.text) {
+			total += processText(structure?.footer.text, 'footer').length;
 		}
 		return total;
 	};
@@ -64,19 +64,21 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 			>
 				<div className="space-y-3">
 					{/* Header */}
-					{structure.header?.text && (
+					{structure?.header?.text && (
 						<div className="font-bold text-foreground text-base mb-3">
 							{processText(structure.header.text, 'header')}
 						</div>
 					)}
 
 					{/* Body */}
-					<p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
-						{processText(structure.body.text, 'body')}
-					</p>
+					{structure?.body?.text && (
+						<p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
+							{processText(structure?.body.text, 'body')}
+						</p>
+					)}
 
 					{/* Footer */}
-					{structure.footer?.text && (
+					{structure?.footer?.text && (
 						<div className="text-muted-foreground text-xs mt-3 pt-3 border-t border-border/50">
 							{processText(structure.footer.text, 'footer')}
 						</div>

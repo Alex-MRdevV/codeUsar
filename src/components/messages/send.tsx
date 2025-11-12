@@ -1,4 +1,5 @@
 import { ButtonEnvio } from "@/components/messages/buttonEnvio";
+import { UploadFile } from "@/components/messages/buttonUploadFile";
 import { ConfigurarSend } from "@/components/messages/configurarEnvio";
 import { CreateTemplateModal } from "@/components/messages/modalTemplates";
 import { PreviewCard } from "@/components/messages/previewCard";
@@ -22,6 +23,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	const [selectedTemplate, setSelectedTemplate] = useState("");
 	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
 	const [showCreateModal, setShowCreateModal] = useState(false);
+
 	const { createHandler, resultados, resetResultados, isSubmitting } = ConfigurarSend();
 
 	// Obtener template seleccionado
@@ -32,6 +34,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		return response;
 	});
 
+	// Importar destinatarios desde archivo .txt o .csv
 	const handleImportRecipients = (file: File) => {
 		const reader = new FileReader();
 		reader.onload = (e) => {
@@ -54,25 +57,25 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	const handleTemplateChange = (templateId: string) => {
 		setSelectedTemplate(templateId);
-		setVariableValues({}); // Reset variables al cambiar template
+		setVariableValues({}); // Resetear variables al cambiar de plantilla
 	};
 
 	const handleSendMessage = () => {
 		if (!currentTemplate) return;
 
 		const datos: SendMessageRequest = {
-			recipients: recipients,
-			messageType: 'template',
+			templateId: currentTemplate.id,
+			recipients,
+			messageType: "template",
 			templateName: currentTemplate.metaTemplateName,
 			templateParams: variableValues,
-			templateLanguage: currentTemplate.language || 'es',
+			templateLanguage: currentTemplate.language || "es",
 		};
 
 		onSubmit(datos);
 	};
 
 	const handleCreateTemplate = async (newTemplate: Template) => {
-		// Agregar la nueva plantilla a la lista local inmediatamente
 		setTemplates(prev => [...prev, newTemplate]);
 		setShowCreateModal(false);
 	};
@@ -83,7 +86,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			return false;
 		}
 
-		// Verificar que todas las variables requeridas tengan valor
 		if (currentTemplate?.variables) {
 			return currentTemplate.variables.params.every(
 				param => variableValues[param.name]?.trim()
@@ -110,14 +112,11 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Main Form */}
+				{/* Sección principal */}
 				<div className="lg:col-span-2 space-y-6">
 					{resultados ? (
 						<div className="space-y-4">
-							<ResultsCard
-								resultados={resultados}
-								onClose={handleNewSend}
-							/>
+							<ResultsCard resultados={resultados} onClose={handleNewSend} />
 							<Button
 								onClick={handleNewSend}
 								className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold"
@@ -127,61 +126,28 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 						</div>
 					) : (
 						<>
-							{/* Selector de Template */}
+							{/* Selector de plantilla */}
 							<TemplateSelector
 								value={selectedTemplate}
 								templates={templates}
 								onChange={handleTemplateChange}
 							/>
 
-							{/* Editor de Variables */}
-							{currentTemplate?.variables && currentTemplate.variables.params.length > 0 && (
-								<div className="bg-card border border-border rounded-lg p-6">
-									<VariableEditor
-										variables={currentTemplate.variables}
-										values={variableValues}
-										onChange={setVariableValues}
-									/>
-								</div>
-							)}
+							{/* Editor de variables */}
+							{/* Editor de Variables */} {currentTemplate?.variables && currentTemplate.variables.params.length > 0 && (<div className="bg-card border border-border rounded-lg p-6"> <VariableEditor variables={currentTemplate.variables} values={variableValues} onChange={setVariableValues} /> </div>)}
 
-							{/* Gestión de Destinatarios */}
-							<div className="bg-card border border-border rounded-lg p-6">
-								<h3 className="text-sm font-semibold text-foreground mb-4">
-									Destinatarios
-								</h3>
+							{/* Gestión de destinatarios */}
+							<UploadFile handleImportRecipients={handleImportRecipients} recipients={recipients} />
 
-								<div className="space-y-4">
-									<div className="flex items-center gap-4">
-										<label className="text-sm font-medium text-foreground">
-											Importar desde archivo:
-										</label>
-										<input
-											type="file"
-											accept=".csv,.txt"
-											onChange={(e) => {
-												if (e.target.files?.[0]) {
-													handleImportRecipients(e.target.files[0]);
-												}
-											}}
-											className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-										/>
-									</div>
+							{/* Botón de envío */}
+							<ButtonEnvio
+								canSend={canSend}
+								handleSendMessage={handleSendMessage}
+								isSubmitting={isSubmitting}
+								recipients={recipients}
+							/>
 
-									{recipients.length > 0 && (
-										<div className="p-3 bg-muted/20 rounded-lg">
-											<p className="text-sm text-foreground">
-												<span className="font-semibold">{recipients.length}</span> destinatario{recipients.length !== 1 ? 's' : ''} agregado{recipients.length !== 1 ? 's' : ''}
-											</p>
-										</div>
-									)}
-								</div>
-							</div>
-
-							{/* Botón de Envío */}
-							<ButtonEnvio canSend={canSend} handleSendMessage={handleSendMessage} isSubmitting={isSubmitting} recipients={recipients} />
-
-							{/* Mensaje de advertencia si faltan variables */}
+							{/* Advertencia si faltan variables */}
 							{!canSend() && selectedTemplate && recipients.length > 0 && currentTemplate?.variables && (
 								<div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
 									<p className="text-sm text-yellow-600 dark:text-yellow-400">
@@ -193,7 +159,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 					)}
 				</div>
 
-				{/* Preview Card - Solo mostrar si no hay resultados */}
+				{/* Vista previa */}
 				{!resultados && currentTemplate && (
 					<PreviewCard
 						template={currentTemplate}

@@ -1,5 +1,4 @@
 import { validateAndFilterNumbers } from "@/lib/utils";
-import { getDb } from "@/utils/db";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 import XLSX from "xlsx";
@@ -7,14 +6,12 @@ import XLSX from "xlsx";
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 
-	if (!env.DB) {
+	if (!env.DB || !env.KV) {
 		return res(
 			{
-				message: "La variable de entorno DB no está definida",
+				message: "Variables de entorno no configuradas",
 			},
-			{
-				status: 401,
-			}
+			{ status: 401 }
 		);
 	}
 
@@ -46,7 +43,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		if (validRows.length === 0) {
 			return res(
 				{
-					message: "No se encontraron filas válidas en el archivo",
+					message: "No se encontraron Números válidos en el archivo",
 					invalidRows: invalidRows.map(({ row, errors }) => ({
 						fila: row,
 						errores: errors,
@@ -58,22 +55,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		const db = getDb(env.DB);
-		const insertClientStmt = createClient(db);
+		const dataToStore = {
+			phones: validRows,
+			timestamp: new Date().toISOString(),
+			totalRecords: validRows.length,
+		};
 
-		// Insertar cada cliente válido usando prepared statement
-		for (const phone of validRows) {
-			await insertClientStmt.execute({
-				id: crypto.randomUUID(),
-				numeroCliente: phone.Cliente,
-				nombre: phone.Nombre,
-				telefono: phone.Telefono,
-				documento: phone.Documento,
-				createdAt: new Date(),
-			});
-		}
+		await env.KV.put("phones", JSON.stringify(dataToStore), {
+			expirationTtl: 3600, // 1 hora en segundos
+		});
 
-		// Respuesta con información detallada
 		return res(
 			{
 				message:

@@ -27,6 +27,7 @@ export interface MessageResult {
 }
 
 export interface SendMessageRequest {
+	templateId: string;
 	recipients: string[];
 	messageType: "text" | "template";
 	content?: string;

@@ -1,6 +1,13 @@
+import {
+	createUserStats,
+	getUserStats,
+	updateUserStats,
+} from "@/lib/drizzle/stats/stadistics";
+import { incrementTemplateCount } from "@/lib/drizzle/templates/templates";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/callApi/send";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
+import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -74,6 +81,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	try {
+		// 1. Enviar mensajes
 		const [error, result] = await sendMessagesToAPI(
 			jsonData,
 			ACCESS_TOKEN,
@@ -91,6 +99,48 @@ export const POST: APIRoute = async ({ request, locals }) => {
 					status: 500,
 				}
 			);
+		}
+		// --- Obtener userId desde la sesión ---
+		const sessionUser = locals.user ?? null;
+		const userId = (sessionUser?.id as string) ?? null;
+
+		if (!userId && result) {
+			const messagesSent = result.summary.failed || 0;
+
+			// Calcular tiempo ahorrado (ejemplo: 30 segundos por mensaje = 0.0083 horas)
+			const timeSavedPerMessage = 0.0083; // 30 segundos en horas
+			const timeSavedHours = messagesSent * timeSavedPerMessage;
+
+			// Obtener estadísticas actuales
+			const currentStats = await getUserStats.execute({ userId });
+
+			if (currentStats.length > 0) {
+				// Actualizar estadísticas existentes
+				const stats = currentStats[0].userStats;
+				await updateUserStats(userId, {
+					totalMessagesSent: (stats.totalMessagesSent ?? 0) + messagesSent,
+					totalTimeSavedHours:
+						(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
+					totalContacts:
+						(stats.totalContacts ?? 0) + jsonData.recipients.length,
+					lastUpdated: new Date(),
+				}).execute();
+			} else {
+				// Crear nuevas estadísticas
+				await createUserStats.execute({
+					id: uuid.uuid,
+					userId,
+					totalMessagesSent: messagesSent,
+					totalTimeSavedHours: timeSavedHours,
+					totalContacts: jsonData.recipients.length,
+					lastUpdated: new Date(),
+				});
+			}
+
+			// 3. Incrementar contador de template si se usó uno
+			if (jsonData.messageType === "template" && jsonData.templateId) {
+				await incrementTemplateCount.execute({ id: jsonData.templateId });
+			}
 		}
 
 		return res(
@@ -114,4 +164,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
-

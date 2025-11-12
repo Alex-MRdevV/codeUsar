@@ -43,6 +43,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 			sameSite: "lax",
 		});
 
+		console.log(token);
 		return res({ user }, { status: 200 });
 	} catch (error) {
 		return res("Algo ha salido mal", { status: 500 });

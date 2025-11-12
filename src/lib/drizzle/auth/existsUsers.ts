@@ -24,10 +24,6 @@ export const existsUser = db
 	})
 	.from(User)
 	.where(
-		and(
-			eq(User.email, sql.placeholder("email")),
-			ne(User.estado, "retirado"),
-			eq(User.rol, sql.placeholder("rol"))
-		)
+		and(eq(User.email, sql.placeholder("email")), ne(User.estado, "retirado"))
 	)
 	.prepare();

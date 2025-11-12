@@ -13,15 +13,17 @@ import Layout from "@/layouts/Layout.astro";
 	import { type userDevolver } from "@/utils/types/user";
 
 	const routes: Record<userDevolver["rol"], string> = {
-		user: "user",
+		user: "/user/index",
 	};
 
 	window.addEventListener("userAuthenticate", (event) => {
-		const user = (event as CustomEvent<userDevolver>).detail;
+		const customEvent = event as CustomEvent<userDevolver>;
+		const user = customEvent.detail;
 
-		if (!user?.rol) return;
-
-		const target = routes[user.rol] || "/user/index";
-		window.location.assign(target);
+		setTimeout(() => {
+			if (user?.rol === routes[user.rol]) {
+				window.location.href = "/user/index";
+			}
+		}, 100);
 	});
 </script>

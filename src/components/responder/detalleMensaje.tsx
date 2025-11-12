@@ -7,7 +7,7 @@ import type { SetStateAction } from "react"
 
 interface Props {
 	selectedMsg: MessageReplicar
-	handleSendReply: () => Promise<void>// ✅ Cambiar a una función simple que no retorna nada
+	handleSendReply: (data?: any) => Promise<void>
 	setSelectedMessage: (value: SetStateAction<string | null>) => void
 	setReplyText: (value: SetStateAction<string>) => void
 	replyText: string
@@ -22,6 +22,19 @@ export const MensajeDetalle = ({
 	replyText,
 	isSubmitting
 }: Props) => {
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault() // ✅ Previene el comportamiento por defecto del formulario
+
+		if (!replyText.trim()) return // ✅ Valida que no esté vacío
+
+		try {
+			await handleSendReply() // ✅ Ejecuta la función asíncrona
+		} catch (error) {
+			console.error("Error al enviar respuesta:", error)
+		}
+	}
+
 	return (
 		<article className="lg:col-span-2">
 			<div className="space-y-4">
@@ -68,29 +81,31 @@ export const MensajeDetalle = ({
 							Escribir Respuesta
 						</h3>
 
-						<div className="space-y-3">
+						{/* ✅ Envolver en un formulario */}
+						<form onSubmit={handleSubmit} className="space-y-3">
 							<Textarea
 								value={replyText}
 								onChange={(e) => setReplyText(e.target.value)}
 								placeholder="Escribe tu respuesta aquí..."
 								className="w-full min-h-32 bg-input border-border text-foreground placeholder-muted-foreground rounded-lg p-4 resize-none"
-								disabled={isSubmitting} // ✅ Deshabilitar durante el envío
+								disabled={isSubmitting}
 							/>
 
 							<div className="flex justify-end gap-2">
 								<Button
+									type="button" // ✅ Especificar que no es submit
 									variant="outline"
 									onClick={() => {
 										setSelectedMessage(null)
 										setReplyText("")
 									}}
-									disabled={isSubmitting} // ✅ Deshabilitar durante el envío
+									disabled={isSubmitting}
 								>
 									Cancelar
 								</Button>
 								<Button
-									onClick={handleSendReply} // ✅ Ejecuta directamente sin parámetros
-									disabled={!replyText.trim() || isSubmitting} // ✅ Deshabilitar si está vacío o enviando
+									type="submit" // ✅ Cambiar a tipo submit
+									disabled={!replyText.trim() || isSubmitting}
 									className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
 								>
 									{isSubmitting ? (
@@ -106,7 +121,7 @@ export const MensajeDetalle = ({
 									)}
 								</Button>
 							</div>
-						</div>
+						</form>
 					</Card>
 				)}
 			</div>

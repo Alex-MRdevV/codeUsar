@@ -12,51 +12,51 @@ export function MessageReplies() {
 	const [messages, setMessages] = useState<MessageReplicar[]>([])
 	const [selectedMessage, setSelectedMessage] = useState<string | null>(null)
 	const [replyText, setReplyText] = useState("")
-	const { createHandler, isSubmitting, resultados } = ConfigurarSend()
+	const { createHandler, isSubmitting } = ConfigurarSend()
 
 	const selectedMsg = messages.find((m) => m.id === selectedMessage)
 	const unrepliedCount = messages.filter((m) => !m.hasReply).length
 
-	const handleSendReply = createHandler(async () => {
-		if (!replyText.trim() || !selectedMsg) return [new Error("Datos inválidos"), null]
-
-		const requestData: ReplyMessageRequest = {
-			messageType: "text",
-			replyToMessageId: selectedMsg.id,
-			content: replyText,
+	// 👇 Aquí integras la data real al crear el handler
+	const handleSendReply = createHandler(async (data: ReplyMessageRequest) => {
+		if (!data.replyToMessageId || !data.content.trim()) {
+			return [new Error("Datos inválidos"), null];
 		}
 
-		const [error, response] = await sendWhatsAppMessage(requestData)
+		// Enviar mensaje a la API con la data real
+		const [error, response] = await sendWhatsAppMessage(data);
+		if (error) return [error, null];
 
-		if (error) {
-			return [error, null]
-		}
-
-		setMessages(
-			messages.map((msg) =>
-				msg.id === selectedMessage
+		// Actualizar estado de mensajes
+		setMessages((prev) =>
+			prev.map((msg) =>
+				msg.id === data.replyToMessageId
 					? {
 						...msg,
 						hasReply: true,
-						replyMessage: replyText,
+						replyMessage: data.content,
 						replyTime: new Date(),
 					}
-					: msg,
-			),
-		)
+					: msg
+			)
+		);
 
-		setReplyText("")
-		setSelectedMessage(null)
+		setReplyText("");
+		setSelectedMessage(null);
+		return [null, response];
+	});
 
-		return [null, response]
-	})
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h1 className="text-3xl font-bold text-foreground mb-2">Responder Mensajes</h1>
-				<p className="text-muted-foreground">Gestiona y responde a los mensajes de tus clientes</p>
+				<h1 className="text-3xl font-bold text-foreground mb-2">
+					Responder Mensajes
+				</h1>
+				<p className="text-muted-foreground">
+					Gestiona y responde a los mensajes de tus clientes
+				</p>
 			</div>
 
 			{/* Stats */}
@@ -70,20 +70,21 @@ export function MessageReplies() {
 					setSelectedMessage={setSelectedMessage}
 				/>
 
-				{/* Message Detail and Reply */}
-				{
-					selectedMsg ? (
-						<MensajeDetalle
-							selectedMsg={selectedMsg}
-							handleSendReply={() => handleSendReply()} // ✅ Envolver
-							setSelectedMessage={setSelectedMessage}
-							setReplyText={setReplyText}
-							replyText={replyText}
-							isSubmitting={isSubmitting}
-						/>
-					) : <EligirMensaje />
-				}
+				{/* Message Detail */}
+				{selectedMsg ? (
+					<MensajeDetalle
+						selectedMsg={selectedMsg}
+						handleSendReply={handleSendReply}
+						setSelectedMessage={setSelectedMessage}
+						setReplyText={setReplyText}
+						replyText={replyText}
+						isSubmitting={isSubmitting}
+					/>
+				) : (
+					<EligirMensaje />
+				)}
 			</div>
 		</div>
 	)
 }
+

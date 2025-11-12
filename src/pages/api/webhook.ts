@@ -11,13 +11,67 @@ export const GET: APIRoute = async ({ url, locals }) => {
 	if (mode === "subscribe" && token === VERIFY_TOKEN) {
 		return new Response(challenge, { status: 200 });
 	}
+
 	return new Response("Forbidden", { status: 403 });
 };
 
+// ✅ Función para validar la firma de Meta
+async function validateSignature(
+	payload: string,
+	signature: string | null,
+	appSecret: string
+): Promise<boolean> {
+	if (!signature || !signature.startsWith("sha256=")) {
+		return false;
+	}
+
+	// Extraer la firma (después de "sha256=")
+	const expectedSignature = signature.slice(7);
+
+	// Generar nuestra propia firma usando el App Secret
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		"raw",
+		encoder.encode(appSecret),
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"]
+	);
+
+	const signatureBuffer = await crypto.subtle.sign(
+		"HMAC",
+		key,
+		encoder.encode(payload)
+	);
+
+	// Convertir a hexadecimal
+	const calculatedSignature = Array.from(new Uint8Array(signatureBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+
+	// Comparar de forma segura (timing-safe)
+	return calculatedSignature === expectedSignature;
+}
+
 // ✅ Recepción de eventos de WhatsApp (mensajes, estados, errores, etc.)
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
 	try {
-		const body = await request.json();
+		const { env } = locals.runtime;
+		const APP_SECRET = env.APP_SECRET; // 🔑 Tu App Secret de Meta
+
+		// Obtener el cuerpo como texto para validar la firma
+		const rawBody = await request.text();
+		const signature = request.headers.get("X-Hub-Signature-256");
+
+		// 🔒 VALIDAR LA FIRMA (recomendado en producción)
+		const isValid = await validateSignature(rawBody, signature, APP_SECRET);
+		if (!isValid) {
+			console.error("⚠️ Firma inválida - posible intento de falsificación");
+			return new Response("Forbidden", { status: 403 });
+		}
+
+		// Parsear el JSON ahora que sabemos que es legítimo
+		const body = JSON.parse(rawBody);
 
 		// 1️⃣ Validar que sea de WhatsApp
 		if (body.object !== "whatsapp_business_account") {
@@ -60,6 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 		return new Response("EVENT_RECEIVED", { status: 200 });
 	} catch (error) {
+		console.error("Error procesando webhook:", error);
 		return new Response("Error", { status: 500 });
 	}
 };

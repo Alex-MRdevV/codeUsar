@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 
-export function useRedirigir<T = null>(initialState: T = null as T,event: string) {
+export function useRedirigir<T = null>(
+	initialState: T = null as T,
+	event: string
+) {
 	const [user, setUser] = useState<T>(initialState);
 
 	useEffect(() => {
 		const redirigirUser = () => {
 			if (user) {
-				// Dispara el evento solo si hay datos de usuario
-				window.dispatchEvent(
-					new CustomEvent(event, { detail: user })
-				);
+				window.dispatchEvent(new CustomEvent(event, { detail: user }));
 			}
 		};
 
 		redirigirUser();
-	}, [user]);
+	}, [user, event]);
 
 	return { user, setUser };
 }

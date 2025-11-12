@@ -1,16 +1,18 @@
 import { type userDevolver } from "@/utils/types/user";
 import { SignJWT } from "jose";
 
-export function accessToken(payload: userDevolver): Promise<string> {
-  return new Promise((resolve, reject) => {
-    new SignJWT({ payload })
-      .setExpirationTime("7d")
-      .sign(import.meta.env.SECRET_KEY_JWT)
-      .then((token) => {
-        resolve(token);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+export async function accessToken(payload: userDevolver): Promise<string> {
+	const secret = new TextEncoder().encode(import.meta.env.SECRET_KEY_JWT);
+
+	try {
+		const token = await new SignJWT({ payload })
+			.setProtectedHeader({ alg: "HS256", typ: "JWT" }) // 🔥 obligatorio
+			.setIssuedAt()
+			.setExpirationTime("7d")
+			.sign(secret);
+
+		return token;
+	} catch (error) {
+		throw new Error(`Error generando token: ${error}`);
+	}
 }

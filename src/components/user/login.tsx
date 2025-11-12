@@ -11,12 +11,26 @@ import { loginSchema } from "@/lib/schemas/user/auth";
 import { loginResponse } from "@/utils/services/user/loginResponse";
 import type { responseMessage, userDataLogin } from "@/utils/types/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 export const LoginForm = () => {
 	const { message, setMessage } = useMessage<Error | null>(null);
 	const { createHandler } = ConfigurarInicio();
-	const { setUser } = useRedirigir<responseMessage | null>(null, "userAuthenticate");
+	const [user, setUser] = useState<responseMessage | null>();
+
+	useEffect(() => {
+		const redirigirUser = () => {
+			if (user) {
+				// Solo dispara el evento si no hay error y hay datos de usuario
+				window.dispatchEvent(
+					new CustomEvent("userAuthenticate", { detail: user }),
+				);
+			}
+		};
+
+		redirigirUser();
+	}, [user]);
 
 	const {
 		register,

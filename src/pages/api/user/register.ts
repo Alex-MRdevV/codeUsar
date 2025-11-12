@@ -66,6 +66,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
 		return res({ newUser }, { status: 200 });
 	} catch (error) {
+		console.log(error);
 		return res({ message: "Algo ha salido mal" }, { status: 500 });
 	}
 };

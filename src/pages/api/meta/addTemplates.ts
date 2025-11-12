@@ -1,8 +1,5 @@
-// =======================
-
 import { createTemplate } from "@/lib/drizzle/templates/templates";
 import { crearPlantillaIndividual } from "@/lib/providersMensajes/callApi/addTemplate";
-import { getDb } from "@/utils/db";
 import { res } from "@/utils/responseAstro";
 import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
 import type { APIRoute } from "astro";
@@ -121,10 +118,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		// Si la creación en Meta fue exitosa, guardar en la base de datos
-		const db = getDb(env.DB);
-		const insertTemplateStmt = createTemplate(db);
-
+		const insertTemplateStmt = createTemplate;
 		await insertTemplateStmt.execute({
 			id: templateId,
 			name: jsonData.name,

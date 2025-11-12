@@ -1,17 +1,12 @@
 ---
 import { WelcomeCard } from "@/components/welcome/welcome";
-import { User } from "@/db/schema/users";
 import Layout from "@/layouts/LayoutUsers.astro";
 import { getUserStats } from "@/lib/drizzle/stats/stadistics";
 import { sidebarDataItems } from "@/lib/sidebarItems";
-import { getDb } from "@/utils/db";
-import type { dataUserSidebar } from "@/utils/types/sidebar";
-import { eq } from "drizzle-orm";
+import { getUserSidebarData } from "@/utils/getUserDataLayout";
 
-// --- Obtener locals y conexión a la base de datos ---
+const data = await getUserSidebarData(Astro, sidebarDataItems);
 const { locals } = Astro;
-const db = getDb(locals.runtime.env.DB);
-
 // --- Obtener userId desde la sesión ---
 const sessionUser = locals.user ?? null;
 const userId = (sessionUser?.id as string) ?? null;
@@ -21,7 +16,7 @@ if (!userId) {
 }
 
 // --- Ejecutar consulta preparada (solo UserStats) ---
-const stmt = getUserStats(db);
+const stmt = getUserStats;
 const result = await stmt.execute({ userId });
 
 // --- Obtener estadísticas ---
@@ -37,25 +32,6 @@ const userStats: WelcomeStats = {
 	totalMessagesSent: Number(rawStats?.totalMessagesSent ?? 0),
 	totalTimeSavedHours: Number(rawStats?.totalTimeSavedHours ?? 0),
 	totalContacts: Number(rawStats?.totalContacts ?? 0),
-};
-
-// --- Obtener email desde la tabla User ---
-const userRow = await db
-	.select({ email: User.email })
-	.from(User)
-	.where(eq(User.id, userId))
-	.get();
-
-const email = userRow?.email ?? "usuario@ejemplo.com";
-const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
-
-// --- Construir data para Layout ---
-const data: dataUserSidebar = {
-	items: sidebarDataItems,
-	user: {
-		name: nombreUser,
-		email,
-	},
 };
 ---
 

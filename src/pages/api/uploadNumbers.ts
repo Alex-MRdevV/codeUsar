@@ -1,0 +1,109 @@
+import { validateAndFilterNumbers } from "@/lib/utils";
+import { getDb } from "@/utils/db";
+import { res } from "@/utils/responseAstro";
+import type { APIRoute } from "astro";
+import XLSX from "xlsx";
+
+export const POST: APIRoute = async ({ request, locals }) => {
+	const { env } = locals.runtime;
+
+	if (!env.DB) {
+		return res(
+			{
+				message: "La variable de entorno DB no está definida",
+			},
+			{
+				status: 401,
+			}
+		);
+	}
+
+	const data = await request.formData();
+	const file = data.get("file") as File;
+
+	if (!file) {
+		return res(
+			{
+				message: "No se ha cargado ningún archivo",
+			},
+			{
+				status: 400,
+			}
+		);
+	}
+
+	try {
+		const buffer = await file.arrayBuffer();
+		const workbook = XLSX.read(buffer, { type: "buffer" });
+		const sheetName = workbook.SheetNames[0];
+		const worksheet = workbook.Sheets[sheetName];
+		const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+		// Validar y filtrar las filas
+		const { validRows, invalidRows } = validateAndFilterNumbers(jsonData);
+
+		// Si no hay filas válidas, retornar error
+		if (validRows.length === 0) {
+			return res(
+				{
+					message: "No se encontraron filas válidas en el archivo",
+					invalidRows: invalidRows.map(({ row, errors }) => ({
+						fila: row,
+						errores: errors,
+					})),
+				},
+				{
+					status: 400,
+				}
+			);
+		}
+
+		const db = getDb(env.DB);
+		const insertClientStmt = createClient(db);
+
+		// Insertar cada cliente válido usando prepared statement
+		for (const phone of validRows) {
+			await insertClientStmt.execute({
+				id: crypto.randomUUID(),
+				numeroCliente: phone.Cliente,
+				nombre: phone.Nombre,
+				telefono: phone.Telefono,
+				documento: phone.Documento,
+				createdAt: new Date(),
+			});
+		}
+
+		// Respuesta con información detallada
+		return res(
+			{
+				message:
+					invalidRows.length > 0
+						? `Se agregaron ${validRows.length} registros. ${invalidRows.length} filas fueron omitidas por errores.`
+						: "Se han agregado correctamente todos los datos.",
+				data: {
+					insertados: validRows.length,
+					omitidos: invalidRows.length,
+					...(invalidRows.length > 0 && {
+						filasInvalidas: invalidRows.map(({ row, errors }) => ({
+							fila: row,
+							errores: errors,
+						})),
+					}),
+				},
+			},
+			{
+				status: 201,
+			}
+		);
+	} catch (error) {
+		return res(
+			{
+				message: "Error al procesar el archivo",
+				error: (error as Error).message,
+			},
+			{
+				status: 500,
+			}
+		);
+	}
+};

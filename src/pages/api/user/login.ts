@@ -1,7 +1,6 @@
 import { accessToken } from "@/lib/accessTokens";
 import { existsUser } from "@/lib/drizzle/auth/existsUsers";
 import { loginSchema } from "@/lib/schemas/user/auth";
-import { getDb } from "@/utils/db";
 import { verifyPassword } from "@/utils/password/verify";
 import { res } from "@/utils/responseAstro";
 import { type APIRoute } from "astro";
@@ -17,9 +16,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 	const { email, password, rol } = output;
 
 	try {
-		const db = getDb(locals.runtime.env.DB);
-
-		const [user] = await existsUser(db).execute({
+		const [user] = await existsUser.execute({
 			email: email,
 			estado: "activo",
 			rol: rol,

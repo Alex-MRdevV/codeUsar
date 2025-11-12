@@ -1,8 +1,8 @@
 import { User } from "@/db/schema/users";
 import { accessToken } from "@/lib/accessTokens";
+import { db } from "@/lib/db";
 import { existsUser, existUserById } from "@/lib/drizzle/auth/existsUsers";
 import { updateSchema } from "@/lib/schemas/user/register";
-import { getDb } from "@/utils/db";
 import { passwordGenerate } from "@/utils/password/generate";
 import { hashPassword } from "@/utils/password/hashPassword";
 import { res } from "@/utils/responseAstro";
@@ -20,9 +20,8 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 	const { email, id, password, nombre } = output;
 
 	try {
-		const db = getDb(locals.runtime.env.DB);
 		// Verificar que el usuario a actualizar existe
-		const [user] = await existUserById(db).execute({
+		const [user] = await existUserById.execute({
 			id: id,
 		});
 
@@ -31,7 +30,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
 		// Si se proporciona un email, verificar que no esté en uso
 		if (email) {
-			const [existingUserByEmail] = await existsUser(db).execute({
+			const [existingUserByEmail] = await existsUser.execute({
 				email: email,
 				estado: "activo",
 			});
@@ -93,17 +92,10 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 		return res(
 			{
 				message: "Usuario actualizado exitosamente",
-				user: {
-					id: updatedUser.id,
-					email: updatedUser.email,
-					nombre: updatedUser.nombre,
-					rol: updatedUser.rol,
-				},
 			},
 			{ status: 200 }
 		);
 	} catch (error) {
-		console.error("Error al actualizar usuario:", error);
 		return res({ message: "Algo ha salido mal" }, { status: 500 });
 	}
 };

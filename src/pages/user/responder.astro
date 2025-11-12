@@ -1,42 +1,10 @@
 ---
-import Layout from "@/layouts/LayoutUsers.astro";
 import { MessageReplies } from "@/components/responder/mensajeReplicar";
+import Layout from "@/layouts/LayoutUsers.astro";
 import { sidebarDataItems } from "@/lib/sidebarItems";
-import type { dataUserSidebar } from "@/utils/types/sidebar";
-import { User } from "@/db/schema/users";
-import { eq } from "drizzle-orm";
-import { getDb } from "@/utils/db";
+import { getUserSidebarData } from "@/utils/getUserDataLayout";
 
-// --- Obtener locals y conexión a la base de datos ---
-const { locals } = Astro;
-const db = getDb(locals.runtime.env.DB);
-
-// --- Obtener userId desde la sesión ---
-const sessionUser = locals.user ?? null;
-const userId = (sessionUser?.id as string) ?? null;
-
-if (!userId) {
-	throw new Error("Usuario no autenticado o sin ID válido.");
-}
-
-// --- Obtener email desde la tabla User ---
-const userRow = await db
-	.select({ email: User.email })
-	.from(User)
-	.where(eq(User.id, userId))
-	.get();
-
-const email = userRow?.email ?? "usuario@ejemplo.com";
-const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
-
-// --- Construir data para Layout ---
-const data: dataUserSidebar = {
-	items: sidebarDataItems,
-	user: {
-		name: nombreUser,
-		email,
-	},
-};
+const data = await getUserSidebarData(Astro, sidebarDataItems);
 ---
 
 <Layout

@@ -35,32 +35,8 @@ export interface Template {
 }
 
 export interface PreviewCardProps {
-	template: {
-		structure: {
-			header?: {
-				type: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT";
-				text?: string;
-				example?: string;
-			};
-			body: {
-				text: string;
-				example?: string[];
-			};
-			footer?: {
-				text: string;
-			};
-		};
-		variables?: {
-			format: "named" | "positional";
-			params: Array<{
-				name: string;
-				placeholder: string;
-				example: string;
-				component: "header" | "body" | "footer";
-			}>;
-		};
-	};
-	variableValues?: Record<string, string>; // Valores actuales de las variables
+	template: Partial<Pick<Template, "structure" | "variables">>;
+	variableValues?: Record<string, string>;
 	recipients: string[];
 }
 

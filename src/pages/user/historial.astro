@@ -1,73 +1,65 @@
 ---
 import { HistorialAplicado } from "@/components/historial/view";
-import { User } from "@/db/schema/users";
 import Layout from "@/layouts/LayoutUsers.astro";
 import { getTemplatesForHistory } from "@/lib/drizzle/templates/templates";
 import { sidebarDataItems } from "@/lib/sidebarItems";
-import { getDb } from "@/utils/db";
-import type { dataUserSidebar } from "@/utils/types/sidebar";
-import { eq } from "drizzle-orm";
+import { getUserSidebarData } from "@/utils/getUserDataLayout";
 
-const { locals } = Astro;
-const db = getDb(locals.runtime.env.DB);
-
-// --- Obtener userId desde la sesión ---
-const sessionUser = locals.user ?? null;
-const userId = (sessionUser?.id as string) ?? null;
-
-if (!userId) {
-	throw new Error("Usuario no autenticado o sin ID válido.");
-}
-
-// --- Obtener email desde la tabla User ---
-const userRow = await db
-	.select({ email: User.email })
-	.from(User)
-	.where(eq(User.id, userId))
-	.get();
-
-const email = userRow?.email ?? "usuario@ejemplo.com";
-const nombreUser = (sessionUser?.nombre as string) ?? "Usuario";
+const data = await getUserSidebarData(Astro, sidebarDataItems);
 
 // --- Obtener plantillas usando la consulta preparada
-const templatesHistoryConsulta = getTemplatesForHistory(db);
+const templatesHistoryConsulta = getTemplatesForHistory;
 const templatesHistoryData = await templatesHistoryConsulta.all();
 
-//data para el historial
 // Transformar los datos al formato que espera HistorialAplicadoProps
-const templatesHistory = templatesHistoryData.map(t => ({
-    id: Number(t.id) || 0,
-    name: t.name,
-    icon: t.icon || "📄",
-    count: t.count || 0,
-    color: t.color || "#3b82f6",
+const templatesHistory = templatesHistoryData.map((t) => ({
+	id: Number(t.id) || 0,
+	name: t.name,
+	icon: t.icon || "📄",
+	count: t.count || 0,
+	color: t.color || "#3b82f6",
 }));
 
 const statsConfig = [
-    {
-        label: "Total Mensajes",
-        value: templatesHistory.reduce((acc, t) => acc + t.count, 0),
-        icon: "📊",
-        trend: "+12%",
-        description: "Mensajes enviados este mes",
-        trendColor: "green"
-    },
-    {
-        label: "Plantillas Activas",
-        value: templatesHistory.length,
-        icon: "📝",
-        description: "Plantillas disponibles"
-    }
-];
-
-// --- Construir data para Layout ---
-const data: dataUserSidebar = {
-	items: sidebarDataItems,
-	user: {
-		name: nombreUser,
-		email,
+	{
+		label: "Total Mensajes",
+		value: templatesHistory.reduce((acc, t) => acc + t.count, 0),
+		icon: "📊",
+		description: "Mensajes enviados este mes",
+		trendColor: "green",
 	},
-};
+	{
+		label: "Plantilla Más Usada",
+		value:
+			templatesHistory.length > 0
+				? templatesHistory.reduce(
+						(max, t) => (t.count > max.count ? t : max),
+						templatesHistory[0]
+					).name
+				: "Seguimiento",
+		icon: "🏆",
+		description: "Mayor uso",
+	},
+	{
+		label: "Promedio por Plantilla",
+		value:
+			templatesHistory.length > 0
+				? Math.round(
+						templatesHistory.reduce((acc, t) => acc + t.count, 0) /
+							templatesHistory.length
+					)
+				: 0,
+		icon: "📈",
+		description: "Mensajes por plantilla",
+		trendColor: "green",
+	},
+	{
+		label: "Total de Plantillas",
+		value: templatesHistory.length,
+		icon: "📋",
+		description: "Activas",
+	},
+];
 ---
 
 <Layout
@@ -75,5 +67,9 @@ const data: dataUserSidebar = {
 	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
 	data={data}
 >
-	<HistorialAplicado templates={templatesHistory} statsConfig={statsConfig} client:visible />
+	<HistorialAplicado
+		templates={templatesHistory}
+		statsConfig={statsConfig}
+		client:visible
+	/>
 </Layout>

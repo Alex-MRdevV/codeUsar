@@ -1,10 +1,10 @@
 import { ButtonEnvio } from "@/components/messages/buttonEnvio";
 import { ConfigurarSend } from "@/components/messages/configurarEnvio";
 import { CreateTemplateModal } from "@/components/messages/modalTemplates";
-import { VariableEditor } from "@/components/messages/phoneConfig/variableEditor";
 import { PreviewCard } from "@/components/messages/previewCard";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { TemplateSelector } from "@/components/messages/templaterSelector";
+import { VariableEditor } from "@/components/messages/variablesEditor";
 import { Button } from "@/components/ui/button";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";

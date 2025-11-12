@@ -1,5 +1,5 @@
 import type { FormValuesCreate } from "@/lib/schemas/user/register";
-import type { userData, userDevolver } from "@/utils/types/user";
+import type { userDevolver } from "@/utils/types/user";
 
 export const registerResponse = async (
 	user: FormValuesCreate

@@ -1,7 +1,7 @@
 {
 	"name": "bavaria-now",
 	"type": "module",
-	"version": "0.0.1",
+	"version": "0.0.8",
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
@@ -9,16 +9,14 @@
 		"astro": "astro",
 		"db:drop": "drizzle-kit drop",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate:local": "wrangler d1 migrations apply d1-demo-prod-db --local",
-		"db:migrate:prod": "drizzle-kit migrate",
-		"db:migrate:preview": "wrangler d1 migrations apply --env preview d1-demo-preview-db --remote",
-		"db:studio:local": "db:studio:local",
+		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^12.6.10",
 		"@astrojs/react": "^4.4.1",
 		"@hookform/resolvers": "^5.2.2",
+		"@libsql/client": "^0.15.15",
 		"@nanostores/react": "^1.0.0",
 		"@radix-ui/react-collapsible": "^1.1.12",
 		"@radix-ui/react-dialog": "^1.1.15",

@@ -1,8 +1,8 @@
 import { User } from "@/db/schema/users";
 import { accessToken } from "@/lib/accessTokens";
+import { db } from "@/lib/db";
 import { existsUser } from "@/lib/drizzle/auth/existsUsers";
 import { registerSchema } from "@/lib/schemas/user/register";
-import { getDb } from "@/utils/db";
 import { passwordGenerate } from "@/utils/password/generate";
 import { hashPassword } from "@/utils/password/hashPassword";
 import { res } from "@/utils/responseAstro";
@@ -21,9 +21,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 	const { email, rol, confirmPassword, nombre } = output;
 
 	try {
-		const db = getDb(locals.runtime.env.DB);
-
-		const [user] = await existsUser(db).execute({
+		const [user] = await existsUser.execute({
 			email: email,
 			estado: "activo",
 		});
@@ -66,7 +64,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 			sameSite: "strict",
 		});
 
-		return res(newUser, { status: 200 });
+		return res({ newUser }, { status: 200 });
 	} catch (error) {
 		return res({ message: "Algo ha salido mal" }, { status: 500 });
 	}

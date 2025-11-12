@@ -1,34 +1,5 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1762722921352,
-      "tag": "0000_lean_layla_miller",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1762725810572,
-      "tag": "0001_easy_killraven",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1762826772804,
-      "tag": "0002_red_drax",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1762831900383,
-      "tag": "0003_needy_sharon_ventura",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }

@@ -1,6 +1,5 @@
 import { Templates } from "@/db/schema/templates";
 import { db } from "@/lib/db";
-import type { Database } from "@/utils/db";
 import { eq, sql } from "drizzle-orm";
 
 // Crear plantilla
@@ -103,11 +102,10 @@ export const updateTemplate = (
 		.prepare();
 
 // Incrementar contador de uso de plantilla
-export const incrementTemplateCount = (db: Database) =>
-	db
-		.update(Templates)
-		.set({
-			count: sql`${Templates.count} + 1`,
-		})
-		.where(eq(Templates.id, sql.placeholder("id")))
-		.prepare();
+export const incrementTemplateCount = db
+	.update(Templates)
+	.set({
+		count: sql`${Templates.count} + 1`,
+	})
+	.where(eq(Templates.id, sql.placeholder("id")))
+	.prepare();

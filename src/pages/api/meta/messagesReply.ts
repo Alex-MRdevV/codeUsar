@@ -1,3 +1,4 @@
+import { getUserStats, updateUserStats } from "@/lib/drizzle/stats/stadistics";
 import { enviarRespuestaIndividual } from "@/lib/providersMensajes/callApi/sendResponse";
 import { res } from "@/utils/responseAstro";
 import type { ReplyMessageRequest } from "@/utils/types/providers/meta";
@@ -7,6 +8,7 @@ export interface ReplyRequest {
 	to: string;
 	content: string;
 	replyToMessageId: string;
+	templateId?: string;
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -16,52 +18,37 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
 		return res(
-			{
-				message: "Las variables de entorno no están definidas",
-			},
-			{
-				status: 401,
-			}
+			{ message: "Las variables de entorno no están definidas" },
+			{ status: 401 }
 		);
 	}
 
 	const jsonData: ReplyRequest = await request.json();
 
-	// Validaciones
+	// --- Validaciones ---
 	if (!jsonData.to) {
 		return res(
-			{
-				message: "El campo 'to' (destinatario) es requerido",
-			},
-			{
-				status: 400,
-			}
+			{ message: "El campo 'to' (destinatario) es requerido" },
+			{ status: 400 }
 		);
 	}
 
 	if (!jsonData.content || jsonData.content.trim() === "") {
 		return res(
-			{
-				message: "El campo 'content' (mensaje) es requerido",
-			},
-			{
-				status: 400,
-			}
+			{ message: "El campo 'content' (mensaje) es requerido" },
+			{ status: 400 }
 		);
 	}
 
 	if (!jsonData.replyToMessageId) {
 		return res(
-			{
-				message: "El campo 'replyToMessageId' es requerido para responder",
-			},
-			{
-				status: 400,
-			}
+			{ message: "El campo 'replyToMessageId' es requerido para responder" },
+			{ status: 400 }
 		);
 	}
 
 	try {
+		// --- 1️⃣ Enviar respuesta ---
 		const replyRequest: ReplyMessageRequest = {
 			messageType: "text",
 			content: jsonData.content,
@@ -82,13 +69,35 @@ export const POST: APIRoute = async ({ request, locals }) => {
 					error: result.errorMessage,
 					errorCode: result.errorCode,
 				},
-				{
-					status: 400,
-				}
+				{ status: 400 }
 			);
 		}
 
-		// Respuesta exitosa
+		// --- 2️⃣ Actualizar estadísticas del usuario ---
+		const sessionUser = locals.user ?? null;
+		const userId = (sessionUser?.id as string) ?? null;
+
+		if (userId && result) {
+			const messagesSent = 1; // solo se envía un mensaje
+			const timeSavedPerMessage = 0.0083; // 30 segundos en horas
+			const timeSavedHours = messagesSent * timeSavedPerMessage;
+
+			// Obtener estadísticas actuales
+			const currentStats = await getUserStats.execute({ userId });
+
+			if (currentStats && currentStats.length > 0) {
+				const stats = currentStats[0].userStats;
+				await updateUserStats(userId, {
+					totalMessagesSent: (stats.totalMessagesSent ?? 0) + messagesSent,
+					totalTimeSavedHours:
+						(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
+					totalContacts: (stats.totalContacts ?? 0) + 1,
+					lastUpdated: new Date(),
+				}).execute();
+			}
+		}
+
+		// --- 4️⃣ Respuesta exitosa ---
 		return res(
 			{
 				message: "Respuesta enviada exitosamente",
@@ -98,9 +107,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 					status: result.status,
 				},
 			},
-			{
-				status: 200,
-			}
+			{ status: 200 }
 		);
 	} catch (error) {
 		return res(
@@ -108,10 +115,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 				message: "Error interno del servidor",
 				error: (error as Error).message,
 			},
-			{
-				status: 500,
-			}
+			{ status: 500 }
 		);
 	}
 };
-

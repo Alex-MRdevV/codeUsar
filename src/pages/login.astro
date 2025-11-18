@@ -17,7 +17,7 @@ import Layout from "@/layouts/Layout.astro";
 	};
 
 	// Función para comprobar si la cookie ya está disponible
-	function checkCookie(name) {
+	function checkCookie(name: string) {
 		return document.cookie
 			.split("; ")
 			.some((row) => row.startsWith(`${name}=`));

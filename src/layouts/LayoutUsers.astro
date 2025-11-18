@@ -1,5 +1,5 @@
 ---
-import { TourWrapper } from "@/components/provider";
+import { AppWrapper } from "@/components/provider";
 import { SidebarLayout } from "@/components/sidebar/provider";
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
@@ -19,11 +19,11 @@ const { title, description, data } = Astro.props;
 	</head>
 	<body>
 		<div class="flex-container">
-			<TourWrapper client:only>
+			<AppWrapper client:only>
 				<SidebarLayout data={data} client:only>
 					<slot />
 				</SidebarLayout>
-			</TourWrapper>
+			</AppWrapper>
 		</div>
 	</body>
 </html>

@@ -1,5 +1,5 @@
 import { getUserStats, updateUserStats } from "@/lib/drizzle/stats/stadistics";
-import { enviarRespuestaIndividual } from "@/lib/providersMensajes/callApi/sendResponse";
+import { enviarRespuestaIndividual } from "@/lib/providersMensajes/apiMeta/sendResponse";
 import { res } from "@/utils/responseAstro";
 import type { ReplyMessageRequest } from "@/utils/types/providers/meta";
 import type { APIRoute } from "astro";

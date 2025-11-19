@@ -1,5 +1,5 @@
 import { urlCrearPlantilla } from "@/lib/providersMensajes/metaUrls";
-import { buildMetaTemplateRequest } from "@/lib/providersMensajes/templates";
+import { buildMetaTemplateRequest } from "@/utils/services/buildTemplates";
 import type { CreateTemplateResult, Template } from "@/utils/types/templates";
 
 export const crearPlantillaIndividual = async (

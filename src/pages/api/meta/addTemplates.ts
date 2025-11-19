@@ -1,5 +1,5 @@
 import { createTemplate } from "@/lib/drizzle/templates/templates";
-import { crearPlantillaIndividual } from "@/lib/providersMensajes/callApi/addTemplate";
+import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
 import { res } from "@/utils/responseAstro";
 import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
 import type { APIRoute } from "astro";

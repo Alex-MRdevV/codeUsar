@@ -4,7 +4,7 @@ import {
 	updateUserStats,
 } from "@/lib/drizzle/stats/stadistics";
 import { incrementTemplateCount } from "@/lib/drizzle/templates/templates";
-import { sendMessagesToAPI } from "@/lib/providersMensajes/callApi/send";
+import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import { uuid } from "@/utils/uuid";

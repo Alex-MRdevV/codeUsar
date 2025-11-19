@@ -13,7 +13,7 @@ import clerk from "@clerk/astro";
 export default defineConfig({
 	output: "server",
 	vite: {
-		plugins: [tailwindcss(),clerk()],
+		plugins: [tailwindcss(), clerk()],
 	},
 	integrations: [react()],
 	adapter: cloudflare({

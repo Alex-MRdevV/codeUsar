@@ -1,6 +1,6 @@
 ---
 import { Header } from "@/components/headerNoAccess";
-import { TourWrapper } from "@/components/provider";
+import { AppWrapper } from "@/components/provider";
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 
@@ -19,10 +19,10 @@ const { title, description } = Astro.props;
 	</head>
 	<body>
 		<section class="flex-container">
-			<TourWrapper client:only>
+			<AppWrapper client:only>
 				<Header client:only />
 				<slot />
-			</TourWrapper>
+			</AppWrapper>
 		</section>
 	</body>
 </html>

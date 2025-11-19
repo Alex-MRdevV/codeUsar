@@ -1,5 +1,5 @@
 import { urlEnviarMensajeTexto } from "@/lib/providersMensajes/metaUrls";
-import { buildMetaReplyRequest } from "@/lib/providersMensajes/sendMessageSpecific";
+import { buildMetaReplyRequest } from "@/utils/services/sendMessageSpecific";
 import type {
 	MessageResult,
 	ReplyMessageRequest,

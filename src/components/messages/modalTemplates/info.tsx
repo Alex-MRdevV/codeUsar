@@ -10,7 +10,7 @@ export const InfoTemplateAprobation = ({ closeModal, isOpen }: Props) => {
 		<>
 			<div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
 				<p className="text-sm text-blue-600 dark:text-blue-400">
-					ℹ️ Las plantillas requieren aprobación de Meta. Esto puede tardar hasta 24 horas.
+					ℹ️ Las plantillas requieren aprobación de Meta. Esto puede tardar hasta 48 horas.
 				</p>
 			</div>
 

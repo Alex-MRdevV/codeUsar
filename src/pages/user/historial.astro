@@ -9,7 +9,7 @@ const data = await getUserSidebarData(Astro, sidebarDataItems);
 
 // --- Obtener plantillas usando la consulta preparada
 const templatesHistoryConsulta = getTemplatesForHistory;
-const templatesHistoryData = await templatesHistoryConsulta.all();
+const templatesHistoryData = await templatesHistoryConsulta.execute();
 
 // Transformar los datos al formato que espera HistorialAplicadoProps
 const templatesHistory = templatesHistoryData.map((t) => ({

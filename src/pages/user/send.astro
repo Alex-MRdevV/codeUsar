@@ -11,7 +11,7 @@ const data = await getUserSidebarData(Astro, sidebarDataItems);
 
 // --- Obtener plantillas usando la consulta preparada
 const templatesStmt = getTemplates;
-const templatesData = await templatesStmt.all();
+const templatesData = await templatesStmt.execute();
 
 // Transformar los datos al tipo Template correcto
 const templates: Template[] = templatesData

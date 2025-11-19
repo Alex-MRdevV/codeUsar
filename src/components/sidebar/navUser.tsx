@@ -15,7 +15,6 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar"
-import { LogoutButton } from "@/components/user/logout"
 import type { PropsUserOptions } from "@/utils/types/sidebar"
 
 export function NavUser({ email, name }: PropsUserOptions) {
@@ -56,7 +55,6 @@ export function NavUser({ email, name }: PropsUserOptions) {
 								<a href="/user/manager"><Settings />
 									Gestionar cuenta</a>
 							</DropdownMenuItem>
-							<LogoutButton />
 						</DropdownMenuGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -20,4 +20,3 @@ export const useModal = () => {
 
 	return { dialogRef, isOpen, openModal, closeModal };
 };
-

@@ -11,9 +11,6 @@ const baseSchema = v.object({
         v.string("El nombre no puede ser null"),
         v.minLength(1, "El nombre no puede estar vacío")
     ),
-    rol: v.pipe(
-        v.picklist(roles, "El rol debe ser una de las opciones")
-    ),
     password: v.pipe(
         v.string("La contraseña no puede ser null"),
         v.minLength(8, "La contraseña debe tener al menos 8 caracteres"),

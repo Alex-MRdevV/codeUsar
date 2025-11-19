@@ -1,12 +1,14 @@
-import "dotenv/config";
-require("dotenv").config();
+import type { Config } from "drizzle-kit";
 
 export default {
-	schema: "./src/db/schema/",
-	out: "./src/db/migrations/",
-	dialect: "turso",
+	schema: "./src/db/schema",
+	out: "./src/db/migrations",
+	dialect: "mysql",
 	dbCredentials: {
-		url: process.env.TURSO_DATABASE_URL!,
-		authToken: process.env.TURSO_AUTH_TOKEN,
+		user: process.env.DB_USER!,
+		password: process.env.DB_PASS!,
+		database: process.env.DB_NAME!,
+		host: process.env.DB_HOST!,
+		port: Number(process.env.DB_PORT!),
 	},
-};
+} satisfies Config;

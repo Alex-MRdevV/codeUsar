@@ -1,48 +1,42 @@
-import { User } from "@/db/schema/users";
-import { UserStats } from "@/db/schema/userStats";
-import { db } from "@/lib/db";
+import { db } from "@/db/db";
+import { User } from "@/db/schema/user";
+import { userStats } from "@/db/schema/user-stats";
+import { buildUpdateSet } from "@/utils/updateUtilities";
 import { and, eq, ne, sql } from "drizzle-orm";
 
-// Obtener estadísticas del usuario
 export const getUserStats = db
-	.select({
-		userStats: UserStats,
-		user: User,
-	})
-	.from(UserStats)
-	.innerJoin(User, eq(UserStats.userId, User.id))
+	.select()
+	.from(userStats)
+	.innerJoin(User, eq(userStats.userId, User.id))
 	.where(
 		and(
-			eq(UserStats.userId, sql.placeholder("userId")),
-			ne(User.estado, "retirado")
+			eq(userStats.userId, sql.placeholder("userId")),
+			ne(User.status, "retirado")
 		)
-	)
-	.prepare();
+	);
 
-// Actualizar estadísticas del usuario
 export const updateUserStats = (
 	userId: string,
-	stats: {
-		totalMessagesSent: number;
-		totalTimeSavedHours: number;
-		totalContacts: number;
-		lastUpdated: Date;
-	}
+	totalMessagesSent?: number,
+	totalTimeSavedHours?: number,
+	totalContacts?: number,
+	lastUpdated?: Date
 ) =>
 	db
-		.update(UserStats)
-		.set({
-			totalMessagesSent: stats.totalMessagesSent,
-			totalTimeSavedHours: stats.totalTimeSavedHours,
-			totalContacts: stats.totalContacts,
-			lastUpdated: stats.lastUpdated,
-		})
-		.where(eq(UserStats.userId, userId))
+		.update(userStats)
+		.set(
+			buildUpdateSet({
+				totalMessagesSent,
+				totalTimeSavedHours,
+				totalContacts,
+				lastUpdated,
+			})
+		)
+		.where(eq(userStats.userId, userId))
 		.prepare();
 
-// Crear estadísticas de usuario
 export const createUserStats = db
-	.insert(UserStats)
+	.insert(userStats)
 	.values({
 		id: sql.placeholder("id"),
 		userId: sql.placeholder("userId"),

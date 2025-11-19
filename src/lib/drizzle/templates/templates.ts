@@ -1,8 +1,8 @@
-import { Templates } from "@/db/schema/templates";
-import { db } from "@/lib/db";
+import { db } from "@/db/db";
+import { Templates } from "@/db/schema/template";
+import { buildUpdateSet } from "@/utils/updateUtilities";
 import { eq, sql } from "drizzle-orm";
 
-// Crear plantilla
 export const createTemplate = db
 	.insert(Templates)
 	.values({
@@ -10,27 +10,33 @@ export const createTemplate = db
 		name: sql.placeholder("name"),
 		icon: sql.placeholder("icon"),
 		color: sql.placeholder("color"),
-		content: sql.placeholder("content"),
 		metaTemplateId: sql.placeholder("metaTemplateId"),
-		structure: sql.placeholder("structure"),
+		metaStatus: sql.placeholder("metaStatus"),
+		headerType: sql.placeholder("headerType"),
+		headerText: sql.placeholder("headerText"),
+		bodyText: sql.placeholder("bodyText"),
+		footerText: sql.placeholder("footerText"),
 		variables: sql.placeholder("variables"),
+		buttons: sql.placeholder("buttons"),
 		createdAt: sql.placeholder("createdAt"),
-		status: sql.placeholder("status"), // Añadido también el status
 	})
 	.prepare();
 
-// Añade esta consulta preparada donde tienes createTemplate
 export const getTemplates = db
 	.select({
 		id: Templates.id,
 		name: Templates.name,
-		metaTemplateName: Templates.metaTemplateId, // o el campo correcto si tienes el nombre
-		language: sql<string>`'es'`, // ajusta según tu lógica
-		structure: Templates.structure,
+		metaTemplateName: Templates.metaTemplateId,
+		language: sql<string>`'es'`,
+		headerType: Templates.headerType,
+		headerText: Templates.headerText,
+		bodyText: Templates.bodyText,
+		footerText: Templates.footerText,
 		variables: Templates.variables,
+		buttons: Templates.buttons,
 	})
 	.from(Templates)
-	.where(eq(Templates.status, "APPROVED"))
+	.where(eq(Templates.metaStatus, "APPROVED"))
 	.prepare();
 
 export const getTemplatesForHistory = db
@@ -38,74 +44,55 @@ export const getTemplatesForHistory = db
 		id: Templates.id,
 		name: Templates.name,
 		icon: Templates.icon,
-		count: Templates.count,
 		color: Templates.color,
+		count: Templates.usageCount,
 	})
 	.from(Templates)
-	.where(eq(Templates.status, "APPROVED"))
+	.where(eq(Templates.metaStatus, "APPROVED"))
 	.prepare();
 
-// Actualizar plantilla
 export const updateTemplate = (
 	idTemplate: string,
 	temp: {
-		name: string;
-		icon: string;
-		color: string;
-		content: string;
-		metaTemplateId: string;
-		structure: {
-			header?: {
-				type: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT";
-				text?: string;
-				example?: string;
-			};
-			body: {
-				text: string;
-				example?: string[];
-			};
-			footer?: {
-				text: string;
-			};
-			buttons?: Array<{
-				type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
-				text: string;
-				url?: string;
-				phone_number?: string;
-			}>;
-		};
+		name?: string;
+		icon?: string;
+		color?: string;
+
+		metaTemplateId?: string;
+		metaStatus?: "PENDING" | "APPROVED" | "REJECTED";
+
+		headerType?: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT" | "NONE";
+		headerText?: string;
+		bodyText?: string;
+		footerText?: string;
+
 		variables?: {
-			format: "named" | "positional";
-			params: Array<{
-				name: string;
-				placeholder: string;
+			type: "named" | "positional";
+			list: Array<{
+				key: string;
+				label: string;
 				example: string;
-				component: "header" | "body" | "footer";
 			}>;
 		};
-		status?: "PENDING" | "APPROVED" | "REJECTED";
+
+		buttons?: Array<{
+			type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
+			text: string;
+			url?: string;
+			phoneNumber?: string;
+		}>;
 	}
 ) =>
 	db
 		.update(Templates)
-		.set({
-			name: temp.name,
-			icon: temp.icon,
-			color: temp.color,
-			content: temp.content,
-			metaTemplateId: temp.metaTemplateId,
-			structure: temp.structure,
-			variables: temp.variables,
-			...(temp.status && { status: temp.status }),
-		})
+		.set(buildUpdateSet(temp))
 		.where(eq(Templates.id, idTemplate))
 		.prepare();
 
-// Incrementar contador de uso de plantilla
 export const incrementTemplateCount = db
 	.update(Templates)
 	.set({
-		count: sql`${Templates.count} + 1`,
+		usageCount: sql`${Templates.usageCount} + 1`,
 	})
 	.where(eq(Templates.id, sql.placeholder("id")))
 	.prepare();

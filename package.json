@@ -1,5 +1,5 @@
 {
-	"name": "bavaria-now",
+	"name": "OrderFlow",
 	"type": "module",
 	"version": "0.0.8",
 	"scripts": {
@@ -9,8 +9,7 @@
 		"astro": "astro",
 		"db:drop": "drizzle-kit drop",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:migrate": "drizzle-kit migrate"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^12.6.10",

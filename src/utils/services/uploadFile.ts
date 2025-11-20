@@ -1,14 +1,15 @@
 import type { ErrorResponse, SuccessResponse } from "@/utils/types/file";
 
-export const UploadFileResponse = async (): Promise<
-	[Error, null] | [null, SuccessResponse]
-> => {
+export const UploadFileResponse = async (
+	files: File[]
+): Promise<[Error, null] | [null, SuccessResponse]> => {
 	try {
-		const response = await fetch(`api/meta/uploadNumbers`, {
+		const formData = new FormData();
+		files.forEach((f) => formData.append("files", f));
+
+		const response = await fetch(`api/files/uploads`, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			body: formData,
 			credentials: "include",
 		});
 

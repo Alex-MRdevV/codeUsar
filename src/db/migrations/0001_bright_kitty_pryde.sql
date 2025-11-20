@@ -1,0 +1,1 @@
+ALTER TABLE `User_stats` MODIFY COLUMN `last_updated` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP;

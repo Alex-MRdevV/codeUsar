@@ -8,6 +8,13 @@
       "when": 1763571158023,
       "tag": "0000_bored_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763649652083,
+      "tag": "0001_bright_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

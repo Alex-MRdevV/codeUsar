@@ -13,5 +13,5 @@ export const userStats = mysqlTable("User_stats", {
 	// Métricas de tiempo
 	totalTimeSavedHours: int("total_time_saved_hours").default(0).notNull(),
 	lastMessageAt: timestamp("last_message_at"),
-	lastUpdated: timestamp("last_updated").defaultNow().onUpdateNow().notNull(),
+	lastUpdated: timestamp("last_updated").defaultNow().onUpdateNow(),
 });

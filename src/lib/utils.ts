@@ -1,12 +1,12 @@
-import { uploadNumbers } from "@/lib/schemas/files/validarNumeros";
+//import { uploadNumbers } from "@/lib/schemas/files/validarNumeros";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type z from "zod";
+//import type z from "zod";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
-
+/*
 export const validateAndFilterNumbers = (data: unknown[]) => {
 	const validRows: z.infer<typeof uploadNumbers>[] = [];
 	const invalidRows: { row: number; data: unknown; errors: string }[] = [];
@@ -27,3 +27,4 @@ export const validateAndFilterNumbers = (data: unknown[]) => {
 
 	return { validRows, invalidRows };
 };
+*/

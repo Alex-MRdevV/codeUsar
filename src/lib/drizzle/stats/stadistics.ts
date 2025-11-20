@@ -41,8 +41,9 @@ export const createUserStats = db
 		id: sql.placeholder("id"),
 		userId: sql.placeholder("userId"),
 		totalMessagesSent: sql.placeholder("totalMessagesSent"),
-		totalTimeSavedHours: sql.placeholder("totalTimeSavedHours"),
 		totalContacts: sql.placeholder("totalContacts"),
-		lastUpdated: sql.placeholder("lastUpdated"),
+		totalOrders: sql.placeholder("totalOrders"),
+		totalTimeSavedHours: sql.placeholder("totalTimeSavedHours"),
+		lastMessageAt: sql.placeholder("lastMessageAt")
 	})
 	.prepare();

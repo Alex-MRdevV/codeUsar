@@ -30,12 +30,19 @@ export interface PhoneData {
 }
 
 export interface MessageReplicar {
-  id: string
-  from: string
-  fromPhone: string
-  message: string
-  timestamp: Date
-  hasReply: boolean
-  replyMessage?: string
-  replyTime?: Date
+	id: string;
+	from: string;
+	fromPhone: string;
+	message: string;
+	timestamp: Date;
+	hasReply: boolean;
+	replyMessage?: string;
+	replyTime?: Date;
+}
+
+export interface ReplyRequest {
+	to: string;
+	content: string;
+	replyToMessageId: string;
+	templateId?: string;
 }

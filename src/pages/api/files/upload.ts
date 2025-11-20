@@ -1,10 +1,11 @@
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { validateAndFilterPedidosPorEstado } from "@/lib/schemas/files/validarRutero";
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
-
 	const data = await request.formData();
 	const file = data.get("file") as File;
 
@@ -13,46 +14,71 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	try {
-		/** -------------------------------
-		 * Leer archivo desde formulario
-		 --------------------------------*/
 		const arrayBuffer = await file.arrayBuffer();
-
 		const workbook = XLSX.read(arrayBuffer, {
-			type: "array", // <--- necesario para uploads
-			cellStyles: true, // <--- habilita lectura de colores
+			type: "array",
 		});
 
+		// Leer la segunda hoja (índice 1)
 		const sheetName = workbook.SheetNames[0];
 		const sheet = workbook.Sheets[sheetName];
-		console.log(sheet["A4"]);
 
-		/** -------------------------------
-		 * Convertir a JSON (solo valores)
-		 --------------------------------*/
-		const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+		// OBTENER LOS HEADERS DETECTADOS
+		const rawHeaders = XLSX.utils.sheet_to_json(sheet, {
+			header: 1, // Obtener como array de arrays
+			defval: "",
+			raw: false,
+		});
 
-		/** -------------------------------
-		 * Extraer colores celda por celda
-		 --------------------------------*/
-		const colors: Record<string, string | null> = {};
+		// La primera fila contiene los headers
+		const detectedHeaders = rawHeaders[0] as string[];
 
-		for (const cellAddr in sheet) {
-			if (cellAddr.startsWith("!")) continue; // ignorar metadatos
+		// Convertir a JSON con encabezados
+		const jsonData = XLSX.utils.sheet_to_json(sheet, {
+			header: 0,
+			defval: "",
+			raw: false,
+		});
 
-			const cell = sheet[cellAddr];
-			const color = cell.s?.fill?.fgColor?.rgb ?? null;
+		// Filtrar filas vacías o que parezcan encabezados
+		const filteredData = jsonData.filter((row: any) => {
+			const hasActualData = Object.values(row).some(
+				(val) =>
+					val && String(val).trim() !== "" && !String(val).includes("Solic")
+			);
+			return hasActualData;
+		});
 
-			colors[cellAddr] = color;
+		// Validar y filtrar los datos
+		const resultado = validateAndFilterPedidosPorEstado(filteredData);
+
+		// Si hay errores, devolver información detallada + headers
+		if (resultado.invalidRows.length > 0) {
+			return res(
+				{
+					message: "Se encontraron errores en el archivo",
+					headers: detectedHeaders, // ✅ Headers detectados
+					headerCount: detectedHeaders.length,
+					summary: resultado.summary,
+					validRows: resultado.validRows,
+					invalidRows: resultado.invalidRows.slice(0, 10),
+					grouped: resultado.grouped,
+					// Muestra de la primera fila procesada para debug
+					firstRowSample: filteredData[0] || null,
+				},
+				{ status: 207 }
+			);
 		}
-		//jsonData,
-		/** -------------------------------
-		 * Respuesta para inspección
-		 --------------------------------*/
+
+		// Si todo es válido
 		return res(
 			{
-				message: "Archivo leído correctamente", // valores del Excel
-				colors, // colores por celda
+				message: "Archivo procesado correctamente",
+				summary: resultado.summary,
+				grouped: resultado.grouped,
+				data: resultado.validRows,
+				// Muestra de la primera fila procesada para debug
+				firstRowSample: filteredData[0] || null,
 			},
 			{ status: 200 }
 		);
@@ -67,6 +93,78 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 };
 
+/*
+export const POST: APIRoute = async ({ request, locals }) => {
+	const { env } = locals.runtime;
+	const data = await request.formData();
+	const file = data.get("file") as File;
+
+	if (!file) {
+		return res({ message: "No se ha cargado ningún archivo" }, { status: 400 });
+	}
+
+	try {
+		const arrayBuffer = await file.arrayBuffer();
+		const workbook = XLSX.read(arrayBuffer, {
+			type: "array",
+			cellStyles: true, // Habilita estilos
+			cellNF: true, // Habilita formatos de número
+		});
+
+		const sheetName = workbook.SheetNames[1];
+		const sheet = workbook.Sheets[sheetName];
+
+		// Convertir a JSON (valores)
+		const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+		// Extraer colores de fondo - VERSIÓN CORREGIDA
+		const colors: Record<string, string | null> = {};
+
+		for (const cellAddr in sheet) {
+			if (cellAddr.startsWith("!")) continue;
+
+			const cell = sheet[cellAddr];
+			let color = null;
+
+			// Verificar si existe estilo y fill
+			if (cell.s && cell.s.fill) {
+				const fill = cell.s.fill;
+
+				// Priorizar fgColor (color de frente) que suele ser el color de fondo en Excel
+				if (fill.fgColor && fill.fgColor.rgb) {
+					color = fill.fgColor.rgb;
+				}
+				// Luego bgColor (color de fondo)
+				else if (fill.bgColor && fill.bgColor.rgb) {
+					color = fill.bgColor.rgb;
+				}
+				// Para fills con patrón
+				else if (fill.patternType && fill.fgColor && fill.fgColor.rgb) {
+					color = fill.fgColor.rgb;
+				}
+			}
+
+			colors[cellAddr] = color;
+		}
+
+		return res(
+			{
+				message: "Archivo leído correctamente",
+				data: jsonData,
+				colors,
+			},
+			{ status: 200 }
+		);
+	} catch (error) {
+		return res(
+			{
+				message: "Error al procesar el archivo",
+				error: (error as Error).message,
+			},
+			{ status: 500 }
+		);
+	}
+};
 /*
 import { validateAndFilterNumbers } from "@/lib/utils";
 import { res } from "@/utils/responseAstro";

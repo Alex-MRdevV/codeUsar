@@ -1,3 +1,4 @@
+/*
 import { validateAndFilterNumbers } from "@/lib/utils";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
@@ -98,3 +99,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
+*/

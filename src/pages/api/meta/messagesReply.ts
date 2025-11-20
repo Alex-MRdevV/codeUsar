@@ -1,21 +1,21 @@
-import { getUserStats, updateUserStats } from "@/lib/drizzle/stats/stadistics";
+import {
+	createUserStats,
+	getUserStats,
+	updateUserStats,
+} from "@/lib/drizzle/stats/stadistics";
 import { enviarRespuestaIndividual } from "@/lib/providersMensajes/apiMeta/sendResponse";
 import { res } from "@/utils/responseAstro";
+import type { ReplyRequest } from "@/utils/types/message";
 import type { ReplyMessageRequest } from "@/utils/types/providers/meta";
+import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
-
-export interface ReplyRequest {
-	to: string;
-	content: string;
-	replyToMessageId: string;
-	templateId?: string;
-}
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_NUMBER_ID;
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
 
+	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
 		return res(
 			{ message: "Las variables de entorno no están definidas" },
@@ -23,9 +23,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	const jsonData: ReplyRequest = await request.json();
+	let jsonData: ReplyRequest;
+	try {
+		jsonData = await request.json();
+	} catch (error) {
+		return res(
+			{ message: "JSON inválido en el cuerpo de la solicitud" },
+			{ status: 400 }
+		);
+	}
 
-	// --- Validaciones ---
+	// Validaciones de campos requeridos
 	if (!jsonData.to) {
 		return res(
 			{ message: "El campo 'to' (destinatario) es requerido" },
@@ -33,7 +41,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	if (!jsonData.content || jsonData.content.trim() === "") {
+	if (!jsonData.content?.trim()) {
 		return res(
 			{ message: "El campo 'content' (mensaje) es requerido" },
 			{ status: 400 }
@@ -48,16 +56,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	try {
-		// --- 1️⃣ Enviar respuesta ---
-		const replyRequest: ReplyMessageRequest = {
+		// Construir el objeto ReplyMessageRequest correctamente
+		const replyMessageRequest: ReplyMessageRequest = {
 			messageType: "text",
-			content: jsonData.content,
 			replyToMessageId: jsonData.replyToMessageId,
+			content: jsonData.content,
 		};
 
+		// Enviar mensaje de respuesta
 		const result = await enviarRespuestaIndividual(
 			jsonData.to,
-			replyRequest,
+			replyMessageRequest,
 			ACCESS_TOKEN,
 			PHONE_NUMBER_ID
 		);
@@ -73,31 +82,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		// --- 2️⃣ Actualizar estadísticas del usuario ---
+		// Actualizar estadísticas del usuario si está autenticado
 		const sessionUser = locals.user ?? null;
 		const userId = (sessionUser?.id as string) ?? null;
 
-		if (userId && result) {
-			const messagesSent = 1; // solo se envía un mensaje
-			const timeSavedPerMessage = 0.0083; // 30 segundos en horas
-			const timeSavedHours = messagesSent * timeSavedPerMessage;
-
-			// Obtener estadísticas actuales
-			const currentStats = await getUserStats.execute({ userId });
-
-			if (currentStats && currentStats.length > 0) {
-				const stats = currentStats[0].userStats;
-				await updateUserStats(userId, {
-					totalMessagesSent: (stats.totalMessagesSent ?? 0) + messagesSent,
-					totalTimeSavedHours:
-						(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
-					totalContacts: (stats.totalContacts ?? 0) + 1,
-					lastUpdated: new Date(),
-				}).execute();
-			}
+		if (userId && result.status === "success") {
+			await updateUserStatsLogic(userId);
 		}
 
-		// --- 4️⃣ Respuesta exitosa ---
 		return res(
 			{
 				message: "Respuesta enviada exitosamente",
@@ -119,3 +111,38 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
+
+async function updateUserStatsLogic(userId: string) {
+	const MESSAGES_SENT_COUNT = 1;
+	const TIME_SAVED_PER_MESSAGE_HOURS = 0.0083; // 30 segundos en horas
+
+	try {
+		const currentStats = await getUserStats.execute({ userId });
+
+		if (currentStats && currentStats.length > 0) {
+			const stats = currentStats[0].User_stats;
+
+			await updateUserStats(
+				userId,
+				(stats.totalMessagesSent ?? 0) + MESSAGES_SENT_COUNT,
+				(stats.totalTimeSavedHours ?? 0) + TIME_SAVED_PER_MESSAGE_HOURS,
+				stats.totalContacts, // No incrementar contactos en respuestas
+				new Date() // lastUpdated
+			).execute();
+		} else {
+			// Crear nuevo registro usando createUserStats
+			await createUserStats.execute({
+				id: uuid.uuid,
+				userId: userId,
+				totalMessagesSent: MESSAGES_SENT_COUNT,
+				totalContacts: 0, // No incrementar contactos en respuestas
+				totalOrders: 0,
+				totalTimeSavedHours: TIME_SAVED_PER_MESSAGE_HOURS,
+				lastMessageAt: new Date(),
+			});
+		}
+	} catch (error) {
+		console.error("Error actualizando estadísticas del usuario:", error);
+		// No fallar la solicitud completa por error en estadísticas
+	}
+}

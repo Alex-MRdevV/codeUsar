@@ -14,74 +14,36 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_NUMBER_ID;
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
+	const user = await locals.currentUser();
 
+	if (!user) return res({ message: "NO existe el usuario" }, { status: 403 });
+
+	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
 		return res(
-			{
-				message: "Las variables de entorno no están definidas",
-			},
-			{
-				status: 401,
-			}
+			{ message: "Las variables de entorno no están definidas" },
+			{ status: 401 }
 		);
 	}
 
-	const jsonData: SendMessageRequest = await request.json();
-
-	// Validar que haya destinatarios
-	if (!jsonData.recipients || jsonData.recipients.length === 0) {
+	let jsonData: SendMessageRequest;
+	try {
+		jsonData = await request.json();
+	} catch (error) {
 		return res(
-			{
-				message: "No hay destinatarios en la solicitud",
-			},
-			{
-				status: 400,
-			}
+			{ message: "JSON inválido en el cuerpo de la solicitud" },
+			{ status: 400 }
 		);
 	}
 
-	// Validar uso correcto de messageType
-	if (jsonData.recipients.length > 1 && jsonData.messageType === "text") {
-		return res(
-			{
-				message:
-					"Para envíos masivos debes usar messageType: 'template'. Los mensajes de texto solo funcionan en conversaciones activas.",
-			},
-			{
-				status: 400,
-			}
-		);
-	}
-
-	// Validar campos requeridos para templates
-	if (jsonData.messageType === "template") {
-		if (!jsonData.templateName || !jsonData.templateLanguage) {
-			return res(
-				{
-					message:
-						"templateName y templateLanguage son requeridos para messageType: 'template'",
-				},
-				{
-					status: 400,
-				}
-			);
-		}
-	}
-
-	// Validar campos requeridos para text
-	if (jsonData.messageType === "text" && !jsonData.content) {
-		return res(
-			{
-				message: "content es requerido para messageType: 'text'",
-			},
-			{
-				status: 400,
-			}
-		);
+	// Validaciones del request
+	const validationError = validateSendMessageRequest(jsonData);
+	if (validationError) {
+		return validationError;
 	}
 
 	try {
-		// 1. Enviar mensajes
+		// Enviar mensajes
 		const [error, result] = await sendMessagesToAPI(
 			jsonData,
 			ACCESS_TOKEN,
@@ -95,52 +57,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 					message: "Error al enviar mensajes",
 					error: error.message,
 				},
-				{
-					status: 500,
-				}
+				{ status: 500 }
 			);
 		}
-		// --- Obtener userId desde la sesión ---
-		const sessionUser = locals.user ?? null;
-		const userId = (sessionUser?.id as string) ?? null;
 
-		if (!userId && result) {
-			const messagesSent = result.summary.failed || 0;
-
-			// Calcular tiempo ahorrado (ejemplo: 30 segundos por mensaje = 0.0083 horas)
-			const timeSavedPerMessage = 0.0083; // 30 segundos en horas
-			const timeSavedHours = messagesSent * timeSavedPerMessage;
-
-			// Obtener estadísticas actuales
-			const currentStats = await getUserStats.execute({ userId });
-
-			if (currentStats.length > 0) {
-				// Actualizar estadísticas existentes
-				const stats = currentStats[0].userStats;
-				await updateUserStats(userId, {
-					totalMessagesSent: (stats.totalMessagesSent ?? 0) + messagesSent,
-					totalTimeSavedHours:
-						(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
-					totalContacts:
-						(stats.totalContacts ?? 0) + jsonData.recipients.length,
-					lastUpdated: new Date(),
-				}).execute();
-			} else {
-				// Crear nuevas estadísticas
-				await createUserStats.execute({
-					id: uuid.uuid,
-					userId,
-					totalMessagesSent: messagesSent,
-					totalTimeSavedHours: timeSavedHours,
-					totalContacts: jsonData.recipients.length,
-					lastUpdated: new Date(),
-				});
-			}
-
-			// 3. Incrementar contador de template si se usó uno
-			if (jsonData.messageType === "template" && jsonData.templateId) {
-				await incrementTemplateCount.execute({ id: jsonData.templateId });
-			}
+		if (user.id && result) {
+			await updateUserStatistics(user.id, jsonData, result);
 		}
 
 		return res(
@@ -148,9 +70,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 				message: "Mensajes enviados exitosamente",
 				data: result,
 			},
-			{
-				status: 200,
-			}
+			{ status: 200 }
 		);
 	} catch (error) {
 		return res(
@@ -158,9 +78,99 @@ export const POST: APIRoute = async ({ request, locals }) => {
 				message: "Error interno del servidor",
 				error: (error as Error).message,
 			},
-			{
-				status: 500,
-			}
+			{ status: 500 }
 		);
 	}
 };
+
+// Funciones auxiliares
+function validateSendMessageRequest(data: SendMessageRequest) {
+	// Validar destinatarios
+	if (!data.recipients?.length) {
+		return res(
+			{ message: "No hay destinatarios en la solicitud" },
+			{ status: 400 }
+		);
+	}
+
+	// Validar uso correcto de messageType para envíos masivos
+	if (data.recipients.length > 1 && data.messageType === "text") {
+		return res(
+			{
+				message:
+					"Para envíos masivos debes usar messageType: 'template'. Los mensajes de texto solo funcionan en conversaciones activas.",
+			},
+			{ status: 400 }
+		);
+	}
+
+	// Validar campos requeridos para templates
+	if (data.messageType === "template") {
+		if (!data.templateName || !data.templateLanguage) {
+			return res(
+				{
+					message:
+						"templateName y templateLanguage son requeridos para messageType: 'template'",
+				},
+				{ status: 400 }
+			);
+		}
+	}
+
+	// Validar campos requeridos para text
+	if (data.messageType === "text" && !data.content) {
+		return res(
+			{ message: "content es requerido para messageType: 'text'" },
+			{ status: 400 }
+		);
+	}
+
+	return null;
+}
+
+async function updateUserStatistics(
+	userId: string,
+	requestData: SendMessageRequest,
+	result: any
+) {
+	const TIME_SAVED_PER_MESSAGE_HOURS = 0.0083; // 30 segundos en horas
+
+	try {
+		// Calcular métricas
+		const messagesSent = result.summary?.successful || 0;
+		const timeSavedHours = messagesSent * TIME_SAVED_PER_MESSAGE_HOURS;
+		const newContacts = requestData.recipients.length;
+
+		// Obtener estadísticas actuales
+		const currentStats = await getUserStats.execute({ userId });
+
+		if (currentStats && currentStats.length > 0) {
+			const stats = currentStats[0].User_stats;
+			await updateUserStats(
+				userId,
+				(stats.totalMessagesSent ?? 0) + messagesSent,
+				(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
+				(stats.totalContacts ?? 0) + newContacts,
+				new Date() // lastUpdated
+			).execute();
+		} else {
+			await createUserStats.execute({
+				id: uuid.uuid,
+				userId: userId,
+				totalMessagesSent: messagesSent,
+				totalTimeSavedHours: timeSavedHours,
+				totalContacts: newContacts,
+				totalOrders: 0,
+				lastMessageAt: new Date(),
+			});
+		}
+
+		// Incrementar contador de template si se usó uno
+		if (requestData.messageType === "template" && requestData.templateId) {
+			await incrementTemplateCount.execute({ id: requestData.templateId });
+		}
+	} catch (error) {
+		console.error("Error actualizando estadísticas:", error);
+		// No fallar la solicitud completa por error en estadísticas
+	}
+}

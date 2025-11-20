@@ -9,13 +9,20 @@ import cloudflare from "@astrojs/cloudflare";
 
 import clerk from "@clerk/astro";
 
+import { esMX } from "@clerk/localizations";
+
 // https://astro.build/config
 export default defineConfig({
 	output: "server",
 	vite: {
-		plugins: [tailwindcss(), clerk()],
+		plugins: [tailwindcss()],
 	},
-	integrations: [react()],
+	integrations: [
+		react(),
+		clerk({
+			localization: esMX,
+		}),
+	],
 	adapter: cloudflare({
 		platformProxy: {
 			enabled: true,

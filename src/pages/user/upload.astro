@@ -1,0 +1,15 @@
+---
+import { ExcelUploadManager } from "@/components/uploadFiles/manager";
+import Layout from "@/layouts/LayoutUsers.astro";
+---
+
+<Layout
+	title="Subir Archivos necesarios"
+	description="Sube los archivos Excel requeridos para el funcionamiento de la app"
+>
+	<main class="min-h-screen bg-background">
+		<section class="container mx-auto px-4 py-8 max-w-7xl">
+			<ExcelUploadManager />
+		</section>
+	</main>
+</Layout>

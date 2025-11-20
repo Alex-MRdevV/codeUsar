@@ -119,16 +119,3 @@ export const validateAndFilterPedidos = (data: unknown[]) => {
 
 	return { validRows, invalidRows };
 };
-
-// Ejemplo de uso
-/*
-const excelData = [
-	{ "CLIENTE": 123, "Nombre": "Juan", "TELÉFONO": "3001234567", "Cashless": "si", "Documento": "123456", "Cajas": "5" },
-	{ "cliente": 456, "nombre": "María", "telefono": 3009876543, "cashless": "NO", "documento": 789012, "cajas": 3 },
-	{ "Cliente": 789, "Nombre": "Pedro", "Teléfono": "300123", "Cashless": "SI", "Documento": "345678", "Cajas": 2 }, // Inválido
-];
-
-const resultado = validateAndFilterPedidos(excelData);
-console.log("Válidos:", resultado.validRows);
-console.log("Inválidos:", resultado.invalidRows);
-*/

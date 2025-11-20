@@ -112,18 +112,26 @@ export const EXCEL_FILE_TYPES: ExcelFileType[] = [
 		name: "Pedidos re-programados (rechazos)",
 		description:
 			"Envió de mensajes a clientes, cuyos pedidos fueron rechazados",
-		requiredColumns: ["Cliente", "Fecha preferente", "Material", "Material"],
+		requiredColumns: [
+			"Cliente",
+			"Material",
+			"Material",
+			"Motivo Rechazo",
+			"Fecha preferente",
+		],
 		exampleData: [
 			{
 				Cliente: "11111100",
-				"Fecha preferente": "2024-01-15",
 				"Material(id)": "00000",
 				Material: "CORONA",
+				"Motivo Rechazo": "Restricción logística externa",
+				"Fecha preferente": "2024-01-15",
 			},
 			{
 				Cliente: "11111100",
 				"Fecha preferente": "2024-01-16",
 				"Material(id)": "00000",
+				"Motivo Rechazo": "",
 				Material: "CORONA",
 			},
 		],

@@ -26,6 +26,11 @@ export interface MessageResult {
 	errorMessage?: string;
 }
 
+export interface RecipientWithParams {
+	phone: string;
+	params: string[] | Record<string, string>;
+}
+
 export interface SendMessageRequest {
 	templateId: string;
 	recipients: string[];
@@ -36,7 +41,9 @@ export interface SendMessageRequest {
 	// Cambia esto para soportar ambos formatos
 	templateParams?: Record<string, string>; // Para parámetros con nombre
 	templateParamsPositional?: string[]; // Para parámetros posicionales (opcional)
-	parameterFormat?: "named" | "positional"; // Nuevo: especificar el formato
+	parameterFormat?: "named" | "positional"; //especificar el formato
+	headerParams?: string[] | Record<string, string>;
+	buttonParams?: string[]; // URLs dinámicas
 }
 
 export interface ReplyMessageRequest {
@@ -52,7 +59,7 @@ export interface ReplyMessageRequest {
 
 export interface MetaRequest {
 	messaging_product: "whatsapp";
-	recipient_type: "individual";
+	recipient_type?: "individual";
 	to: string; // PHONE_NUMBER
 	type: "template" | "text";
 	text?: Text;
@@ -70,7 +77,7 @@ export interface Text {
 export interface Template {
 	name: string; // TEMPLATE_NAME
 	language: Language;
-	components: Component[];
+	components?: Component[];
 }
 
 export interface Language {

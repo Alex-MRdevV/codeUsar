@@ -1,9 +1,9 @@
-import {
+/*import {
 	createUserStats,
 	getUserStats,
 	updateUserStats,
-} from "@/lib/drizzle/stats/stadistics";
-import { incrementTemplateCount } from "@/lib/drizzle/templates/templates";
+} from "@/lib/drizzle/stats/stadistics";*/
+//import { incrementTemplateCount } from "@/lib/drizzle/templates/templates";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
@@ -12,11 +12,10 @@ import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
-	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_NUMBER_ID;
+	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_ID;
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
-	const user = await locals.currentUser();
-
-	if (!user) return res({ message: "NO existe el usuario" }, { status: 403 });
+	//const user = await locals.currentUser();
+	//if (!user) return res({ message: "NO existe el usuario" }, { status: 403 });
 
 	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
@@ -61,9 +60,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		if (user.id && result) {
+		/*if (user.id && result) {
 			await updateUserStatistics(user.id, jsonData, result);
-		}
+		}*/
 
 		return res(
 			{
@@ -127,7 +126,7 @@ function validateSendMessageRequest(data: SendMessageRequest) {
 
 	return null;
 }
-
+/*
 async function updateUserStatistics(
 	userId: string,
 	requestData: SendMessageRequest,
@@ -174,3 +173,4 @@ async function updateUserStatistics(
 		// No fallar la solicitud completa por error en estadísticas
 	}
 }
+*/

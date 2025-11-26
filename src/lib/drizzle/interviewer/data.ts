@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { Interviewer } from "@/db/schema/interviewer";
 import { buildUpdateSet } from "@/utils/updateUtilities";
@@ -38,3 +39,4 @@ export const deleteInterviewer = db
 	.delete(Interviewer)
 	.where(eq(Interviewer.id, sql.placeholder("id")))
 	.prepare();
+*/

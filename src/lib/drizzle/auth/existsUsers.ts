@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { User } from "@/db/schema/user";
 import { and, eq, ne, sql } from "drizzle-orm";
@@ -22,3 +23,4 @@ export const createUser = db
 		createdAt: sql.placeholder("createdAt"),
 	})
 	.prepare();
+*/

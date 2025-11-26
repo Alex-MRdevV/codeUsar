@@ -2,6 +2,7 @@ import { urlEnviarMensajeTexto } from "@/lib/providersMensajes/metaUrls";
 import { buildMetaRequest } from "@/utils/services/sendMessages";
 import type {
 	MessageResult,
+	RecipientWithParams,
 	SendMessageRequest,
 } from "@/utils/types/providers/meta";
 
@@ -70,13 +71,18 @@ export const sendMessagesToAPI = async (
 };
 
 export const enviarMensajeIndividual = async (
-	recipient: string,
+	recipient: string | RecipientWithParams,
 	datos: SendMessageRequest,
 	accessToken: string,
 	phoneNumberId: string
 ): Promise<MessageResult> => {
 	try {
-		const metaRequest = buildMetaRequest(recipient, datos);
+		// Extraer número y parámetros personalizados
+		const phone = typeof recipient === "string" ? recipient : recipient.phone;
+		const customParams =
+			typeof recipient === "string" ? undefined : recipient.params;
+
+		const metaRequest = buildMetaRequest(phone, datos, customParams);
 		const url = urlEnviarMensajeTexto(phoneNumberId);
 
 		const response = await fetch(url, {
@@ -92,7 +98,7 @@ export const enviarMensajeIndividual = async (
 
 		if (!response.ok) {
 			return {
-				recipient,
+				recipient: phone,
 				status: "error",
 				errorCode: data.error?.code,
 				errorMessage: data.error?.message || "Error desconocido",
@@ -100,13 +106,13 @@ export const enviarMensajeIndividual = async (
 		}
 
 		return {
-			recipient,
+			recipient: phone,
 			messageId: data.messages?.[0]?.id,
 			status: "success",
 		};
 	} catch (error) {
 		return {
-			recipient,
+			recipient: typeof recipient === "string" ? recipient : recipient.phone,
 			status: "error",
 			errorMessage: (error as Error).message,
 		};

@@ -10,10 +10,11 @@
 	"observability": {
 		"enabled": true
 	},
-	"kv_namespaces": [
+	"d1_databases": [
 		{
-			"binding": "KV",
-			"id": "de5da5adc1b04defb27fe21559718969"
+			"binding": "DB",
+			"database_name": "mensajeriabavariamasiva",
+			"database_id": "5a7086e3-bb4f-4d31-a4ba-28ab15559658"
 		}
 	]
 }

@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { Templates } from "@/db/schema/template";
 import { buildUpdateSet } from "@/utils/updateUtilities";
@@ -96,3 +97,4 @@ export const incrementTemplateCount = db
 	})
 	.where(eq(Templates.id, sql.placeholder("id")))
 	.prepare();
+*/

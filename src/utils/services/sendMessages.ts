@@ -7,12 +7,16 @@ import type {
 
 export const buildMetaRequest = (
 	recipient: string,
-	request: SendMessageRequest
+	request: SendMessageRequest,
+	customParams?: string[] | Record<string, string>
 ): MetaRequest => {
+	const numeroConCodigo = recipient.startsWith("57")
+		? recipient
+		: `57${recipient}`;
+
 	const baseRequest: MetaRequest = {
 		messaging_product: "whatsapp",
-		recipient_type: "individual",
-		to: recipient,
+		to: numeroConCodigo,
 		type: request.messageType,
 	};
 
@@ -23,54 +27,101 @@ export const buildMetaRequest = (
 		};
 	} else if (request.messageType === "template" && request.templateName) {
 		const components: Component[] = [];
-
-		// Determinar el formato (por defecto "positional" como indica Meta)
 		const paramFormat = request.parameterFormat || "positional";
 
-		// Si hay parámetros de plantilla
-		if (
-			request.templateParams &&
-			Object.keys(request.templateParams).length > 0
-		) {
+		const paramsToUse =
+			customParams ||
+			request.templateParamsPositional ||
+			request.templateParams;
+
+		if (paramsToUse) {
 			let parameters: TextParameter[];
 
-			if (paramFormat === "named") {
-				// Formato con nombre: incluir parameter_name
-				parameters = Object.entries(request.templateParams).map(
-					([paramName, paramValue]) => ({
-						type: "text",
-						parameter_name: paramName,
-						text: paramValue,
-					})
-				);
-			} else {
-				// Formato posicional: mantener el orden, sin parameter_name
-				parameters = Object.values(request.templateParams).map((param) => ({
+			if (Array.isArray(paramsToUse)) {
+				// Parámetros posicionales
+				parameters = paramsToUse.map((param) => ({
 					type: "text",
 					text: param,
 				}));
+			} else {
+				// Parámetros con nombre
+				if (paramFormat === "named") {
+					parameters = Object.entries(paramsToUse).map(
+						([paramName, paramValue]) => ({
+							type: "text",
+							parameter_name: paramName,
+							text: paramValue,
+						})
+					);
+				} else {
+					parameters = Object.values(paramsToUse).map((param) => ({
+						type: "text",
+						text: param,
+					}));
+				}
 			}
 
-			components.push({
-				type: "body",
-				parameters,
-			});
-		} else if (
-			request.templateParamsPositional &&
-			request.templateParamsPositional.length > 0
-		) {
-			// Soporte alternativo para array directo (siempre posicional)
-			const parameters: TextParameter[] = request.templateParamsPositional.map(
-				(param) => ({
-					type: "text",
-					text: param,
-				})
-			);
+			// Separar parámetros por componente
+			if (parameters.length > 0) {
+				// Si el request especifica distribución de parámetros por componente
+				if (request.headerParams) {
+					// HEADER component
+					const headerParams = Array.isArray(request.headerParams)
+						? request.headerParams.map((param) => ({
+								type: "text" as const,
+								text: param,
+						  }))
+						: Object.values(request.headerParams).map((param) => ({
+								type: "text" as const,
+								text: param,
+						  }));
 
-			components.push({
-				type: "body",
-				parameters,
-			});
+					if (headerParams.length > 0) {
+						components.push({
+							type: "header",
+							parameters: headerParams,
+						});
+					}
+				}
+
+				// BODY component (parámetros restantes o todos si no hay headerParams)
+				const bodyParams = request.headerParams
+					? parameters.slice(
+							Array.isArray(request.headerParams)
+								? request.headerParams.length
+								: Object.keys(request.headerParams).length
+					  )
+					: parameters;
+
+				if (bodyParams.length > 0) {
+					components.push({
+						type: "body",
+						parameters: bodyParams,
+					});
+				}
+			}
+		}
+
+		// BUTTONS component (si hay URL dinámica)
+		if (request.buttonParams) {
+			const buttonParameters = Array.isArray(request.buttonParams)
+				? request.buttonParams.map((param) => ({
+						type: "text" as const,
+						text: String(param), // Asegurar que sea string
+				  }))
+				: Object.values(request.buttonParams).map((param) => ({
+						type: "text" as const,
+						text: String(param), // Asegurar que sea string
+				  }));
+
+			if (buttonParameters.length > 0) {
+				components.push({
+					type: "button",
+					sub_type: "url",
+					index: "0",
+					parameters: buttonParameters,
+				});
+			}
 		}
 
 		baseRequest.template = {
@@ -78,7 +129,7 @@ export const buildMetaRequest = (
 			language: {
 				code: request.templateLanguage || "es",
 			},
-			components,
+			...(components.length > 0 && { components }),
 		};
 	}
 

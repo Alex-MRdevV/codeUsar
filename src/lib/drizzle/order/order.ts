@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { Orders } from "@/db/schema/order";
 import type { rejectCodes, statusPedidos } from "@/utils/types/orders";
@@ -60,3 +61,4 @@ export const updateOrder = (
 		)
 		.where(eq(Orders.id, sql.placeholder("id")))
 		.prepare();
+*/

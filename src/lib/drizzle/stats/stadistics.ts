@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { User } from "@/db/schema/user";
 import { userStats } from "@/db/schema/user-stats";
@@ -47,3 +48,4 @@ export const createUserStats = db
 		lastMessageAt: sql.placeholder("lastMessageAt")
 	})
 	.prepare();
+*/

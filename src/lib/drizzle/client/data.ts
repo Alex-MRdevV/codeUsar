@@ -1,3 +1,4 @@
+/*
 import { db } from "@/db/db";
 import { Client } from "@/db/schema/client";
 import { buildUpdateSet } from "@/utils/updateUtilities";
@@ -57,3 +58,4 @@ export const deleteClient = db
 	.delete(Client)
 	.where(eq(Client.id, sql.placeholder("id")))
 	.prepare();
+*/

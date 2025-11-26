@@ -1,3 +1,4 @@
+/*
 import {
 	createUserStats,
 	getUserStats,
@@ -146,3 +147,4 @@ async function updateUserStatsLogic(userId: string) {
 		// No fallar la solicitud completa por error en estadísticas
 	}
 }
+*/

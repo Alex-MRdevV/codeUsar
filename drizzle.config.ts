@@ -1,14 +1,13 @@
-import type { Config } from "drizzle-kit";
+import { defineConfig } from "drizzle-kit";
 
-export default {
-	schema: "./src/db/schema",
+export default defineConfig({
 	out: "./src/db/migrations",
-	dialect: "mysql",
+	schema: "./src/db/schema",
+	dialect: "sqlite",
+	driver: "d1-http",
 	dbCredentials: {
-		user: process.env.DB_USER!,
-		password: process.env.DB_PASS!,
-		database: process.env.DB_NAME!,
-		host: process.env.DB_HOST!,
-		port: Number(process.env.DB_PORT!),
+		accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+		databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
+		token: process.env.CLOUDFLARE_D1_TOKEN!,
 	},
-} satisfies Config;
+});

@@ -1,42 +1,45 @@
-/*
-import { db } from "@/db/db";
-import { Client } from "@/db/schema/client";
+import { type Database } from "@/db/db";
+import { Clients } from "@/db/schema/clients";
 import { buildUpdateSet } from "@/utils/updateUtilities";
 import { eq, like, sql } from "drizzle-orm";
 
-export const insertClient = db
-	.insert(Client)
-	.values({
-		id: sql.placeholder("id"),
-		phone: sql.placeholder("phone"),
-		document: sql.placeholder("document"),
-		name: sql.placeholder("name"),
-		cashless: sql.placeholder("cashless"),
-	})
-	.prepare();
+export const insertClient = (db: Database) =>
+	db
+		.insert(Clients)
+		.values({
+			id: sql.placeholder("id"),
+			phone: sql.placeholder("phone"),
+			document: sql.placeholder("document"),
+			name: sql.placeholder("name"),
+			cashless: sql.placeholder("cashless"),
+		})
+		.prepare();
 
-export const getAllClients = db.select().from(Client);
+export const getAllClients = (db: Database) => db.select().from(Clients);
 
-export const getClientById = db
-	.select()
-	.from(Client)
-	.where(eq(Client.id, sql.placeholder("id")))
-	.prepare();
+export const getClientById = (db: Database) =>
+	db
+		.select()
+		.from(Clients)
+		.where(eq(Clients.id, sql.placeholder("id")))
+		.prepare();
 
-export const getClientByDocument = db
-	.select()
-	.from(Client)
-	.where(eq(Client.document, sql.placeholder("document")))
-	.prepare();
+export const getClientByDocument = (db: Database) =>
+	db
+		.select()
+		.from(Clients)
+		.where(eq(Clients.document, sql.placeholder("document")))
+		.prepare();
 
 export const updateClient = (
+	db: Database,
 	phone?: string,
 	document?: string,
 	name?: string,
 	cashless?: "Si" | "No"
 ) =>
 	db
-		.update(Client)
+		.update(Clients)
 		.set(
 			buildUpdateSet({
 				phone,
@@ -45,17 +48,18 @@ export const updateClient = (
 				cashless,
 			})
 		)
-		.where(eq(Client.id, sql.placeholder("id")))
+		.where(eq(Clients.id, sql.placeholder("id")))
 		.prepare();
 
-export const searchClientsByName = db
-	.select()
-	.from(Client)
-	.where(like(Client.name, sql.placeholder("query")))
-	.prepare();
+export const searchClientsByName = (db: Database) =>
+	db
+		.select()
+		.from(Clients)
+		.where(like(Clients.name, sql.placeholder("query")))
+		.prepare();
 
-export const deleteClient = db
-	.delete(Client)
-	.where(eq(Client.id, sql.placeholder("id")))
-	.prepare();
-*/
+export const deleteClient = (db: Database) =>
+	db
+		.delete(Clients)
+		.where(eq(Clients.id, sql.placeholder("id")))
+		.prepare();

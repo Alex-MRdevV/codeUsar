@@ -1,19 +1,19 @@
-/*
-import { db } from "@/db/db";
-import { Interviewer } from "@/db/schema/interviewer";
+import { type Database } from "@/db/db";
+import { Interviewer } from "@/db/schema/interviewers";
 import { buildUpdateSet } from "@/utils/updateUtilities";
 import { eq, sql } from "drizzle-orm";
 
-export const createInterviewer = db
-	.insert(Interviewer)
-	.values({
-		name: sql.placeholder("name"),
-		email: sql.placeholder("email"),
-		created_at: sql.placeholder("created_at"),
-	})
-	.prepare();
+export const createInterviewer = (db: Database) =>
+	db
+		.insert(Interviewer)
+		.values({
+			name: sql.placeholder("name"),
+			email: sql.placeholder("email"),
+			created_at: sql.placeholder("created_at"),
+		})
+		.prepare();
 
-export const getInterviewers = () => {
+export const getInterviewers = (db: Database) => {
 	return db
 		.select({
 			id: Interviewer.id,
@@ -23,7 +23,11 @@ export const getInterviewers = () => {
 		.from(Interviewer);
 };
 
-export const updateInterviewer = (name?: string, email?: string) =>
+export const updateInterviewer = (
+	db: Database,
+	name?: string,
+	email?: string
+) =>
 	db
 		.update(Interviewer)
 		.set(
@@ -35,8 +39,8 @@ export const updateInterviewer = (name?: string, email?: string) =>
 		.where(eq(Interviewer.id, sql.placeholder("id")))
 		.prepare();
 
-export const deleteInterviewer = db
-	.delete(Interviewer)
-	.where(eq(Interviewer.id, sql.placeholder("id")))
-	.prepare();
-*/
+export const deleteInterviewer = (db: Database) =>
+	db
+		.delete(Interviewer)
+		.where(eq(Interviewer.id, sql.placeholder("id")))
+		.prepare();

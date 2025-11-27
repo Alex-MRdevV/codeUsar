@@ -1,42 +1,10 @@
-/*
-import { db } from "@/db/db";
-import { User } from "@/db/schema/user";
-import { userStats } from "@/db/schema/user-stats";
+import { type Database } from "@/db/db";
+import { userStats } from "@/db/schema/userStats";
+import { Users } from "@/db/schema/users";
 import { buildUpdateSet } from "@/utils/updateUtilities";
-import { and, eq, ne, sql } from "drizzle-orm";
+import { eq, sql, and,ne } from "drizzle-orm";
 
-export const getUserStats = db
-	.select()
-	.from(userStats)
-	.innerJoin(User, eq(userStats.userId, User.id))
-	.where(
-		and(
-			eq(userStats.userId, sql.placeholder("userId")),
-			ne(User.status, "retirado")
-		)
-	);
-
-export const updateUserStats = (
-	userId: string,
-	totalMessagesSent?: number,
-	totalTimeSavedHours?: number,
-	totalContacts?: number,
-	lastUpdated?: Date
-) =>
-	db
-		.update(userStats)
-		.set(
-			buildUpdateSet({
-				totalMessagesSent,
-				totalTimeSavedHours,
-				totalContacts,
-				lastUpdated,
-			})
-		)
-		.where(eq(userStats.userId, userId))
-		.prepare();
-
-export const createUserStats = db
+export const createUserStats = (db: Database) =>  db
 	.insert(userStats)
 	.values({
 		id: sql.placeholder("id"),
@@ -48,4 +16,32 @@ export const createUserStats = db
 		lastMessageAt: sql.placeholder("lastMessageAt")
 	})
 	.prepare();
-*/
+
+export const getUserStats = (db: Database) => db
+	.select()
+	.from(userStats)
+	.innerJoin(Users, eq(userStats.userId, Users.id))
+	.where(
+		and(
+			eq(userStats.userId, sql.placeholder("userId")),
+			ne(Users.status, "retirado")
+		)
+);
+	
+export const updateUserStats = (
+	db: Database,
+	userId: string,
+	totalMessagesSent?: number,
+	totalTimeSavedHours?: number,
+	totalContacts?: number,
+	lastUpdated?: Date
+) =>
+	db
+		.update(userStats)
+		.set(
+			buildUpdateSet({
+				
+			})
+		)
+		.where(eq(userStats.userId, userId))
+		.prepare();

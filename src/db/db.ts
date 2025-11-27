@@ -1,12 +1,8 @@
-/*
-export interface Env {
-  <BINDING_NAME>: D1Database;
+import type { D1Database } from "@cloudflare/workers-types";
+import { drizzle } from "drizzle-orm/d1";
+
+export function getDb(d1: D1Database) {
+	return drizzle(d1);
 }
 
-// Función que devuelve db
-function getDb(env: Env) {
-  return drizzle(env.<BINDING_NAME>);
-}
-
-export const db = drizzle(pool);
-*/
+export type Database = ReturnType<typeof getDb>;

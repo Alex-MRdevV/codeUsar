@@ -1,16 +1,21 @@
-import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	mysqlEnum,
+	mysqlTable,
+	timestamp,
+	varchar,
+} from "drizzle-orm/mysql-core";
 
-export const Users = sqliteTable(
-	"Users",
+export const User = mysqlTable(
+	"User",
 	{
-		id: text("id", { length: 191 }).primaryKey(),
-		name: text("name", { length: 191 }).notNull(),
-		email: text("email", { length: 191 }).notNull().unique(),
-		status: text("status", { enum: ["activo", "retirado"] }).default("activo"),
-		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
-			sql`(unixepoch() * 1000)`
-		),
+		id: varchar("id", { length: 191 }).primaryKey(),
+		name: varchar("name", { length: 191 }).notNull(),
+		email: varchar("email", { length: 191 }).notNull().unique(),
+		password: varchar("password", { length: 191 }).notNull(),
+		secretUserJWT: varchar("secretUserJWT", { length: 191 }).notNull(),
+		status: mysqlEnum("status", ["activo", "retirado"]).default("activo"),
+		createdAt: timestamp("created_at", { mode: "string" }),
 	},
 	(table) => [
 		index("idx_user_status").on(table.status),

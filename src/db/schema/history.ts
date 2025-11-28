@@ -1,24 +1,24 @@
 import { Templates } from "@/db/schema/templates";
 import { sql } from "drizzle-orm";
 import {
-	check,
-	index,
-	integer,
-	sqliteTable,
+	varchar,
+	int,
+	mysqlTable,
 	text,
-} from "drizzle-orm/sqlite-core";
+	timestamp,
+	check,
+	index
+} from "drizzle-orm/mysql-core";
 
-export const History = sqliteTable(
+export const History = mysqlTable(
 	"History",
 	{
-		id: text("id").primaryKey(),
-		messagesSend: integer("messagesSend").default(0),
+		id: varchar("id").primaryKey(),
+		messagesSend: int("messagesSend").default(0),
 		templateId: text("templateId").references(() => Templates.id, {
 			onDelete: "set null",
 		}),
-		date: integer("created_at", { mode: "timestamp_ms" })
-			.notNull()
-			.default(sql`(unixepoch() * 1000)`),
+		date: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 	},
 	(table) => [
 		check("messagesSend_positive", sql`${table.messagesSend} >= 0`),

@@ -57,8 +57,7 @@ async function validateSignature(
 export const POST: APIRoute = async ({ request, locals }) => {
 	try {
 		const { env } = locals.runtime;
-		const APP_SECRET = env.APP_SECRET; // 🔑 Tu App Secret de Meta
-
+		const APP_SECRET = env.APP_SECRET; 
 		// Obtener el cuerpo como texto para validar la firma
 		const rawBody = await request.text();
 		const signature = request.headers.get("X-Hub-Signature-256");
@@ -114,7 +113,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		return new Response("EVENT_RECEIVED", { status: 200 });
 	} catch (error) {
-		console.error("Error procesando webhook:", error);
 		return new Response("Error", { status: 500 });
 	}
 };

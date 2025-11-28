@@ -1,27 +1,45 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	int,
+	json,
+	mysqlEnum,
+	mysqlTable,
+	text,
+	timestamp,
+	varchar,
+} from "drizzle-orm/mysql-core";
 
-export const Templates = sqliteTable(
+export const Templates = mysqlTable(
 	"Templates",
 	{
-		id: text("id").primaryKey(),
-		name: text("name").notNull().unique(),
-		icon: text("icon").notNull(),
-		color: text("color", { length: 20 }),
+		id: varchar("id", { length: 191 }).primaryKey(),
+		name: varchar("name", { length: 255 }).notNull().unique(),
+		icon: varchar("icon", { length: 50 }).notNull(),
+		color: varchar("color", { length: 20 }),
+
 		// Meta Template Info
-		metaStatus: text("metaStatus", {
-			enum: ["PENDING", "APPROVED", "REJECTED"],
-		}).default("PENDING"),
+		metaTemplateId: varchar("meta_template_id", { length: 191 }),
+		metaStatus: mysqlEnum("meta_status", [
+			"PENDING",
+			"APPROVED",
+			"REJECTED",
+		]).default("PENDING"),
+
 		// Content Structure - Simplificado pero completo
-		headerType: text("headerType", {
-			enum: ["TEXT", "IMAGE", "VIDEO", "DOCUMENT", "NONE"],
-		}).default("NONE"),
+		headerType: mysqlEnum("header_type", [
+			"TEXT",
+			"IMAGE",
+			"VIDEO",
+			"DOCUMENT",
+			"NONE",
+		]).default("NONE"),
 		headerText: text("header_text"),
 		bodyText: text("body_text").notNull(),
-		footerText: text("footer_text", { length: 60 }), // Meta limita a 60 caracteres
-		// Variables como JSON
-		variables: text("variables", { mode: "json" }).$type<{
-			type: "named" | "positional";
+		footerText: varchar("footer_text", { length: 60 }), // Meta limita a 60 caracteres
+		// Variables y ejemplos como JSON (más simple)
+		variables: json("variables").$type<{
+			type: "named" | "positional"; // {{nombre}} vs {{1}}
 			list: Array<{
 				key: string;
 				label: string;
@@ -29,8 +47,7 @@ export const Templates = sqliteTable(
 			}>;
 		}>(),
 		// Botones como JSON
-		// Botones como JSON (ARRAY)
-		buttons: text("buttons", { mode: "json" }).$type<
+		buttons: json("buttons").$type<
 			Array<{
 				type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
 				text: string;
@@ -39,13 +56,11 @@ export const Templates = sqliteTable(
 			}>
 		>(),
 		// Métricas
-		usageCount: integer("usage_count").default(0).notNull(),
-		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
-			sql`(unixepoch() * 1000)`
-		),
-		updatedAt: text("updated_at")
-			.default(sql`( DATETIME('now','localtime'))`)
-			.$onUpdate(() => sql`( DATETIME('now','localtime'))`),
+		usageCount: int("usage_count").default(0).notNull(),
+		createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: timestamp("updated_at")
+			.default(sql`CURRENT_TIMESTAMP`)
+			.onUpdateNow(),
 	},
 	(table) => [
 		index("idx_template_status").on(table.metaStatus),

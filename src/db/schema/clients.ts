@@ -1,18 +1,23 @@
 import { sql } from "drizzle-orm";
-import { check, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	check,
+	index,
+	mysqlEnum,
+	mysqlTable,
+	varchar,
+} from "drizzle-orm/mysql-core";
 
-export const Clients = sqliteTable(
-	"Clients",
+export const Client = mysqlTable(
+	"Client",
 	{
-		id: text("id").primaryKey(),
-		phone: text("phone").notNull(),
-		document: text("document").notNull(),
-		name: text("name").notNull(),
-		cashless: text("cashless", { enum: ["Si", "No"] }).default("No"),
+		id: varchar("id", { length: 100 }).primaryKey(),
+		phone: varchar("phone", { length: 20 }).notNull(),
+		document: varchar("document", { length: 20 }).notNull(),
+		name: varchar("name", { length: 100 }).notNull(),
+		cashless: mysqlEnum("cashless", ["Si", "No"]).default("No"),
 	},
 	(table) => [
-		index("idx_name_clients").on(table.name),
-		index("idx_phone_clients").on(table.phone),
-		check("phone_check_length", sql`${table.phone} = 10`),
+		check("phone_check", sql`${table.phone} = 0`),
+		index("idx_phone_client").on(table.phone),
 	]
 );

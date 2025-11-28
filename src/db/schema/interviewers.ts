@@ -1,15 +1,18 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	int,
+	mysqlTable,
+	timestamp,
+	varchar,
+} from "drizzle-orm/mysql-core";
 
-export const Interviewer = sqliteTable(
+export const Interviewer = mysqlTable(
 	"Interviewer",
 	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		name: text("name").notNull(),
-		email: text("email").notNull().unique(),
-		created_at: integer("created_at", { mode: "timestamp" }),
+		id: int("id").primaryKey().autoincrement(),
+		name: varchar("name", { length: 100 }).notNull(),
+		email: varchar("email", { length: 100 }).notNull().unique(),
+		created_at: timestamp("created_at"),
 	},
-	(table) => [
-		index("idx_interviewer_email").on(table.email),
-		index("idx_interviewer_name").on(table.name),
-	]
+	(table) => [index("idx_interviewer_email").on(table.email)]
 );

@@ -9,7 +9,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 	const WABA_ID = env.WHATSAPP_WABA_ID; // WhatsApp Business Account ID
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
-
+	
 	if (!WABA_ID || !ACCESS_TOKEN) {
 		return res(
 			{
@@ -117,7 +117,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		const insertTemplateStmt = createTemplate;
+		const insertTemplateStmt = createTemplate();
 		await insertTemplateStmt.execute({
 			id: templateId,
 			name: jsonData.name,

@@ -37,9 +37,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	// Validaciones del request
 	const validationError = validateSendMessageRequest(jsonData);
-	if (validationError) {
-		return validationError;
-	}
+	if (validationError) return validationError;
 
 	try {
 		// Enviar mensajes
@@ -57,6 +55,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 					error: error.message,
 				},
 				{ status: 500 }
+			);
+		}
+
+		if (result?.results.map((item) => item.status === "error")) {
+			return res(
+				{
+					message: "Error al enviar mensajes",
+					error: "Algo ha fallado al enviar el mensaje",
+				},
+				{ status: 400 }
 			);
 		}
 
@@ -126,6 +134,7 @@ function validateSendMessageRequest(data: SendMessageRequest) {
 
 	return null;
 }
+
 /*
 async function updateUserStatistics(
 	userId: string,

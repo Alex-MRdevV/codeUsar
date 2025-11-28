@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "ce7a7b6a-af39-4060-abab-abfc1a49b2f3",
+  "id": "ceb812fc-b38d-46c0-aeed-550391aeabed",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Client": {
@@ -44,7 +44,15 @@
           "default": "'No'"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_phone_client": {
+          "name": "idx_phone_client",
+          "columns": [
+            "phone"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "Client_id": {
@@ -55,7 +63,86 @@
         }
       },
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "checkConstraint": {
+        "phone_check": {
+          "name": "phone_check",
+          "value": "`Client`.`phone` = 0"
+        }
+      }
+    },
+    "HistoryGeneral": {
+      "name": "HistoryGeneral",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "messagesSend": {
+          "name": "messagesSend",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "templateId": {
+          "name": "templateId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "idx_history_template": {
+          "name": "idx_history_template",
+          "columns": [
+            "templateId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "HistoryGeneral_templateId_Templates_id_fk": {
+          "name": "HistoryGeneral_templateId_Templates_id_fk",
+          "tableFrom": "HistoryGeneral",
+          "tableTo": "Templates",
+          "columnsFrom": [
+            "templateId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "HistoryGeneral_id": {
+          "name": "HistoryGeneral_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "messagesSend_positive": {
+          "name": "messagesSend_positive",
+          "value": "`HistoryGeneral`.`messagesSend` >= 0"
+        }
+      }
     },
     "Interviewer": {
       "name": "Interviewer",
@@ -112,245 +199,6 @@
           "name": "Interviewer_email_unique",
           "columns": [
             "email"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "Orders": {
-      "name": "Orders",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "contact_id": {
-          "name": "contact_id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "order_number": {
-          "name": "order_number",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "total_amount": {
-          "name": "total_amount",
-          "type": "decimal(10,2)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum('Rechazado','Confirmado','Pendiente','Aplazado')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'Pendiente'"
-        },
-        "rejection_code": {
-          "name": "rejection_code",
-          "type": "enum('ZP','Z6','ZR','ZH','ZL','Z4','99','ZS','ZE','Z3','16','10','MC','MT')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "order_date": {
-          "name": "order_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "delivery_date": {
-          "name": "delivery_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
-        }
-      },
-      "indexes": {
-        "idx_order_status": {
-          "name": "idx_order_status",
-          "columns": [
-            "status"
-          ],
-          "isUnique": false
-        },
-        "idx_order_date": {
-          "name": "idx_order_date",
-          "columns": [
-            "order_date"
-          ],
-          "isUnique": false
-        },
-        "idx_order_number": {
-          "name": "idx_order_number",
-          "columns": [
-            "order_number"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "Orders_contact_id_Client_id_fk": {
-          "name": "Orders_contact_id_Client_id_fk",
-          "tableFrom": "Orders",
-          "tableTo": "Client",
-          "columnsFrom": [
-            "contact_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "Orders_id": {
-          "name": "Orders_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "Orders_order_number_unique": {
-          "name": "Orders_order_number_unique",
-          "columns": [
-            "order_number"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "Order_items": {
-      "name": "Order_items",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "order_id": {
-          "name": "order_id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
-        }
-      },
-      "indexes": {
-        "idx_order_items_name": {
-          "name": "idx_order_items_name",
-          "columns": [
-            "name"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "Order_items_order_id_Orders_id_fk": {
-          "name": "Order_items_order_id_Orders_id_fk",
-          "tableFrom": "Order_items",
-          "tableTo": "Orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "Order_items_id": {
-          "name": "Order_items_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "Order_items_name_unique": {
-          "name": "Order_items_name_unique",
-          "columns": [
-            "name"
           ]
         }
       },
@@ -457,18 +305,18 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
-          "default": "(now())"
+          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
           "onUpdate": true,
-          "default": "(now())"
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {
@@ -506,106 +354,6 @@
       },
       "checkConstraint": {}
     },
-    "User_stats": {
-      "name": "User_stats",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "total_messages_sent": {
-          "name": "total_messages_sent",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "total_contacts": {
-          "name": "total_contacts",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "total_orders": {
-          "name": "total_orders",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "total_time_saved_hours": {
-          "name": "total_time_saved_hours",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "last_message_at": {
-          "name": "last_message_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "last_updated": {
-          "name": "last_updated",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "User_stats_user_id_User_id_fk": {
-          "name": "User_stats_user_id_User_id_fk",
-          "tableFrom": "User_stats",
-          "tableTo": "User",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "User_stats_id": {
-          "name": "User_stats_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "User_stats_user_id_unique": {
-          "name": "User_stats_user_id_unique",
-          "columns": [
-            "user_id"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
     "User": {
       "name": "User",
       "columns": {
@@ -630,13 +378,12 @@
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
-          "type": "enum('activo','retirado')",
+        "password": {
+          "name": "password",
+          "type": "varchar(191)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'activo'"
+          "notNull": true,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
@@ -647,13 +394,6 @@
         }
       },
       "indexes": {
-        "idx_user_status": {
-          "name": "idx_user_status",
-          "columns": [
-            "status"
-          ],
-          "isUnique": false
-        },
         "idx_user_email": {
           "name": "idx_user_email",
           "columns": [

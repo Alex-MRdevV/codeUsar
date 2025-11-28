@@ -7,13 +7,13 @@ import {
 	text,
 	timestamp,
 	check,
-	index
+	index,
 } from "drizzle-orm/mysql-core";
 
-export const History = mysqlTable(
-	"History",
+export const HistoryGeneral = mysqlTable(
+	"HistoryGeneral",
 	{
-		id: varchar("id").primaryKey(),
+		id: varchar("id", { length: 100 }).primaryKey(),
 		messagesSend: int("messagesSend").default(0),
 		templateId: text("templateId").references(() => Templates.id, {
 			onDelete: "set null",

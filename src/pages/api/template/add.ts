@@ -1,4 +1,6 @@
-import { createTemplate } from "@/lib/drizzle/templates/templates";
+
+//import { createTemplate } from "@/lib/drizzle/templates/templates";
+/*
 import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
 import { res } from "@/utils/responseAstro";
 import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
@@ -158,3 +160,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
+*/

@@ -1,6 +1,7 @@
+/*
 import { type Database } from "@/db/db";
 import { Clients } from "@/db/schema/clients";
-import { buildUpdateSet } from "@/utils/updateUtilities";
+import { buildUpdateSet } from "@/utils/utilities";
 import { eq, like, sql } from "drizzle-orm";
 
 export const insertClient = (db: Database) =>
@@ -63,3 +64,4 @@ export const deleteClient = (db: Database) =>
 		.delete(Clients)
 		.where(eq(Clients.id, sql.placeholder("id")))
 		.prepare();
+*/

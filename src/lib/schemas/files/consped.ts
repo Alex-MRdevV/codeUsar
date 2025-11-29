@@ -20,6 +20,7 @@ const pedidoSchema = v.looseObject({
 	"Motivo Rechazo": v.optional(v.string()),
 });
 
+
 export type PedidoSchema = v.InferOutput<typeof pedidoSchema>;
 
 // Normalizar fila del Excel

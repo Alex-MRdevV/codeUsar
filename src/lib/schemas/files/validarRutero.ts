@@ -8,7 +8,6 @@ export const normalizeKey = (key: string): string => {
 		.replace(/[^a-z0-9]/g, ""); // Esto elimina puntos, guiones bajos, etc.
 };
 
-
 const HEADER_MAP_PEDIDOS: Record<string, string> = {
 	// Variantes de Solic
 	solic: "Solic",

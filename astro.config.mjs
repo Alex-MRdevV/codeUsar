@@ -11,6 +11,8 @@ import clerk from "@clerk/astro";
 
 import { esMX } from "@clerk/localizations";
 
+import { dark } from "@clerk/themes";
+
 // https://astro.build/config
 export default defineConfig({
 	output: "server",
@@ -21,6 +23,9 @@ export default defineConfig({
 		react(),
 		clerk({
 			localization: esMX,
+			appearance: {
+				baseTheme: dark,
+			},
 		}),
 	],
 	adapter: cloudflare({

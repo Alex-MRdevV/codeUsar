@@ -4,17 +4,19 @@ import {
 	LayoutDashboard,
 	MessageSquareReply,
 	Send,
+	Upload,
 } from "lucide-react";
 
 export const sidebarDataItems: PropsNavMain = {
 	items: [
-		{ title: "Panel de control", url: "/user/index", icon: LayoutDashboard },
-		{ title: "Historial Mensajes", url: "/user/historial", icon: History },
+		{ title: "Panel de control", url: "/users/index", icon: LayoutDashboard },
+		{ title: "Historial Mensajes", url: "/users/historial", icon: History },
 		{
 			title: "Responder mensajes",
-			url: "/user/responder",
+			url: "/users/reply",
 			icon: MessageSquareReply,
 		},
-		{ title: "Enviar mensajes", url: "/user/send", icon: Send },
+		{ title: "Enviar mensajes", url: "/users/send", icon: Send },
+		{ title: "Cargar Archivo", url: "/users/upload", icon: Upload },
 	],
 };

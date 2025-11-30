@@ -1,7 +1,8 @@
+/*
 import { type Database } from "@/db/db";
 import { Templates } from "@/db/schema/templates";
 import { eq, sql } from "drizzle-orm";
-import { buildUpdateSet } from "@/utils/updateUtilities";
+import { buildUpdateSet } from "@/utils/utilities";
 
 export const createTemplate = (db: Database) =>
 	db
@@ -100,3 +101,4 @@ export const incrementTemplateCount = (db: Database) =>
 		})
 		.where(eq(Templates.id, sql.placeholder("id")))
 		.prepare();
+*/

@@ -11,8 +11,13 @@ export const Clients = mysqlTable(
 	"Clients",
 	{
 		id: varchar("id", { length: 100 }).primaryKey(),
-		phone: varchar("phone", { length: 20 }).notNull(),
 		name: varchar("name", { length: 100 }).notNull(),
+		phone: varchar("phone", { length: 20 }).notNull(),
+<<<<<<< HEAD
+		name: varchar("name", { length: 100 }).notNull(),
+=======
+		document: varchar("document", { length: 20 }).notNull(),
+>>>>>>> 85de8590700aee9dd58678a32c162882d7dbc947
 		cashless: mysqlEnum("cashless", ["Si", "No"]).default("No"),
 	},
 	(table) => [
@@ -20,3 +25,4 @@ export const Clients = mysqlTable(
 		index("idx_phone_client").on(table.phone),
 	]
 );
+

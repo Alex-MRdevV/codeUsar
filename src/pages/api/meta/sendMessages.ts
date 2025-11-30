@@ -1,10 +1,5 @@
-/*import {
-	createUserStats,
-	getUserStats,
-	updateUserStats,
-} from "@/lib/drizzle/stats/stadistics";*/
-//import { incrementTemplateCount } from "@/lib/drizzle/templates/templates";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
+import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import { uuid } from "@/utils/uuid";
@@ -14,8 +9,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_ID;
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
-	//const user = await locals.currentUser();
-	//if (!user) return res({ message: "NO existe el usuario" }, { status: 403 });
 
 	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
@@ -45,7 +38,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			jsonData,
 			ACCESS_TOKEN,
 			PHONE_NUMBER_ID,
-			10 // batchSize explícito
+			15 // batchSize explícito
 		);
 
 		if (error) {
@@ -68,9 +61,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		/*if (user.id && result) {
-			await updateUserStatistics(user.id, jsonData, result);
-		}*/
+		
 
 		return res(
 			{
@@ -89,97 +80,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
-
-// Funciones auxiliares
-function validateSendMessageRequest(data: SendMessageRequest) {
-	// Validar destinatarios
-	if (!data.recipients?.length) {
-		return res(
-			{ message: "No hay destinatarios en la solicitud" },
-			{ status: 400 }
-		);
-	}
-
-	// Validar uso correcto de messageType para envíos masivos
-	if (data.recipients.length > 1 && data.messageType === "text") {
-		return res(
-			{
-				message:
-					"Para envíos masivos debes usar messageType: 'template'. Los mensajes de texto solo funcionan en conversaciones activas.",
-			},
-			{ status: 400 }
-		);
-	}
-
-	// Validar campos requeridos para templates
-	if (data.messageType === "template") {
-		if (!data.templateName || !data.templateLanguage) {
-			return res(
-				{
-					message:
-						"templateName y templateLanguage son requeridos para messageType: 'template'",
-				},
-				{ status: 400 }
-			);
-		}
-	}
-
-	// Validar campos requeridos para text
-	if (data.messageType === "text" && !data.content) {
-		return res(
-			{ message: "content es requerido para messageType: 'text'" },
-			{ status: 400 }
-		);
-	}
-
-	return null;
-}
-
-/*
-async function updateUserStatistics(
-	userId: string,
-	requestData: SendMessageRequest,
-	result: any
-) {
-	const TIME_SAVED_PER_MESSAGE_HOURS = 0.0083; // 30 segundos en horas
-
-	try {
-		// Calcular métricas
-		const messagesSent = result.summary?.successful || 0;
-		const timeSavedHours = messagesSent * TIME_SAVED_PER_MESSAGE_HOURS;
-		const newContacts = requestData.recipients.length;
-
-		// Obtener estadísticas actuales
-		const currentStats = await getUserStats.execute({ userId });
-
-		if (currentStats && currentStats.length > 0) {
-			const stats = currentStats[0].User_stats;
-			await updateUserStats(
-				userId,
-				(stats.totalMessagesSent ?? 0) + messagesSent,
-				(stats.totalTimeSavedHours ?? 0) + timeSavedHours,
-				(stats.totalContacts ?? 0) + newContacts,
-				new Date() // lastUpdated
-			).execute();
-		} else {
-			await createUserStats.execute({
-				id: uuid.uuid,
-				userId: userId,
-				totalMessagesSent: messagesSent,
-				totalTimeSavedHours: timeSavedHours,
-				totalContacts: newContacts,
-				totalOrders: 0,
-				lastMessageAt: new Date(),
-			});
-		}
-
-		// Incrementar contador de template si se usó uno
-		if (requestData.messageType === "template" && requestData.templateId) {
-			await incrementTemplateCount.execute({ id: requestData.templateId });
-		}
-	} catch (error) {
-		console.error("Error actualizando estadísticas:", error);
-		// No fallar la solicitud completa por error en estadísticas
-	}
-}
-*/

@@ -1,6 +1,7 @@
+/*
 import { type Database } from "@/db/db";
 import { Interviewer } from "@/db/schema/interviewers";
-import { buildUpdateSet } from "@/utils/updateUtilities";
+import { buildUpdateSet } from "@/utils/utilities";
 import { eq, sql } from "drizzle-orm";
 
 export const createInterviewer = (db: Database) =>
@@ -44,3 +45,4 @@ export const deleteInterviewer = (db: Database) =>
 		.delete(Interviewer)
 		.where(eq(Interviewer.id, sql.placeholder("id")))
 		.prepare();
+*/

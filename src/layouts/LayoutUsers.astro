@@ -3,8 +3,9 @@ import { AppWrapper } from "@/components/provider";
 import { SidebarLayout } from "@/components/sidebar/provider";
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import { Header } from "@/components/headerApp";
 
-const { title, description, data } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
 <!doctype html>
@@ -20,11 +21,11 @@ const { title, description, data } = Astro.props;
 	<body>
 		<div class="flex-container">
 			<AppWrapper client:only>
-				<SidebarLayout data={data} client:only>
+				<Header client:only />
+				<SidebarLayout client:only>
 					<slot />
 				</SidebarLayout>
 			</AppWrapper>
 		</div>
 	</body>
 </html>
-

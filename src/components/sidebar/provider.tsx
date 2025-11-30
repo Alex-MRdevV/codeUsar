@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { sidebarDataItems, type dataUserSidebar } from "@/utils/types/sidebar";
+import { sidebarDataItems } from "@/utils/types/sidebar";
 
 interface Props {
 	children: React.ReactNode;

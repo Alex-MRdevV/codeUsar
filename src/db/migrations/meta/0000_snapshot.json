@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "ceb812fc-b38d-46c0-aeed-550391aeabed",
+  "id": "4d49c84d-119b-4765-a0ca-0d3a4306364f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "Client": {
-      "name": "Client",
+    "Clients": {
+      "name": "Clients",
       "columns": {
         "id": {
           "name": "id",
@@ -16,13 +16,6 @@
         },
         "phone": {
           "name": "phone",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "document": {
-          "name": "document",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
@@ -55,8 +48,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "Client_id": {
-          "name": "Client_id",
+        "Clients_id": {
+          "name": "Clients_id",
           "columns": [
             "id"
           ]
@@ -66,7 +59,7 @@
       "checkConstraint": {
         "phone_check": {
           "name": "phone_check",
-          "value": "`Client`.`phone` = 0"
+          "value": "`Clients`.`phone` = 10"
         }
       }
     },
@@ -90,7 +83,7 @@
         },
         "templateId": {
           "name": "templateId",
-          "type": "text",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -168,12 +161,13 @@
           "notNull": true,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {
@@ -204,12 +198,237 @@
       },
       "checkConstraint": {}
     },
+    "Orders": {
+      "name": "Orders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "clientId": {
+          "name": "clientId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "orderNumber": {
+          "name": "orderNumber",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('Rechazado','Confirmado','Pendiente','Aplazado')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'Pendiente'"
+        },
+        "rejectionCode": {
+          "name": "rejectionCode",
+          "type": "enum('ZP','Z6','ZR','ZH','ZL','Z4','99','ZS','ZE','Z3','16','10','MC','MT')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "orderDate": {
+          "name": "orderDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "idx_order_status": {
+          "name": "idx_order_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        },
+        "idx_order_date": {
+          "name": "idx_order_date",
+          "columns": [
+            "orderDate"
+          ],
+          "isUnique": false
+        },
+        "idx_order_number": {
+          "name": "idx_order_number",
+          "columns": [
+            "orderNumber"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "Orders_clientId_Clients_id_fk": {
+          "name": "Orders_clientId_Clients_id_fk",
+          "tableFrom": "Orders",
+          "tableTo": "Clients",
+          "columnsFrom": [
+            "clientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "Orders_id": {
+          "name": "Orders_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "Orders_orderNumber_unique": {
+          "name": "Orders_orderNumber_unique",
+          "columns": [
+            "orderNumber"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "OrdersItems": {
+      "name": "OrdersItems",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orderId": {
+          "name": "orderId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nameProduct": {
+          "name": "nameProduct",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "idx_order_nameProduct": {
+          "name": "idx_order_nameProduct",
+          "columns": [
+            "nameProduct"
+          ],
+          "isUnique": false
+        },
+        "idx_order_orderId": {
+          "name": "idx_order_orderId",
+          "columns": [
+            "orderId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "OrdersItems_orderId_Orders_id_fk": {
+          "name": "OrdersItems_orderId_Orders_id_fk",
+          "tableFrom": "OrdersItems",
+          "tableTo": "Orders",
+          "columnsFrom": [
+            "orderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "OrdersItems_id": {
+          "name": "OrdersItems_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "Templates": {
       "name": "Templates",
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(191)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -235,45 +454,45 @@
           "notNull": false,
           "autoincrement": false
         },
-        "meta_template_id": {
-          "name": "meta_template_id",
+        "metaTemplateId": {
+          "name": "metaTemplateId",
           "type": "varchar(191)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "meta_status": {
-          "name": "meta_status",
+        "metaStatus": {
+          "name": "metaStatus",
           "type": "enum('PENDING','APPROVED','REJECTED')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": "'PENDING'"
         },
-        "header_type": {
-          "name": "header_type",
+        "headerType": {
+          "name": "headerType",
           "type": "enum('TEXT','IMAGE','VIDEO','DOCUMENT','NONE')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": "'NONE'"
         },
-        "header_text": {
-          "name": "header_text",
+        "headerText": {
+          "name": "headerText",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "body_text": {
-          "name": "body_text",
+        "bodyText": {
+          "name": "bodyText",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "footer_text": {
-          "name": "footer_text",
+        "footerText": {
+          "name": "footerText",
           "type": "varchar(60)",
           "primaryKey": false,
           "notNull": false,
@@ -293,24 +512,24 @@
           "notNull": false,
           "autoincrement": false
         },
-        "usage_count": {
-          "name": "usage_count",
+        "dailyMessageCount": {
+          "name": "dailyMessageCount",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": 0
         },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "updated_at": {
-          "name": "updated_at",
+        "updatedAt": {
+          "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -323,7 +542,7 @@
         "idx_template_status": {
           "name": "idx_template_status",
           "columns": [
-            "meta_status"
+            "metaStatus"
           ],
           "isUnique": false
         },
@@ -349,73 +568,6 @@
           "name": "Templates_name_unique",
           "columns": [
             "name"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "User": {
-      "name": "User",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "password": {
-          "name": "password",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "idx_user_email": {
-          "name": "idx_user_email",
-          "columns": [
-            "email"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "User_id": {
-          "name": "User_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "User_email_unique": {
-          "name": "User_email_unique",
-          "columns": [
-            "email"
           ]
         }
       },

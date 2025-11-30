@@ -27,7 +27,7 @@ export type ResultadoAgrupado = {
 		invalid: number;
 		clientes: number;
 		pedidos: number;
-		materiales: number;
+		referenciaProducto: number;
 	};
 	invalidRows: Array<{
 		row: number;

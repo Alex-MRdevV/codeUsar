@@ -1,13 +1,12 @@
 import { Templates } from "@/db/schema/templates";
 import { sql } from "drizzle-orm";
 import {
-	varchar,
-	int,
-	mysqlTable,
-	text,
-	timestamp,
 	check,
 	index,
+	int,
+	mysqlTable,
+	timestamp,
+	varchar,
 } from "drizzle-orm/mysql-core";
 
 export const HistoryGeneral = mysqlTable(
@@ -15,9 +14,12 @@ export const HistoryGeneral = mysqlTable(
 	{
 		id: varchar("id", { length: 100 }).primaryKey(),
 		messagesSend: int("messagesSend").default(0),
-		templateId: text("templateId").references(() => Templates.id, {
-			onDelete: "set null",
-		}),
+		templateId: varchar("templateId", { length: 100 }).references(
+			() => Templates.id,
+			{
+				onDelete: "set null",
+			}
+		),
 		date: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 	},
 	(table) => [

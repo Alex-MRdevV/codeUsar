@@ -13,30 +13,28 @@ import {
 export const Templates = mysqlTable(
 	"Templates",
 	{
-		id: varchar("id", { length: 191 }).primaryKey(),
+		id: varchar("id", { length: 100 }).primaryKey(),
 		name: varchar("name", { length: 255 }).notNull().unique(),
 		icon: varchar("icon", { length: 50 }).notNull(),
 		color: varchar("color", { length: 20 }),
-
 		// Meta Template Info
-		metaTemplateId: varchar("meta_template_id", { length: 191 }),
-		metaStatus: mysqlEnum("meta_status", [
+		metaTemplateId: varchar("metaTemplateId", { length: 191 }),
+		metaStatus: mysqlEnum("metaStatus", [
 			"PENDING",
 			"APPROVED",
 			"REJECTED",
 		]).default("PENDING"),
-
 		// Content Structure - Simplificado pero completo
-		headerType: mysqlEnum("header_type", [
+		headerType: mysqlEnum("headerType", [
 			"TEXT",
 			"IMAGE",
 			"VIDEO",
 			"DOCUMENT",
 			"NONE",
 		]).default("NONE"),
-		headerText: text("header_text"),
-		bodyText: text("body_text").notNull(),
-		footerText: varchar("footer_text", { length: 60 }), // Meta limita a 60 caracteres
+		headerText: text("headerText"),
+		bodyText: text("bodyText").notNull(),
+		footerText: varchar("footerText", { length: 60 }), // Meta limita a 60 caracteres
 		// Variables y ejemplos como JSON (más simple)
 		variables: json("variables").$type<{
 			type: "named" | "positional"; // {{nombre}} vs {{1}}
@@ -56,9 +54,9 @@ export const Templates = mysqlTable(
 			}>
 		>(),
 		// Métricas
-		usageCount: int("usage_count").default(0).notNull(),
-		createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-		updatedAt: timestamp("updated_at")
+		dailyMessageCount: int("dailyMessageCount").default(0).notNull(),
+		createdAt: timestamp("createdAt").default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: timestamp("updatedAt")
 			.default(sql`CURRENT_TIMESTAMP`)
 			.onUpdateNow(),
 	},

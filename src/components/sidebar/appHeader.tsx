@@ -11,7 +11,7 @@ export const AppHeader = () => {
 			<section className="flex flex-col">
 				<span className="text-lg font-medium">{appConfig.name}</span>
 				<Badge variant="secondary" className="w-fit">
-					Preview
+					Versión 1.0
 				</Badge>
 			</section>
 		</article>

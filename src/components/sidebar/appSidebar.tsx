@@ -9,8 +9,11 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar"
 import type { dataUserSidebar } from "@/utils/types/sidebar"
+import { $userStore } from '@clerk/astro/client'
 
-export function AppSidebar({ items, user }: dataUserSidebar) {
+export function AppSidebar({ items }: dataUserSidebar) {
+	const user = $userStore.get()
+	if (!user) return null
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
@@ -20,7 +23,7 @@ export function AppSidebar({ items, user }: dataUserSidebar) {
 				<NavMain items={items.items} />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser email={user.email} name={user.name} />
+				<NavUser />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>

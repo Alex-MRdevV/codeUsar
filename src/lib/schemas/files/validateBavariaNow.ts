@@ -120,7 +120,7 @@ export const validateAndFilterData = (rows: unknown[]) => {
 			invalid: invalidRows.length,
 			clientes: clientesCount,
 			pedidos: pedidosCount,
-			materiales: materialesCount,
+			referenciaProducto: materialesCount,
 		},
 		invalidRows,
 	};

@@ -1,4 +1,4 @@
-import { validateAndFilterData } from "@/lib/schemas/files/validateConsolidado";
+import { validateAndFilterData } from "@/lib/schemas/files/validateBavariaNow";
 import { res } from "@/utils/responseAstro";
 import { getSheetByName } from "@/utils/utilities";
 import type { APIRoute } from "astro";
@@ -37,23 +37,24 @@ export const POST: APIRoute = async ({ request }) => {
 		);
 
 		const normalizedData = filteredData.map((row: any) => ({
-			idCliente: row["idCliente"] ?? "",
-			nameEstablecimiento: row["nombreEstablecimiento"] ?? "",
-			phoneNumber: row["phoneNumber"] ?? "0",
-			status: row["Estado"] ?? "",
-			idClienteConfirmar: row["ClienteId"] ?? "",
-			horaInicial: row["horaInicial"] ?? "",
-			horaFinal: row["horaFinal"] ?? "",
+			idCliente: row["Cliente"] ?? "",
+			numeroPedido: row["No ped Cliente"] ?? "",
+			producto: row["Material"] ?? "",
+			codRechazo: row["Cod Rechazo"] ?? "0",
+			fecha: row["Fecha pref"] ?? "",
+			cajas: row["Cajas"] ?? "",
+			name: row["Nombre establecimiento"] ?? "",
+			cashless: row["Cashless"] ?? "",
 		}));
-		const { byStatus, invalidRows, summary } =
+		const { invalidRows, summary, groupedOrders } =
 			validateAndFilterData(normalizedData);
 
 		return res(
 			{
 				message: "Archivo cargado correctamente",
-				dataPorStatus: byStatus,
-				dataInvalida: invalidRows,
+				groupedOrders: groupedOrders,
 				summary: summary,
+				dataInvalida: invalidRows,
 			},
 			{
 				status: 200,

@@ -4,6 +4,10 @@ export type MaterialPedido = {
 	cajas: number;
 };
 
+export interface SendGroupedOrdersPayload {
+	groupedOrders: Record<string, ClienteAgrupado>;
+}
+
 export type PedidoAgrupado = {
 	numeroPedido: string;
 	fechaPreferente: string;
@@ -12,8 +16,8 @@ export type PedidoAgrupado = {
 
 export type ClienteAgrupado = {
 	clienteInfo: {
+		id: string;
 		nombre: string;
-		establecimiento: string;
 		cashless?: "SI" | "NO";
 	};
 	pedidos: Record<string, PedidoAgrupado>;

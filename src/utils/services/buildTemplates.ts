@@ -56,7 +56,7 @@ export const buildMetaTemplateRequest = (
 
 	return {
 		name: template.metaTemplateName,
-		category: "MARKETING", // Puedes ajustar esto según tus necesidades: MARKETING, UTILITY, AUTHENTICATION
+		category: "MARKETING", // ajustar según necesidades: MARKETING, UTILITY, AUTHENTICATION
 		language: template.language,
 		components,
 	};

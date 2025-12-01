@@ -12,18 +12,6 @@ export interface ErrorResponse {
 	}>;
 }
 
-export interface SuccessResponse {
-	message: string;
-	data?: {
-		insertados: number;
-		omitidos: number;
-		filasInvalidas?: Array<{
-			fila: number;
-			errores: ValidationError[];
-		}>;
-	};
-}
-
 export interface UploadedFile {
 	type: ExcelFileType;
 	file: File;
@@ -31,8 +19,6 @@ export interface UploadedFile {
 	isValid: boolean;
 	errors: string[];
 }
-
-export type APIResponse = ErrorResponse | SuccessResponse;
 
 export interface UploadProgressProps {
 	progress: number;
@@ -137,20 +123,3 @@ export const EXCEL_FILE_TYPES: ExcelFileType[] = [
 		],
 	},
 ];
-
-export interface ExcelUploadViewProps {
-	fileTypes: any[];
-	uploadedFiles: Map<string, any>;
-	progress: number;
-	isProcessing: boolean;
-	completed: boolean;
-	currentBatch: number;
-	totalBatches: number;
-	currentProcessingFile: string;
-	validFilesCount: number;
-	canSave: boolean;
-	onFileSelect: (file: File, fileTypeId: string) => void;
-	onRemoveFile: (fileTypeId: string) => void;
-	onSaveAll: () => void;
-	onReset: () => void;
-}

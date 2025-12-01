@@ -1,5 +1,12 @@
+import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
+import { res } from "@/utils/responseAstro";
+import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
+import { uuid } from "@/utils/uuid";
+import type { APIRoute } from "astro";
 
-//import { createTemplate } from "@/lib/drizzle/templates/templates";
+
+
+
 /*
 import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
 import { res } from "@/utils/responseAstro";
@@ -11,7 +18,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
 	const WABA_ID = env.WHATSAPP_WABA_ID; // WhatsApp Business Account ID
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
-	
+
 	if (!WABA_ID || !ACCESS_TOKEN) {
 		return res(
 			{

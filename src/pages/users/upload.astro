@@ -1,3 +1,11 @@
 ---
 import Layout from "@/layouts/LayoutUsers.astro";
+import { ExcelUploadManager } from "@/components/files/uploadManager";
 ---
+
+<Layout
+	title="Upload de Archivos"
+	description="Sube y procesa archivos de Excel para consolidado y Bavaria Now"
+>
+	<ExcelUploadManager client:visible />
+</Layout>

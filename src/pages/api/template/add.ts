@@ -7,7 +7,7 @@ import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
-	const WABA_ID = env.WHATSAPP_WABA_ID; // WhatsApp Business Account ID
+	const WABA_ID = env.WHATSAPP_WABA_ID;
 	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
 
 	if (!WABA_ID || !ACCESS_TOKEN) {
@@ -74,19 +74,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	if (!jsonData.content) {
-		return res(
-			{
-				message: "content es requerido",
-			},
-			{
-				status: 400,
-			}
-		);
-	}
-
 	try {
 		const templateId = uuid.uuid;
+
 		// Construir objeto Template para enviar a Meta
 		const templateForMeta: Template = {
 			id: templateId,
@@ -117,17 +107,51 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
+		// Extraer información de la estructura para los campos individuales
+		const { header, body, footer, buttons } = jsonData.structure;
+
+		// Determinar el tipo de header
+		let headerType: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT" | "NONE" = "NONE";
+		let headerText: string | undefined;
+
+		if (header) {
+			if (header.type === "TEXT") {
+				headerType = "TEXT";
+				headerText = header.text;
+			} else if (header.type === "IMAGE") {
+				headerType = "IMAGE";
+			} else if (header.type === "VIDEO") {
+				headerType = "VIDEO";
+			} else if (header.type === "DOCUMENT") {
+				headerType = "DOCUMENT";
+			}
+		}
+
+		// Procesar botones si existen
+		let buttonsData = undefined;
+		if (buttons && buttons.length > 0) {
+			buttonsData = buttons.map((btn) => ({
+				type: btn.type,
+				text: btn.text,
+				...(btn.url && { url: btn.url }),
+				...(btn.phone_number && { phoneNumber: btn.phone_number }),
+			}));
+		}
+
+		// Insertar en la base de datos con la nueva estructura
 		await createTemplate.execute({
 			id: templateId,
 			name: jsonData.name,
 			icon: jsonData.icon,
 			color: jsonData.color || "#000000",
-			content: jsonData.content,
-			metaTemplateId: metaResult.templateId || null,
-			structure: JSON.stringify(jsonData.structure),
-			variables: jsonData.variables ? JSON.stringify(jsonData.variables) : null,
-			createdAt: new Date(),
-			status: "PENDING", // Las plantillas de Meta requieren aprobación
+			metaStatus: "PENDING",
+			headerType: headerType,
+			headerText: headerText || null,
+			bodyText: body.text,
+			footerText: footer?.text || null,
+			variables: jsonData.variables || null,
+			buttons: buttonsData || null,
+			usageCount: 0,
 		});
 
 		return res(

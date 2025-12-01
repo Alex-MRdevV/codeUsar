@@ -1,9 +1,49 @@
+import {
+	createHistory,
+	historyExists,
+	incrementMessagesSend,
+} from "@/lib/drizzle/history";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
+
+function getTodayId(): string {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+async function trackMessagesSent(
+	templateId: string | null = null,
+	messageCount: number = 1
+): Promise<void> {
+	const todayId = getTodayId();
+
+	try {
+		// Verificar si ya existe un registro para hoy
+		const exists = await historyExists(todayId);
+
+		if (exists) {
+			// Si existe, incrementar el contador
+			await incrementMessagesSend(todayId, messageCount);
+		} else {
+			// Si no existe, crear un nuevo registro
+			await createHistory({
+				id: todayId,
+				messagesSend: messageCount,
+				templateId: templateId,
+			});
+		}
+	} catch (error) {
+		// Log del error pero no fallar la petición principal
+		console.error("Error al trackear mensajes en HistoryGeneral:", error);
+	}
+}
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const { env } = locals.runtime;
@@ -61,7 +101,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
+		// ✅ REGISTRAR EN EL HISTORIAL
+		// Contar mensajes enviados exitosamente
+		const successfulMessages =
+			result?.results.filter((item) => item.status !== "error").length || 0;
 
+		if (successfulMessages > 0) {
+			// Trackear con el templateId si está disponible
+			await trackMessagesSent(jsonData.templateId || null, successfulMessages);
+		}
 
 		return res(
 			{

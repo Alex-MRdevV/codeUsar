@@ -1,4 +1,4 @@
-import { EventDetails } from "@/components/messages/detalles"
+import { EventDetails } from "@/components/messages/editor/detalles"
 import { MessageStatusBadge } from "@/components/messages/status"
 import { Card } from "@/components/ui/card"
 import type { MessageHistoryProps, WebhookEvent } from "@/utils/types/providers/webhooks"

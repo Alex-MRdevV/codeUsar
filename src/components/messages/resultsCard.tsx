@@ -1,14 +1,8 @@
-import type { ApiResponse } from "@/utils/types/providers/meta";
+import type { ResultsCardProps } from "@/utils/types/editorMessages";
 import { AlertCircle, Check, CheckCircle2, Copy, XCircle } from "lucide-react";
 import { useState } from "react";
 
-interface Props {
-	resultados: ApiResponse | null; // Permitir que `resultados` sea null
-	onClose: () => void;
-}
-
-export const ResultsCard = ({ resultados, onClose }: Props) => {
-	// Validar que `resultados` y `resultados.data` existan
+export const ResultsCard = ({ resultados, onClose }: ResultsCardProps) => {
 	if (!resultados || !resultados.data) {
 		return (
 			<div className="bg-card border border-border rounded-lg p-6 text-center">

@@ -1,10 +1,10 @@
+import { ScalaSection } from "@/components/historialGeneral/sections/scaleSection";
+import { TooltipSection } from "@/components/historialGeneral/tooltipSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CalendarHeatmapProps } from "@/utils/types/historyGeneral";
 
 export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
-	// Get last 84 days (12 weeks)
-	const days = Array.from({ length: 84 }, (_, i) => {
+	const days = Array.from({ length: 120 }, (_, i) => {
 		const date = new Date();
 		date.setDate(date.getDate() - (83 - i));
 		return date;
@@ -47,7 +47,7 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 				<CardTitle className="font-display">Actividad de mensajes</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="space-y-2">
+				<section className="space-y-2">
 					<div className="flex gap-1 text-xs text-muted-foreground mb-2">
 						{monthLabels.map((label, i) => (
 							<div key={i} style={{ width: "calc(100% / 12)" }}>
@@ -56,39 +56,14 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 						))}
 					</div>
 
-					<TooltipProvider>
-						<div className="grid grid-flow-col gap-1" style={{ gridTemplateRows: "repeat(7, minmax(0, 1fr))" }}>
-							{days.map((day, i) => {
-								const count = getCountForDate(day);
-								return (
-									<Tooltip key={i}>
-										<TooltipTrigger asChild>
-											<div
-												className={`w-3 h-3 rounded-sm transition-smooth hover:ring-2 hover:ring-primary hover:scale-110 cursor-pointer ${getIntensity(count)}`}
-											/>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p className="font-medium">{day.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-											<p className="text-sm text-muted-foreground">{count} mensajes</p>
-										</TooltipContent>
-									</Tooltip>
-								);
-							})}
-						</div>
-					</TooltipProvider>
+					<TooltipSection
+						days={days}
+						getCountForDate={getCountForDate}
+						getIntensity={getIntensity}
+					/>
 
-					<div className="flex items-center gap-2 text-xs text-muted-foreground mt-4">
-						<span>Menos</span>
-						<div className="flex gap-1">
-							<div className="w-3 h-3 rounded-sm bg-muted" />
-							<div className="w-3 h-3 rounded-sm bg-primary/20" />
-							<div className="w-3 h-3 rounded-sm bg-primary/40" />
-							<div className="w-3 h-3 rounded-sm bg-primary/60" />
-							<div className="w-3 h-3 rounded-sm bg-primary" />
-						</div>
-						<span>Más</span>
-					</div>
-				</div>
+					<ScalaSection />
+				</section>
 			</CardContent>
 		</Card>
 	);

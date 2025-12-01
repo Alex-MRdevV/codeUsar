@@ -64,7 +64,7 @@ export const validateAndFilterData = (rows: unknown[]) => {
 			const orderKey = numeroPedido;
 
 			// Agregar material al pedido
-			acc[clientKey].pedidos[orderKey].materiales.push({
+			acc[clientKey].pedidos[orderKey].referenciaProducto.push({
 				material: orderData.Material,
 				codRechazo: orderData["Cod Rechazo"],
 				cajas: orderData.Cajas,
@@ -76,8 +76,8 @@ export const validateAndFilterData = (rows: unknown[]) => {
 			string,
 			{
 				clienteInfo: {
+					id: string;
 					nombre: string;
-					establecimiento: string;
 					cashless?: "SI" | "NO";
 				};
 				pedidos: Record<
@@ -85,7 +85,7 @@ export const validateAndFilterData = (rows: unknown[]) => {
 					{
 						numeroPedido: string;
 						fechaPreferente: string;
-						materiales: {
+						referenciaProducto: {
 							material: string;
 							codRechazo?: string;
 							cajas: number;
@@ -106,7 +106,7 @@ export const validateAndFilterData = (rows: unknown[]) => {
 		(total, cliente) =>
 			total +
 			Object.values(cliente.pedidos).reduce(
-				(subTotal, pedido) => subTotal + pedido.materiales.length,
+				(subTotal, pedido) => subTotal + pedido.referenciaProducto.length,
 				0
 			),
 		0

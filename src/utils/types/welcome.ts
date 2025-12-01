@@ -6,7 +6,6 @@ export interface UserStats {
 
 export interface WelcomeCardProps {
 	nombre: string;
-	stats: UserStats;
 }
 
 export const getGreeting = () => {

@@ -1,13 +1,4 @@
-import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
-import { res } from "@/utils/responseAstro";
-import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
-import { uuid } from "@/utils/uuid";
-import type { APIRoute } from "astro";
-
-
-
-
-/*
+import { createTemplate } from "@/lib/drizzle/templates";
 import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
 import { res } from "@/utils/responseAstro";
 import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
@@ -126,8 +117,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		const insertTemplateStmt = createTemplate();
-		await insertTemplateStmt.execute({
+		await createTemplate.execute({
 			id: templateId,
 			name: jsonData.name,
 			icon: jsonData.icon,
@@ -167,4 +157,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 };
-*/

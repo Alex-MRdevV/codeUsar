@@ -3,7 +3,19 @@ import { InfoSection } from "@/components/welcome/info"
 import { formatTimeSaved, getGreeting, type WelcomeCardProps } from "@/utils/types/welcome"
 import { Clock, MessageCircle, Users } from "lucide-react"
 
-export const WelcomeCard = ({ nombre, stats }: WelcomeCardProps) => {
+export interface UserStats {
+	totalMessagesSent: number;
+	totalTimeSavedHours: number;
+	totalContacts: number;
+}
+
+export interface WelcomeCardProps2 {
+	nombre: string;
+	stats: UserStats;
+}
+
+
+export const WelcomeCard = ({ nombre }: WelcomeCardProps) => {
 	return (
 		<div className="space-y-8">
 			{/* Greeting Section */}

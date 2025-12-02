@@ -1,10 +1,11 @@
+import { HOSTINGER_URL_BASE } from "@/lib/utils";
 import type { dataUsarMessages } from "@/utils/types/messages";
 
-export const RequestGetDataSendMessage = async (): Promise<
+export const HostingerRequestGetDataSendMessage = async (): Promise<
 	[Error, null] | [null, dataUsarMessages]
 > => {
 	try {
-		const url = `/api/getData`;
+		const url = `${HOSTINGER_URL_BASE}/api/getData.php`;
 
 		const response = await fetch(url, {
 			method: "GET",
@@ -16,7 +17,10 @@ export const RequestGetDataSendMessage = async (): Promise<
 
 		if (!response.ok) {
 			const errorData = await response.json();
-			return [new Error(errorData.message), null];
+			return [
+				new Error(errorData.message || "Error al obtener estadísticas"),
+				null,
+			];
 		}
 
 		const data: dataUsarMessages = await response.json();

@@ -1,7 +1,9 @@
+import { Collapsible } from "@/components/ui/collapsible"
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarMenu,
+	SidebarMenuButton,
 	SidebarMenuItem
 } from "@/components/ui/sidebar"
 import type { PropsNavMain } from "@/utils/types/sidebar"
@@ -12,15 +14,20 @@ export function NavMain({ items }: PropsNavMain) {
 			<SidebarGroupLabel>Opciones</SidebarGroupLabel>
 			<SidebarMenu>
 				{items.map((item) => (
-					<SidebarMenuItem key={item.title}>
-						<a
-							href={item.url}
-							className="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700"
-						>
-							{item.icon && <item.icon className="size-4" />}
-							<span className="text-sm font-medium">{item.title}</span>
-						</a>
-					</SidebarMenuItem>
+					<Collapsible
+						key={item.title}
+						asChild
+						className="group/collapsible"
+					>
+						<SidebarMenuItem>
+							<SidebarMenuButton tooltip={item.title}>
+								{item.icon && <item.icon />}
+								<a href={item.url}>
+									<span>{item.title}</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</Collapsible>
 				))}
 			</SidebarMenu>
 		</SidebarGroup>

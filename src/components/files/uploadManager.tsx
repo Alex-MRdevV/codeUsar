@@ -1,15 +1,15 @@
 import { ExcelUploadView } from "@/components/files/viewUpload";
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
-import { useExcelUpload } from "@/hooks/use-excelUpload";
+import { useExcelUpload } from "@/hooks/use-uploadFiles";
 import { UploadBavariaNowRequest } from "@/utils/services/files/uploadavariaNowTemplate";
 import { UploadConsolidadoRequest } from "@/utils/services/files/uploadConsolidado";
+import { EXCEL_FILE_TYPES } from "@/utils/types/files";
 import { use, useState } from "react";
 import { toast } from "sonner";
 
 export const ExcelUploadManager = () => {
 	const {
 		clearAll,
-		fileTypes,
 		uploadedFiles,
 		removeFile,
 		uploadFile,
@@ -106,7 +106,7 @@ export const ExcelUploadManager = () => {
 	const canSave = validFilesCount > 0 && !isProcessing;
 	return (
 		<ExcelUploadView
-			fileTypes={fileTypes}
+			fileTypes={EXCEL_FILE_TYPES}
 			uploadedFiles={uploadedFiles}
 			progress={progress}
 			isProcessing={isProcessing}

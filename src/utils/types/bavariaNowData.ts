@@ -38,3 +38,4 @@ export type ResultadoAgrupado = {
 		errors: string[];
 	}>;
 };
+

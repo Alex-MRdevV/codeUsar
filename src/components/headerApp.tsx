@@ -37,7 +37,8 @@ export const Header = () => {
 						</a>
 					</span>
 
-					<div className="flex items-center gap-3 md:gap-4">
+					{/* Contenedor derecho - movido más a la izquierda */}
+					<div className="flex items-center gap-2 md:gap-3 -mr-2">
 						<div className="hidden md:flex items-center gap-1">
 							{!user ? (
 								<SignInButton mode="modal">
@@ -55,13 +56,15 @@ export const Header = () => {
 							)}
 						</div>
 
-						{/* Separador visual */}
-						<div className="hidden md:block">
-							<Separator
-								orientation="vertical"
-								className="h-6 bg-white/30 dark:bg-slate-600/50"
-							/>
-						</div>
+						{/* Separador visual - solo cuando hay usuario */}
+						{user && (
+							<div className="hidden md:block">
+								<Separator
+									orientation="vertical"
+									className="h-6 bg-white/30 dark:bg-slate-600/50"
+								/>
+							</div>
+						)}
 						<SwitchTheme />
 					</div>
 				</div>

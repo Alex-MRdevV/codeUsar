@@ -3,7 +3,7 @@ import { FileUploadZone } from "@/components/uploadFiles/uploadZone";
 import { setDataBavaria, setDataConsolidado } from "@/stores/dataStores";
 import { UploadConsolidadoRequest } from "@/utils/services/files/uploadConsolidado";
 import { UploadBavariaNowRequest } from "@/utils/services/files/uploadavariaNowTemplate";
-import { FileSpreadsheetIcon } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -30,6 +30,7 @@ export const ViewUploadsFiles = () => {
 			// Procesa el archivo consolidado si existe
 			if (file1) {
 				const [errorConsolidado, dataConsolidado] = await UploadConsolidadoRequest(file1);
+				console.log(dataConsolidado);
 
 				if (errorConsolidado) {
 					toast.error(`Error en archivo consolidado: ${errorConsolidado.message}`);
@@ -56,15 +57,14 @@ export const ViewUploadsFiles = () => {
 			// Si no hubo errores, redirige
 			if (!hasError) {
 				toast.success("Todos los archivos procesados exitosamente");
-
 				setTimeout(() => {
-					window.location.href = '/ruta-donde-usaras-la-data'; // 👈 Cambia esta ruta
+					window.location.href = '/users/send';
 				}, 800);
 			} else {
 				setIsLoading(false);
 			}
-
 		} catch (error) {
+			console.error("Error inesperado:", error);
 			toast.error("Error inesperado al procesar los archivos");
 			setIsLoading(false);
 		}
@@ -81,7 +81,7 @@ export const ViewUploadsFiles = () => {
 			<div className="max-w-3xl mx-auto">
 				<div className="text-center mb-8">
 					<div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4">
-						<FileSpreadsheetIcon className="w-8 h-8 text-primary" />
+						<FileSpreadsheet className="w-8 h-8 text-primary" />
 					</div>
 					<h1 className="text-4xl font-bold text-foreground mb-2">
 						Carga de Archivos Excel
@@ -105,11 +105,13 @@ export const ViewUploadsFiles = () => {
 								file={file1}
 								onFileChange={setFile1}
 							/>
+
 							<FileUploadZone
 								label="Archivo Bavaria Now (Opcional)"
 								file={file2}
 								onFileChange={setFile2}
 							/>
+
 							<div className="flex gap-3 pt-4">
 								<Button
 									type="submit"
@@ -125,6 +127,7 @@ export const ViewUploadsFiles = () => {
 										'Procesar Archivos'
 									)}
 								</Button>
+
 								<Button
 									type="button"
 									variant="outline"

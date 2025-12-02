@@ -14,7 +14,7 @@ export const GetHistoryStats = async (
 		if (params?.templateId) queryParams.append("templateId", params.templateId);
 		if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-		const url = `api/history/stats${
+		const url = `/api/history/stats${
 			queryParams.toString() ? `?${queryParams.toString()}` : ""
 		}`;
 

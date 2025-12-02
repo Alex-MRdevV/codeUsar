@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-		const sheet = getSheetByName(workbook, "Plantilla mensajeria");
+		const sheet = getSheetByName(workbook, "Hoja1");
 		const jsonData = XLSX.utils.sheet_to_json(sheet, {
 			header: 0,
 			raw: false,
@@ -61,6 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
 			}
 		);
 	} catch (error) {
+		console.log(error);
 		return res(
 			{
 				message: "Ha ocurrido un error inesperado",

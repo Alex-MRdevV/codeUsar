@@ -21,7 +21,9 @@ const { title, description } = Astro.props;
 		<div class="flex-container">
 			<AppWrapper client:only>
 				<SidebarLayout client:only>
-					<slot />
+					<main class="pt-20">
+						<slot />
+					</main>
 				</SidebarLayout>
 			</AppWrapper>
 		</div>

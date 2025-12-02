@@ -7,7 +7,7 @@ export const UploadBavariaNowRequest = async (
 		const formData = new FormData();
 		formData.append("file", file);
 
-		const response = await fetch(`api/files/uploadBavariaNow`, {
+		const response = await fetch(`/api/files/uploadBavariaNow`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",

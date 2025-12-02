@@ -146,3 +146,14 @@ export interface CreateTemplateResponse {
 	error?: string;
 	errorCode?: string | number;
 }
+
+type TemplateStatus = "APPROVED" | "PENDING" | "REJECTED";
+
+export interface TemplateForMetrics {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  messagesSent: number;
+  status: TemplateStatus;
+}

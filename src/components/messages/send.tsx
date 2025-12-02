@@ -4,24 +4,25 @@ import { PreviewCard } from "@/components/messages/editor/previewCard";
 import { TemplateSelector } from "@/components/messages/editor/templaterSelector";
 import { VariableEditor } from "@/components/messages/editor/variablesEditor";
 import { ResultsCard } from "@/components/messages/resultsCard";
-import { Button } from "@/components/ui/button";
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
+import { allDataTransitoria } from "@/utils/services/dataTransitoria/allData";
+import type { PersistedBavariaNow, PersistedConsolidado } from "@/utils/types/messages";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { ProgressComponent } from "../progress";
 import { Header } from "./header";
-import { messagesDataStore, resetMessagesData } from "@/stores/dataStores";
-import { useStore } from "@nanostores/react";
-import { toast } from "sonner";
+
 
 interface Props {
 	templates: Template[];
 }
 
 export const SendMessages = ({ templates: initialTemplates }: Props) => {
-	const { dataConsolidado, dataBavariaNow } = useStore(messagesDataStore);
+	const [dataConsolidado, setDataConsolidado] = useState<PersistedConsolidado | null>(null);
+	const [dataBavariaNow, setDataBavariaNow] = useState<PersistedBavariaNow | null>(null);
 	const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 	const [templates, setTemplates] = useState<Template[]>(initialTemplates);
 	const [recipients, setRecipients] = useState<string[]>([]);
@@ -29,6 +30,21 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [resultados, setResultados] = useState<any | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	useEffect(() => {
+		async function load() {
+			try {
+				const res = await allDataTransitoria();
+				setDataConsolidado(res.dataConsolidado);
+				setDataBavariaNow(res.dataBavariaNow ?? null);
+			} catch (err) {
+				console.error("Error cargando data transitoria", err);
+				toast.error("No se pudo cargar la data transitoria");
+			}
+		}
+
+		load();
+	}, []);
 
 	const {
 		progress,
@@ -187,9 +203,9 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			setResultados({ ok: true, enviados });
 			toast.success(`Mensajes enviados: ${enviados}`);
 
-			// --- LIMPIAR STORE y localStorage para quitar data inútil
-			resetMessagesData();
-			// También limpiar estado local para la UI
+			setDataConsolidado(null);
+			setDataBavariaNow(null);
+
 			setRecipients([]);
 			setSelectedTemplate("");
 			setVariableValues({});
@@ -220,6 +236,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	const handleNewSend = () => {
 		resetResultados();
+		setDataConsolidado(null);
+		setDataBavariaNow(null);
 		setRecipients([]);
 		setSelectedTemplate("");
 		setVariableValues({});

@@ -1,25 +1,21 @@
 ---
-import Layout from "@/layouts/LayoutUsers.astro";
 import { WelcomeCard } from "@/components/welcome/welcome";
+import Layout from "@/layouts/LayoutUsers.astro";
 
 const user = await Astro.locals.currentUser();
 if (!user) {
 	Astro.redirect("/noAccess");
 	throw new Error("Redirect"); // asegura el narrowing
 }
+---
 
-/*
 <Layout
 	title={`Bienvenido ${user.fullName}`}
 	description="Automatizar envíos de mensajes de WhatsApp para mejorar la comunicación con clientes."
 >
 	<main class="min-h-screen bg-background">
 		<div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-			<WelcomeCard nombre={user.fullName as string} client:visible />
+			<WelcomeCard client:visible />
 		</div>
 	</main>
 </Layout>
-*/
----
-
-

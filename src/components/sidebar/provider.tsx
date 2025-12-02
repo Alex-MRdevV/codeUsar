@@ -1,7 +1,6 @@
+import { HeaderApp } from "@/components/headers/definir";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { sidebarDataItems } from "@/utils/types/sidebar";
-import { Header } from "@/components/headerApp";
 
 interface Props {
 	children: React.ReactNode;
@@ -9,12 +8,10 @@ interface Props {
 
 export const SidebarLayout = ({ children }: Props) => {
 	return (
-		<SidebarProvider>
-			<AppSidebar
-				items={sidebarDataItems}
-			/>
+		<SidebarProvider >
+			<AppSidebar />
 			<SidebarInset>
-				<Header />
+				<HeaderApp />
 				<div className="flex flex-col flex-1">{children}</div>
 			</SidebarInset>
 		</SidebarProvider>

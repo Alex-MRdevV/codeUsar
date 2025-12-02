@@ -5,24 +5,29 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
-	SidebarRail
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuItem
 } from "@/components/ui/sidebar"
-import type { dataUserSidebar } from "@/utils/types/sidebar"
-import { $userStore } from '@clerk/astro/client'
+import { sidebarDataItems } from "@/utils/types/sidebar"
+const data = sidebarDataItems
 
-export function AppSidebar({ items }: dataUserSidebar) {
-	const user = $userStore.get()
-	if (!user) return null
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
-		<Sidebar collapsible="icon">
-			<AppHeader />
+		<Sidebar collapsible="offcanvas" {...props}>
+			<SidebarHeader>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<AppHeader />
+					</SidebarMenuItem>
+				</SidebarMenu>
+			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={items.items} />
+				<NavMain items={data.items} />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser />
 			</SidebarFooter>
-			<SidebarRail />
 		</Sidebar>
 	)
 }

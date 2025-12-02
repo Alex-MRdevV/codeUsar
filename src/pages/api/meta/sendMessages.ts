@@ -7,9 +7,9 @@ import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
-import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 
+// Utilidad para obtener el ID del día actual
 function getTodayId(): string {
 	const now = new Date();
 	const year = now.getFullYear();
@@ -18,6 +18,7 @@ function getTodayId(): string {
 	return `${year}-${month}-${day}`;
 }
 
+// Función para trackear mensajes enviados
 async function trackMessagesSent(
 	templateId: string | null = null,
 	messageCount: number = 1
@@ -39,10 +40,11 @@ async function trackMessagesSent(
 				templateId: templateId,
 			});
 		}
-	} catch (error) {
-		// Log del error pero no fallar la petición principal
-		console.error("Error al trackear mensajes en HistoryGeneral:", error);
-	}
+
+		console.log(
+			`📊 Historial actualizado: ${messageCount} mensaje(s) para ${todayId}`
+		);
+	} catch (error) {}
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -91,11 +93,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		if (result?.results.map((item) => item.status === "error")) {
+		// Verificar si hubo errores en los resultados
+		const hasErrors = result?.results.some((item) => item.status === "error");
+
+		if (hasErrors && result?.results.every((item) => item.status === "error")) {
+			// Todos los mensajes fallaron
 			return res(
 				{
 					message: "Error al enviar mensajes",
-					error: "Algo ha fallado al enviar el mensaje",
+					error: "Todos los mensajes fallaron al enviarse",
 				},
 				{ status: 400 }
 			);
@@ -113,8 +119,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		return res(
 			{
-				message: "Mensajes enviados exitosamente",
-				data: result,
+				message: hasErrors
+					? "Algunos mensajes se enviaron con errores"
+					: "Mensajes enviados exitosamente",
+				data: {
+					...result,
+					summary: {
+						total: result?.results.length || 0,
+						successful: successfulMessages,
+						failed: (result?.results.length || 0) - successfulMessages,
+					},
+				},
 			},
 			{ status: 200 }
 		);

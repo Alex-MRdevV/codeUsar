@@ -2,8 +2,8 @@ import {
 	History,
 	LayoutDashboard,
 	MessageCircle,
-	MessageSquareReply,
 	Send,
+	Upload,
 	type LucideIcon,
 } from "lucide-react";
 
@@ -27,12 +27,8 @@ export const appConfig = {
 export const sidebarDataItems: PropsNavMain = {
 	items: [
 		{ title: "Panel de control", url: "/users/index", icon: LayoutDashboard },
+		{ title: "Cargar de archivos", url: "/users/upload", icon: Upload },
 		{ title: "Historial general", url: "/users/history", icon: History },
-		{
-			title: "Responder mensajes",
-			url: "/users/reply",
-			icon: MessageSquareReply,
-		},
 		{ title: "Enviar mensajes", url: "/users/send", icon: Send },
 	],
 };

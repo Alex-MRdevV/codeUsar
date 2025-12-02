@@ -6,20 +6,23 @@ import { VariableEditor } from "@/components/messages/editor/variablesEditor";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { Button } from "@/components/ui/button";
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
-import { useDataMessages } from "@/hooks/use-sendMessages";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
-import { use, useState } from "react";
+import { useState } from "react";
 import { ProgressComponent } from "../progress";
 import { Header } from "./header";
+import { messagesDataStore } from "@/stores/dataStores";
+import { useStore } from "@nanostores/react";
 
 interface Props {
 	templates: Template[];
 }
 
 export const SendMessages = ({ templates: initialTemplates }: Props) => {
-	const data = use(useDataMessages());
+	// 🔥 Obtener datos desde nanostores
+	const { dataConsolidado, dataBavariaNow } = useStore(messagesDataStore);
+
 	const [selectedTemplate, setSelectedTemplate] = useState("");
 	const [templates, setTemplates] = useState(initialTemplates);
 	const [recipients, setRecipients] = useState<string[]>([]);
@@ -65,14 +68,12 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		setVariableValues({});
 	};
 
-	// 🔥 Extrae teléfonos y datos según la plantilla seleccionada
+	// 🔥 Extrae teléfonos y datos según la plantilla seleccionada usando NANOSTORE
 	const buildRecipients = () => {
-		const { dataConsolidado } = data;
 		if (!dataConsolidado) return [];
 
-		// Ejemplo simple: enviar a TODOS los clientes enRuta
-		const enRuta = dataConsolidado.byStatus.enRuta.map(c => c.phoneNumber);
-		return enRuta;
+		// Ejemplo: enviar solo a clientes enRuta
+		return dataConsolidado.byStatus.enRuta.map(c => c.phoneNumber);
 	};
 
 	// 🔥 Construye el payload compatible con tu API
@@ -81,27 +82,20 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			throw new Error("No template selected");
 		}
 
-		// normalizar formato de parámetros (soportamos ambas fuentes)
-		const paramFormatRaw = currentTemplate?.variables?.format ?? currentTemplate?.variables?.format;
+		const paramFormatRaw = currentTemplate?.variables?.format;
 		const isPositional =
-			(typeof paramFormatRaw === "string" && paramFormatRaw.toUpperCase() === "POSITIONAL")
-			|| paramFormatRaw === "positional";
+			(typeof paramFormatRaw === "string" && paramFormatRaw.toUpperCase() === "POSITIONAL") ||
+			paramFormatRaw === "positional";
 
 		return {
 			templateId: currentTemplate.id,
-			recipients: [recipient], // cada batch envía a 1 o más
+			recipients: [recipient],
 			messageType: "template",
 			templateName: currentTemplate.name,
 			templateLanguage: currentTemplate.language || "es",
-
 			parameterFormat: isPositional ? "positional" : "named",
 
-			// 🔥 Si es POSICIONAL → convertir variableValues a array ordenado
-			templateParamsPositional: isPositional
-				? Object.values(variableValues)
-				: undefined,
-
-			// 🔥 Si es NAMED → pasarlos tal cual
+			templateParamsPositional: isPositional ? Object.values(variableValues) : undefined,
 			templateParams: !isPositional ? variableValues : undefined,
 		};
 	};
@@ -129,10 +123,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		setIsSubmitting(false);
 	};
 
-	// 🔥 Botón principal del UI
 	const handleSendMessage = async () => {
 		if (!currentTemplate) return;
-
 		await handleSendMessages();
 	};
 
@@ -153,14 +145,26 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	};
 
 	return (
-		<article className="p-8">
+		<article className="p-4 sm:p-6 lg:p-8 w-full max-w-[1800px] mx-auto">
 			<Header setShowCreateModal={setShowCreateModal} />
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				<div className="lg:col-span-2 space-y-6">
+			{/* GRID RESPONSIVE */}
+			<div
+				className="
+			grid 
+			grid-cols-1 
+			md:grid-cols-2 
+			lg:grid-cols-3 
+			gap-6
+			w-full
+		"
+			>
+				{/* COLUMNA PRINCIPAL */}
+				<div className="col-span-1 md:col-span-2 space-y-6">
 					{resultados ? (
 						<div className="space-y-4">
 							<ResultsCard resultados={resultados} onClose={handleNewSend} />
+
 							<Button
 								onClick={handleNewSend}
 								className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold"
@@ -179,13 +183,12 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 							{hasVars && (
 								<div className="bg-card border border-border rounded-lg p-6">
 									<VariableEditor
-										variables={vars!} // TS sabe que aquí vars no es undefined
+										variables={vars!}
 										values={variableValues}
 										onChange={setVariableValues}
 									/>
 								</div>
 							)}
-
 
 							<ButtonEnvio
 								canSend={canSend}
@@ -207,7 +210,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 					)}
 				</div>
 
-				<div className="lg:col-span-2 space-y-6">
+				{/* COLUMNA LATERAL (PREVIEW / PROGRESO) */}
+				<div className="col-span-1 space-y-6">
 					{(isProcessing || isPaused || completed || error || isCancelled) && (
 						<ProgressComponent
 							error={error}
@@ -235,14 +239,16 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 						/>
 					)}
 				</div>
-
-				{showCreateModal && (
-					<CreateTemplateModal
-						onClose={() => setShowCreateModal(false)}
-						onSuccess={handleCreateTemplate}
-					/>
-				)}
 			</div>
+
+			{/* MODAL */}
+			{showCreateModal && (
+				<CreateTemplateModal
+					onClose={() => setShowCreateModal(false)}
+					onSuccess={handleCreateTemplate}
+				/>
+			)}
 		</article>
-	);
+
+	)
 };

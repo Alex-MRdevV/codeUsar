@@ -1,7 +1,6 @@
 import { createTemplate } from "@/lib/drizzle/templates";
-import { crearPlantillaIndividual } from "@/lib/providersMensajes/apiMeta/addTemplate";
 import { res } from "@/utils/responseAstro";
-import type { CreateTemplateRequest, Template } from "@/utils/types/templates";
+import type { CreateTemplateRequest } from "@/utils/types/templates";
 import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 
@@ -77,36 +76,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	try {
 		const templateId = uuid.uuid;
 
-		// Construir objeto Template para enviar a Meta
-		const templateForMeta: Template = {
-			id: templateId,
-			name: jsonData.name,
-			metaTemplateName: jsonData.metaTemplateName,
-			language: jsonData.language,
-			structure: jsonData.structure,
-			variables: jsonData.variables,
-		};
-
-		// Crear plantilla en Meta
-		const metaResult = await crearPlantillaIndividual(
-			templateForMeta,
-			ACCESS_TOKEN,
-			WABA_ID
-		);
-
-		if (metaResult.status === "error") {
-			return res(
-				{
-					message: "Error al crear plantilla en Meta",
-					error: metaResult.errorMessage,
-					errorCode: metaResult.errorCode,
-				},
-				{
-					status: 400,
-				}
-			);
-		}
-
 		// Extraer información de la estructura para los campos individuales
 		const { header, body, footer, buttons } = jsonData.structure;
 
@@ -138,13 +107,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			}));
 		}
 
-		// Insertar en la base de datos con la nueva estructura
+		// Insertar en la base de datos
 		await createTemplate.execute({
 			id: templateId,
 			name: jsonData.name,
 			icon: jsonData.icon,
 			color: jsonData.color || "#000000",
-			metaStatus: "PENDING",
 			headerType: headerType,
 			headerText: headerText || null,
 			bodyText: body.text,
@@ -156,13 +124,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		return res(
 			{
-				message:
-					"Plantilla creada exitosamente. Pendiente de aprobación por Meta.",
+				message: "Plantilla creada exitosamente en la base de datos.",
 				data: {
 					id: templateId,
 					name: jsonData.name,
-					metaTemplateId: metaResult.templateId,
-					status: "PENDING",
+					status: "APPROVED",
 				},
 			},
 			{

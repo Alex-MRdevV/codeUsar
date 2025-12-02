@@ -8,9 +8,8 @@ export const TemplateStatsCard = ({
 	name,
 	icon,
 	color,
-	messagesSent,
-	usageCount,
-	status
+	status,
+	messagesSent
 }: TemplateStatsCardProps) => {
 	// Get icon component dynamically
 	const IconComponent = (Icons[icon as keyof typeof Icons] as LucideIcon) || Icons.FileText;
@@ -52,10 +51,6 @@ export const TemplateStatsCard = ({
 							<div>
 								<p className="text-xs text-muted-foreground mb-1">Mensajes enviados</p>
 								<p className="text-2xl font-display font-bold">{messagesSent.toLocaleString()}</p>
-							</div>
-							<div>
-								<p className="text-xs text-muted-foreground mb-1">Veces usado</p>
-								<p className="text-2xl font-display font-bold">{usageCount}</p>
 							</div>
 						</div>
 					</div>

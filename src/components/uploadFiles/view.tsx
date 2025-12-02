@@ -26,13 +26,12 @@ export const ViewUploadsFiles = () => {
 
 		try {
 			let hasError = false;
-			let dataConsolidado
-			let dataBavaria
+			let dataConsolidado;
+			let dataBavaria;
 
 			// === 1. Procesar archivo consolidado ===
 			if (file1) {
 				const [errorConsolidado, parsedConsolidado] = await UploadConsolidadoRequest(file1);
-
 				if (errorConsolidado) {
 					toast.error(`Error en archivo consolidado: ${errorConsolidado.message}`);
 					hasError = true;
@@ -45,7 +44,6 @@ export const ViewUploadsFiles = () => {
 			// === 2. Procesar archivo Bavaria ===
 			if (file2) {
 				const [errorBavaria, parsedBavaria] = await UploadBavariaNowRequest(file2);
-
 				if (errorBavaria) {
 					toast.error(`Error en archivo Bavaria: ${errorBavaria.message}`);
 					hasError = true;
@@ -92,79 +90,79 @@ export const ViewUploadsFiles = () => {
 			toast.error("Error inesperado al procesar los archivos");
 			setIsLoading(false);
 		}
+	}; // ← FALTABA ESTE CIERRE
 
-		const handleReset = () => {
-			setFile1(null);
-			setFile2(null);
-			toast.info("Formulario reiniciado");
-		};
-
-		return (
-			<div className="min-h-screen bg-background py-12 px-4">
-				<div className="max-w-3xl mx-auto">
-					<div className="text-center mb-8">
-						<div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4">
-							<FileSpreadsheet className="w-8 h-8 text-primary" />
-						</div>
-						<h1 className="text-4xl font-bold text-foreground mb-2">
-							Carga de Archivos Excel
-						</h1>
-						<p className="text-muted-foreground">
-							Sube uno o ambos archivos Excel para procesarlos
-						</p>
-					</div>
-
-					<Card className="shadow-lg">
-						<CardHeader>
-							<CardTitle>Formulario de Carga</CardTitle>
-							<CardDescription>
-								Selecciona o arrastra al menos un archivo Excel. Puedes subir ambos o solo uno.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<form onSubmit={handleSubmit} className="space-y-6">
-								<FileUploadZone
-									label="Archivo Consolidado (Opcional)"
-									file={file1}
-									onFileChange={setFile1}
-								/>
-
-								<FileUploadZone
-									label="Archivo Bavaria Now (Opcional)"
-									file={file2}
-									onFileChange={setFile2}
-								/>
-
-								<div className="flex gap-3 pt-4">
-									<Button
-										type="submit"
-										className="flex-1"
-										disabled={(!file1 && !file2) || isLoading}
-									>
-										{isLoading ? (
-											<>
-												<span className="animate-spin mr-2">⏳</span>
-												Procesando...
-											</>
-										) : (
-											'Procesar Archivos'
-										)}
-									</Button>
-
-									<Button
-										type="button"
-										variant="outline"
-										onClick={handleReset}
-										disabled={isLoading}
-									>
-										Reiniciar
-									</Button>
-								</div>
-							</form>
-						</CardContent>
-					</Card>
-				</div>
-			</div>
-		);
+	const handleReset = () => {
+		setFile1(null);
+		setFile2(null);
+		toast.info("Formulario reiniciado");
 	};
-}
+
+	return (
+		<div className="min-h-screen bg-background py-12 px-4">
+			<div className="max-w-3xl mx-auto">
+				<div className="text-center mb-8">
+					<div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4">
+						<FileSpreadsheet className="w-8 h-8 text-primary" />
+					</div>
+					<h1 className="text-4xl font-bold text-foreground mb-2">
+						Carga de Archivos Excel
+					</h1>
+					<p className="text-muted-foreground">
+						Sube uno o ambos archivos Excel para procesarlos
+					</p>
+				</div>
+
+				<Card className="shadow-lg">
+					<CardHeader>
+						<CardTitle>Formulario de Carga</CardTitle>
+						<CardDescription>
+							Selecciona o arrastra al menos un archivo Excel. Puedes subir ambos o solo uno.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<form onSubmit={handleSubmit} className="space-y-6">
+							<FileUploadZone
+								label="Archivo Consolidado (Opcional)"
+								file={file1}
+								onFileChange={setFile1}
+							/>
+
+							<FileUploadZone
+								label="Archivo Bavaria Now (Opcional)"
+								file={file2}
+								onFileChange={setFile2}
+							/>
+
+							<div className="flex gap-3 pt-4">
+								<Button
+									type="submit"
+									className="flex-1"
+									disabled={(!file1 && !file2) || isLoading}
+								>
+									{isLoading ? (
+										<>
+											<span className="animate-spin mr-2">⏳</span>
+											Procesando...
+										</>
+									) : (
+										'Procesar Archivos'
+									)}
+								</Button>
+
+								<Button
+									type="button"
+									variant="outline"
+									onClick={handleReset}
+									disabled={isLoading}
+								>
+									Reiniciar
+								</Button>
+							</div>
+						</form>
+					</CardContent>
+				</Card>
+			</div>
+		</div>
+	);
+};

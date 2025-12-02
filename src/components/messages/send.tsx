@@ -185,36 +185,57 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		setResultados(null);
 
 		try {
+			let successCount = 0;
+			let errorCount = 0;
+
 			await sendInBatches(
 				recipientsList,
 				async (batch) => {
 					for (const phone of batch) {
-						const payload = buildPayload(phone);
-						await sendWhatsAppMessage(payload);
+						try {
+							const payload = buildPayload(phone);
+							await sendWhatsAppMessage(payload);
+							successCount++;
+						} catch (err) {
+							console.error(`Error enviando a ${phone}:`, err);
+							errorCount++;
+						}
 					}
 					// pequeño delay entre batches
 					await new Promise((r) => setTimeout(r, 500));
 				},
-				1000 // intervalo entre batches (ajusta si quieres)
+				1000 // intervalo entre batches
 			);
 
-			// Resultado exitoso
-			const enviados = recipientsList.length;
-			setResultados({ ok: true, enviados });
-			toast.success(`Mensajes enviados: ${enviados}`);
+			// Manejar resultados según el estado
+			if (isCancelled) {
+				setResultados({ ok: false, error: "Envío cancelado por el usuario" });
+				toast.warning(`Envío cancelado. Enviados: ${successCount}, Fallidos: ${errorCount}`);
+			} else if (errorCount > 0 && successCount > 0) {
+				setResultados({ ok: true, enviados: successCount, fallidos: errorCount });
+				toast.warning(`Envío parcial: ${successCount} exitosos, ${errorCount} fallidos`);
+			} else if (errorCount > 0) {
+				setResultados({ ok: false, error: `Todos los envíos fallaron (${errorCount})` });
+				toast.error(`Error: No se pudo enviar ningún mensaje`);
+			} else {
+				setResultados({ ok: true, enviados: successCount });
+				toast.success(`✓ ${successCount} mensajes enviados exitosamente`);
+			}
 
-			setDataConsolidado(null);
-			setDataBavariaNow(null);
-
-			setRecipients([]);
-			setSelectedTemplate("");
-			setVariableValues({});
-			reset();
+			// Limpiar solo si fue exitoso completamente
+			if (errorCount === 0 && !isCancelled) {
+				setDataConsolidado(null);
+				setDataBavariaNow(null);
+				setRecipients([]);
+				setSelectedTemplate("");
+				setVariableValues({});
+				reset();
+			}
 
 		} catch (err: any) {
-			console.error("Error enviando mensajes", err);
+			console.error("Error crítico enviando mensajes", err);
 			setResultados({ ok: false, error: err?.message || String(err) });
-			toast.error("Error al enviar algunos mensajes");
+			toast.error("Error crítico en el envío de mensajes");
 		} finally {
 			setIsSubmitting(false);
 		}

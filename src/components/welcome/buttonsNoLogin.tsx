@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button"
 
 export default function CustomSignInButton() {
 	return (
-		<SignInButton mode="modal">
+		<SignInButton mode="modal"
+			forceRedirectUrl={"/users/index"}
+			fallbackRedirectUrl={"/users/index"}
+		>
 			<section className="flex gap-3 pt-4">
 				<Button>Empezar a usar</Button>
 			</section>

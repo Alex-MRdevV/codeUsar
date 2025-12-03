@@ -4,26 +4,28 @@ import {
 } from "@/lib/schemas/files/bavariaNow";
 import { safeParse } from "valibot";
 
-export const validateAndFilterData = (rows: unknown[]) => {
-	const processedRows = rows.map((rawRow, index) => {
+export const validateAndFilterData = (rows: any[]) => {
+	const processedRows = rows.map((row, index) => {
 		const rowNumber = index + 2;
 
+		// Ya no hay validación: solo verificamos si hay datos mínimos
 		try {
-			const normalizedRow = rawRow as Record<string, unknown>;
-			const result = safeParse(uploadDataBavariaNow, normalizedRow);
+			const requiredFields = ["Cliente", "No ped Cliente"];
 
-			if (!result.success) {
-				const errors = result.issues.map((issue) => {
-					const path = issue.path?.map((p) => p.key).join(".") || "Campo";
-					return `${path}: ${issue.message}`;
-				});
-				return { valid: false, rowNumber, errors } as const;
+			const missing = requiredFields.filter((f) => !row[f] || row[f] === "");
+
+			if (missing.length > 0) {
+				return {
+					valid: false,
+					rowNumber,
+					errors: missing.map((f) => `Falta el campo ${f}`),
+				} as const;
 			}
 
 			return {
 				valid: true,
 				rowNumber,
-				data: result.output,
+				data: row,
 			} as const;
 		} catch (error) {
 			return {
@@ -34,15 +36,9 @@ export const validateAndFilterData = (rows: unknown[]) => {
 		}
 	});
 
-	// Separar filas válidas e inválidas
+	// Filtrar válidas e inválidas
 	const validRows = processedRows.filter(
-		(
-			row
-		): row is {
-			valid: true;
-			rowNumber: number;
-			data: dataConsolidadaBavariaNow;
-		} => row.valid
+		(row): row is { valid: true; rowNumber: number; data: any } => row.valid
 	);
 	const invalidRows = processedRows
 		.filter((row) => !row.valid)
@@ -51,23 +47,38 @@ export const validateAndFilterData = (rows: unknown[]) => {
 			errors: row.errors,
 		}));
 
-	// Agrupar por cliente y número de pedido
+	// --- AGRUPACIÓN ---
 	const groupedOrders = validRows.reduce(
 		(acc, row) => {
-			const {
-				Cliente,
-				"No ped Cliente": numeroPedido,
-				...orderData
-			} = row.data;
+			const data = row.data;
 
-			const clientKey = Cliente;
-			const orderKey = numeroPedido;
+			const clientKey = data.Cliente;
+			const orderKey = data["No ped Cliente"];
 
-			// Agregar material al pedido
+			if (!acc[clientKey]) {
+				acc[clientKey] = {
+					clienteInfo: {
+						id: clientKey,
+						nombre: data["Nombre establecimiento"] ?? "",
+						cashless: data.Cashless === "SI" ? "SI" : "NO",
+					},
+					pedidos: {},
+				};
+			}
+
+			if (!acc[clientKey].pedidos[orderKey]) {
+				acc[clientKey].pedidos[orderKey] = {
+					numeroPedido: orderKey,
+					fechaPreferente: data["Fecha pref"] ?? "",
+					referenciaProducto: [],
+				};
+			}
+
+			// Añadir material
 			acc[clientKey].pedidos[orderKey].referenciaProducto.push({
-				material: orderData.Material,
-				codRechazo: orderData["Cod Rechazo"],
-				cajas: orderData.Cajas,
+				material: data.Material,
+				codRechazo: data["Cod Rechazo"],
+				cajas: Number(data.Cajas ?? 0),
 			});
 
 			return acc;
@@ -96,17 +107,17 @@ export const validateAndFilterData = (rows: unknown[]) => {
 		>
 	);
 
-	// Calcular resumen
+	// Resumen
 	const clientesCount = Object.keys(groupedOrders).length;
 	const pedidosCount = Object.values(groupedOrders).reduce(
-		(total, cliente) => total + Object.keys(cliente.pedidos).length,
+		(t, c) => t + Object.keys(c.pedidos).length,
 		0
 	);
 	const materialesCount = Object.values(groupedOrders).reduce(
-		(total, cliente) =>
-			total +
-			Object.values(cliente.pedidos).reduce(
-				(subTotal, pedido) => subTotal + pedido.referenciaProducto.length,
+		(t, c) =>
+			t +
+			Object.values(c.pedidos).reduce(
+				(sub, p) => sub + p.referenciaProducto.length,
 				0
 			),
 		0

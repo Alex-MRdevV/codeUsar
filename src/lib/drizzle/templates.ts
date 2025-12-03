@@ -2,6 +2,7 @@ import { db } from "@/db/db";
 import { Templates } from "@/db/schemaTransitional/templates";
 import { eq, sql } from "drizzle-orm";
 import { buildUpdateSet } from "@/utils/utilities";
+import { HistoryGeneral } from "@/db/schemaTransitional/history";
 
 export const createTemplate = db
 	.insert(Templates)
@@ -37,16 +38,19 @@ export const getTemplates = db
 	.where(eq(Templates.metaStatus, "APPROVED"))
 	.prepare();
 
-export const getTemplatesForHistory = db
+export const getTemplatesForMetrics = db
 	.select({
 		id: Templates.id,
 		name: Templates.name,
 		icon: Templates.icon,
 		color: Templates.color,
-		count: Templates.usageCount,
+		status: Templates.metaStatus,
+		messagesSent: sql<number>`COALESCE(SUM(${HistoryGeneral.messagesSend}), 0)`,
 	})
 	.from(Templates)
+	.leftJoin(HistoryGeneral, eq(HistoryGeneral.templateId, Templates.id))
 	.where(eq(Templates.metaStatus, "APPROVED"))
+	.groupBy(Templates.id)
 	.prepare();
 
 export const updateTemplate = (

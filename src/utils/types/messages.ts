@@ -22,6 +22,16 @@ export type PersistedBavariaNow = {
 };
 
 export interface dataUsarMessages {
+	dataMessage: dataUsar[];
 	dataConsolidado: PersistedConsolidado;
-	dataBavariaNow?: PersistedBavariaNow;
+}
+
+export interface dataUsar {
+	name: string;
+	phone: string;
+	typeMessage:
+		| "pedidos_no_planeados"
+		| "pedidos_retrasados"
+		| "confirmar_pedido"
+		| "confirmacion_de_pedido";
 }

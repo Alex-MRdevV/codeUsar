@@ -4,7 +4,7 @@ export interface TrendChartProps {
 	data: Array<{ date: string; messages: number }>;
 }
 
-interface DayData {
+export interface DayData {
 	date: string;
 	count: number;
 }

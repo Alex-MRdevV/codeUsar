@@ -2,9 +2,13 @@ import { getTemplatesForMetrics } from "@/utils/services/templates/allDataForMet
 import type { TemplateForMetrics } from "@/utils/types/templates";
 import { useEffect, useState } from "react";
 import { MetricCardSection } from "./sections/metricCards";
+import { CalendarHeatmap } from "./calendarHeatmap";
+import { getDataForDays } from "@/utils/services/templates/allDataByDate";
+import type { CalendarHeatmapProps, DayData, } from "@/utils/types/historyGeneral";
 
 export const ViewHistoryGeneral = () => {
 	const [data, setData] = useState<TemplateForMetrics[] | null>(null);
+	const [dataDays, setDataDays] = useState<DayData[] | null>(null);
 	const [error, setError] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -16,6 +20,12 @@ export const ViewHistoryGeneral = () => {
 			else setData(templates);
 		});
 
+		getDataForDays().then(([err, templates]) => {
+			if (!mounted) return;
+			if (err) setError(true);
+			else setDataDays(templates);
+		});
+
 		return () => {
 			mounted = false; // evita actualizaciones dobles
 		};
@@ -23,6 +33,7 @@ export const ViewHistoryGeneral = () => {
 
 	if (error) return <p>Error</p>;
 	if (!data) return <p>Cargando...</p>;
+	if (!dataDays) return <p>Cargando...</p>;
 
 	const totalMessages = data.reduce(
 		(total: number, template: { messagesSent: number }) => total + template.messagesSent,
@@ -34,6 +45,9 @@ export const ViewHistoryGeneral = () => {
 			<MetricCardSection
 				templatesData={data}
 				totalMessages={totalMessages}
+			/>
+			<CalendarHeatmap
+				data={dataDays}
 			/>
 		</section>
 	)

@@ -2,9 +2,16 @@ import { db } from "@/db/db";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
 import { eq, desc, and, gte, lte, isNull, isNotNull, sql } from "drizzle-orm";
 
-// ============================================
-// CREAR (CREATE)
-// ============================================
+// Consulta para obtener los datos agrupados por fecha
+export const getCalendarData = await db
+	.select({
+		date: sql<string>`date(${HistoryGeneral.date})`.as("date"),
+		count: sql<number>`sum(${HistoryGeneral.messagesSend})`.as("count"),
+	})
+	.from(HistoryGeneral)
+	.groupBy(sql`date(${HistoryGeneral.date})`)
+	.orderBy(sql`date(${HistoryGeneral.date})`)
+	.prepare();
 
 export async function createHistory(data: {
 	id: string;
@@ -72,17 +79,6 @@ export async function getHistoryByTemplate(templateId: string) {
 		.select()
 		.from(HistoryGeneral)
 		.where(eq(HistoryGeneral.templateId, templateId))
-		.orderBy(desc(HistoryGeneral.date));
-}
-
-/**
- * Obtener registros sin template asignado
- */
-export async function getHistoryWithoutTemplate() {
-	return await db
-		.select()
-		.from(HistoryGeneral)
-		.where(isNull(HistoryGeneral.templateId))
 		.orderBy(desc(HistoryGeneral.date));
 }
 

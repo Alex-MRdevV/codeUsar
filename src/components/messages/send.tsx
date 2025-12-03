@@ -7,7 +7,7 @@ import { ResultsCard } from "@/components/messages/resultsCard";
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import { allDataTransitoria } from "@/utils/services/dataTransitoria/allData";
-import type { PersistedBavariaNow, PersistedConsolidado } from "@/utils/types/messages";
+import type { dataUsar, PersistedConsolidado } from "@/utils/types/messages";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
 import { useEffect, useMemo, useState } from "react";
@@ -15,17 +15,15 @@ import { toast } from "sonner";
 import { ProgressComponent } from "../progress";
 import { Header } from "./header";
 
-
 interface Props {
 	templates: Template[];
 }
 
 export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	const [dataConsolidado, setDataConsolidado] = useState<PersistedConsolidado | null>(null);
-	const [dataBavariaNow, setDataBavariaNow] = useState<PersistedBavariaNow | null>(null);
+	const [dataMensajes, setDataMensajes] = useState<dataUsar[] | null>(null);
 	const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 	const [templates, setTemplates] = useState<Template[]>(initialTemplates);
-	const [recipients, setRecipients] = useState<string[]>([]);
 	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [resultados, setResultados] = useState<any | null>(null);
@@ -36,7 +34,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			try {
 				const res = await allDataTransitoria();
 				setDataConsolidado(res.dataConsolidado);
-				setDataBavariaNow(res.dataBavariaNow ?? null);
+				// Asume que dataMensajes viene en la respuesta
+				setDataMensajes(res.dataMessage ?? null);
 			} catch (err) {
 				console.error("Error cargando data transitoria", err);
 				toast.error("No se pudo cargar la data transitoria");
@@ -85,21 +84,25 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		}
 	};
 
-	// Construye recipients desde dataConsolidado y plantilla seleccionada
-	const buildRecipients = (): string[] => {
-		if (!dataConsolidado || !currentTemplate) return [];
-		const status = getTargetStatusForTemplate(currentTemplate.metaTemplateName || "");
-		const list = dataConsolidado.byStatus?.[status] ?? [];
-		return list.map((c) => c.phoneNumber).filter(Boolean);
+	// ❗ NUEVO: recipients memoizado basado en dataMensajes y template seleccionado
+	const recipients = useMemo(() => {
+		if (!dataMensajes || !currentTemplate) return [];
+
+		const templateName = currentTemplate.metaTemplateName || "";
+
+		// Filtrar mensajes por tipo que coincida con la plantilla
+		const filtered = dataMensajes.filter((msg) => msg.typeMessage === templateName);
+
+		return filtered.map((msg) => msg.phone).filter(Boolean);
+	}, [dataMensajes, currentTemplate]);
+
+	// Buscar datos del mensaje por teléfono
+	const getMessageData = (phoneNumber: string) => {
+		if (!dataMensajes) return null;
+		return dataMensajes.find((msg) => msg.phone === phoneNumber) ?? null;
 	};
 
-	// Actualiza recipients cuando cambia plantilla o la data
-	useEffect(() => {
-		const list = buildRecipients();
-		setRecipients(list);
-	}, [dataConsolidado, currentTemplate]);
-
-	// Buscar cliente reducido por teléfono
+	// Buscar cliente reducido por teléfono (mantener para datos adicionales si es necesario)
 	const getClientData = (phoneNumber: string) => {
 		if (!dataConsolidado) return null;
 		const all = [
@@ -110,31 +113,25 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		return all.find((c) => c.phoneNumber === phoneNumber) ?? null;
 	};
 
-	// Obtener bavaria reducido por clienteId
-	const getBavariaNowData = (clienteId?: string) => {
-		if (!clienteId || !dataBavariaNow?.groupedOrders) return null;
-		return dataBavariaNow.groupedOrders[clienteId] ?? null;
-	};
-
-	// Construye variables automáticas según plantilla y cliente
+	// Construye variables automáticas según plantilla y datos del mensaje
 	const buildTemplateVariables = (phoneNumber: string): Record<string, string> => {
-		const clientData = getClientData(phoneNumber);
-		if (!clientData) return {};
+		const messageData = getMessageData(phoneNumber);
+		if (!messageData) return {};
 
-		const bavariaData = getBavariaNowData(clientData.clienteId);
-		const nombreCliente =
-			bavariaData?.clienteInfo?.nombre || clientData.nameEstablecimiento || "Cliente";
+		const nombreCliente = messageData.name || "Cliente";
 
-		switch (currentTemplate?.metaTemplateName) {
+		switch (messageData.typeMessage) {
 			case "pedidos_no_planeados":
 			case "pedidos_retrasados":
 			case "confirmar_pedido":
 				return { "1": nombreCliente };
 
 			case "confirmacion_de_pedido":
+				// Para este tipo, buscar datos adicionales del cliente si existen
+				const clientData = getClientData(phoneNumber);
 				return {
-					"1": clientData.horaInicial ?? "6:00 am",
-					"2": clientData.horaFinal ?? "6:30 am"
+					"1": clientData?.horaInicial ?? "6:00 am",
+					"2": clientData?.horaFinal ?? "6:30 am"
 				};
 
 			default:
@@ -152,9 +149,11 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			paramFormatRaw === "positional";
 
 		const finalVariableValues =
-			Object.keys(variableValues ?? {}).length > 0 ? variableValues : buildTemplateVariables(recipient);
+			Object.keys(variableValues ?? {}).length > 0
+				? variableValues
+				: buildTemplateVariables(recipient);
 
-		const payload: SendMessageRequest = {
+		return {
 			templateId: currentTemplate.id,
 			recipients: [recipient],
 			messageType: "template",
@@ -164,8 +163,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			templateParamsPositional: isPositional ? Object.values(finalVariableValues) : undefined,
 			templateParams: !isPositional ? finalVariableValues : undefined
 		};
-
-		return payload;
 	};
 
 	// Envío en batches
@@ -175,7 +172,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			return;
 		}
 
-		const recipientsList = buildRecipients();
+		const recipientsList = recipients;
 		if (recipientsList.length === 0) {
 			toast.error("No hay destinatarios para esta plantilla");
 			return;
@@ -201,13 +198,11 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 							errorCount++;
 						}
 					}
-					// pequeño delay entre batches
 					await new Promise((r) => setTimeout(r, 500));
 				},
-				1000 // intervalo entre batches
+				1000
 			);
 
-			// Manejar resultados según el estado
 			if (isCancelled) {
 				setResultados({ ok: false, error: "Envío cancelado por el usuario" });
 				toast.warning(`Envío cancelado. Enviados: ${successCount}, Fallidos: ${errorCount}`);
@@ -222,11 +217,9 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 				toast.success(`✓ ${successCount} mensajes enviados exitosamente`);
 			}
 
-			// Limpiar solo si fue exitoso completamente
 			if (errorCount === 0 && !isCancelled) {
 				setDataConsolidado(null);
-				setDataBavariaNow(null);
-				setRecipients([]);
+				setDataMensajes(null);
 				setSelectedTemplate("");
 				setVariableValues({});
 				reset();
@@ -258,8 +251,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	const handleNewSend = () => {
 		resetResultados();
 		setDataConsolidado(null);
-		setDataBavariaNow(null);
-		setRecipients([]);
+		setDataMensajes(null);
 		setSelectedTemplate("");
 		setVariableValues({});
 		reset();
@@ -272,12 +264,10 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	const canSend = (): boolean => {
 		if (!selectedTemplate || isSubmitting) return false;
-		if (!dataConsolidado) return false;
+		if (!dataMensajes) return false;
 
-		const targetRecipients = buildRecipients();
-		if (targetRecipients.length === 0) return false;
+		if (recipients.length === 0) return false;
 
-		// Si hay variables manuales, validarlas
 		if (currentTemplate?.variables && Object.keys(variableValues).length > 0) {
 			return currentTemplate.variables.params.every(
 				(param: any) => (variableValues[param.name] ?? "").trim().length > 0
@@ -287,24 +277,13 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		return true;
 	};
 
-	const getRecipientCount = () => {
-		if (!currentTemplate || !dataConsolidado) return 0;
-		const status = getTargetStatusForTemplate(currentTemplate.metaTemplateName || "");
-		return (dataConsolidado.byStatus?.[status] ?? []).length;
-	};
+	const getRecipientCount = () => recipients.length;
 
 	return (
 		<article className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 w-full max-w-[1800px] mx-auto">
 			<Header setShowCreateModal={setShowCreateModal} />
 
-			<div
-				className="
-        grid
-        grid-cols-1
-        md:grid-cols-3
-        gap-4
-      "
-			>
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div className="col-span-1 md:col-span-2 space-y-4">
 					{resultados ? (
 						<div className="space-y-4">
@@ -365,7 +344,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 									<p className="text-xs text-yellow-600">
 										{!dataConsolidado
 											? "⚠️ No hay datos cargados. Carga un archivo primero."
-											: getRecipientCount() === 0
+											: recipients.length === 0
 												? "⚠️ No hay clientes en el estado correspondiente para esta plantilla."
 												: "⚠️ Completa todas las variables requeridas antes de enviar"}
 									</p>
@@ -422,3 +401,4 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		</article>
 	);
 };
+

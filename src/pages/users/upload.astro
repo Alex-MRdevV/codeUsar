@@ -1,11 +1,11 @@
 ---
 import Layout from "@/layouts/LayoutUsers.astro";
-import { ViewUploadsFiles } from "@/components/uploadFiles/view";
+import { ViewUploadComplete } from "@/components/uploadFiles/viewComplete";
 ---
 
 <Layout
 	title="Upload de Archivos"
 	description="Sube y procesa archivos de Excel para consolidado y Bavaria Now"
 >
-	<ViewUploadsFiles client:visible />
+	<ViewUploadComplete client:visible />
 </Layout>

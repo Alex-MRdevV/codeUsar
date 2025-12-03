@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import {
-	bavaria_clients,
+	clientsMensajes,
 	consolidated_clients,
 } from "@/db/schemaTransitional/dataUsar";
 
@@ -19,13 +19,20 @@ export async function getAllConsolidatedClients() {
 	return await db.select().from(consolidated_clients);
 }
 
-export async function addBavariaClient(data: {
-	clienteId: string;
-	nombre?: string | null;
+export async function addClientMensajes(data: {
+	nombre: string;
+	phoneNumber: string;
+	tipoMensaje: string;
 }) {
-	return await db.insert(bavaria_clients).values(data).returning();
+	return await db.insert(clientsMensajes).values(data).returning();
 }
 
-export async function getAllBavariaClients() {
-	return await db.select().from(bavaria_clients);
+export async function allClientMensajes() {
+	return await db
+		.select({
+			nombre: clientsMensajes.nombre,
+			phoneNumber: clientsMensajes.phoneNumber,
+			mensaje: clientsMensajes.tipoMensaje,
+		})
+		.from(clientsMensajes);
 }

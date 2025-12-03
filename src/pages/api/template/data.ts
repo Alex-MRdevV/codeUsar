@@ -1,10 +1,9 @@
-import { getTemplates, getTemplatesForHistory } from "@/lib/drizzle/templates";
-import { res } from "@/utils/responseAstro";
+import { getTemplatesForMetrics } from "@/lib/drizzle/templates";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ locals }) => {
 	try {
-		const templates = await getTemplatesForHistory.execute();
+		const templates = await getTemplatesForMetrics.execute();
 
 		return new Response(JSON.stringify(templates), {
 			status: 200,

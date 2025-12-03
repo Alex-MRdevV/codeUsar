@@ -1,5 +1,6 @@
 import { addClientMensajes } from "@/lib/drizzle/data";
 import { res } from "@/utils/responseAstro";
+import { validateRow } from "@/utils/validateNumbers";
 import type { APIRoute } from "astro";
 import * as XLSX from "xlsx";
 
@@ -22,93 +23,20 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-
-		// Mapeo de status a nombre de hoja
-		const sheetNameMap: Record<string, string> = {
-			"NO PLAN": "NO PLAN",
-			"BAVARIA NOW": "BAVARIA NOW",
-			// Puedes agregar más mapeos según necesites
-		};
-
-		// Obtener el nombre de la hoja según el status
-		const sheetName = sheetNameMap[status];
-
-		if (!sheetName) {
-			return res(
-				{ message: `No se encontró una hoja para el status: ${status}` },
-				{ status: 400 }
-			);
-		}
+		const sheetName = workbook.SheetNames[1];
 
 		// Verificar que la hoja exista
 		if (!workbook.Sheets[sheetName]) {
 			return res(
-				{ message: `La hoja "${sheetName}" no existe en el archivo` },
+				{ message: `No se encontró la hoja correspondiente` },
 				{ status: 400 }
 			);
 		}
 
-		const sheet = workbook.Sheets[sheetName];
-		const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-		interface ExcelRow {
-			Nombre: string;
-			Celular: string;
-			[key: string]: unknown;
-		}
-
-		// Función para validar y normalizar una fila
-		function validateRow(row: unknown): ExcelRow | null {
-			if (!row || typeof row !== "object") {
-				return null;
-			}
-
-			const validRow = row as Record<string, unknown>;
-
-			// Buscar nombre (flexible con diferentes variaciones)
-			const nombre = validRow.Nombre || validRow.nombre || validRow.NOMBRE;
-
-			// Buscar teléfono (flexible con diferentes variaciones)
-			const celular =
-				validRow.Celular ||
-				validRow.celular ||
-				validRow.CELULAR ||
-				validRow.Telefono ||
-				validRow.telefono ||
-				validRow.TELEFONO ||
-				validRow.phoneNumber;
-
-			if (!nombre || !celular) {
-				return null;
-			}
-
-			// Limpiar el número de teléfono (remover espacios, guiones, etc.)
-			let celularLimpio = String(celular).trim().replace(/[\s-]/g, "");
-
-			// Si el número es 0, es inválido
-			if (celularLimpio === "0" || celularLimpio === "") {
-				return null;
-			}
-
-			// Si tiene 11 dígitos, eliminar el primero (generalmente el código de país)
-			if (celularLimpio.length === 11) {
-				celularLimpio = celularLimpio.substring(1);
-			}
-
-			// Validar que tenga 10 dígitos después de la limpieza
-			if (celularLimpio.length !== 10) {
-				return null;
-			}
-
-			return {
-				Nombre: String(nombre).trim(),
-				Celular: celularLimpio,
-			};
-		}
-
+		const worksheet = workbook.Sheets[sheetName];
+		const jsonData = XLSX.utils.sheet_to_json(worksheet);
 		const savedRecords = [];
 		const errors = [];
-
 		for (let i = 0; i < jsonData.length; i++) {
 			const row = jsonData[i];
 			const validatedRow = validateRow(row);

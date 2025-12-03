@@ -35,3 +35,17 @@ export interface dataUsar {
 		| "confirmar_pedido"
 		| "confirmacion_de_pedido";
 }
+
+export interface ExcelRow {
+	Nombre: string;
+	Celular: string;
+	[key: string]: unknown;
+}
+
+export interface ExcelRowRutas {
+	Nombre: string;
+	Celular: string;
+	"Hora inicial": string;
+	"Hora Final": string;
+	[key: string]: unknown;
+}

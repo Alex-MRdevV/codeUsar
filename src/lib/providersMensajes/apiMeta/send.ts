@@ -22,13 +22,36 @@ export const sendMessagesToAPI = async (
 > => {
 	try {
 		const results: MessageResult[] = [];
-		const totalRecipients = datos.recipients.length;
+
+		// Determinar el tipo de recipients y convertirlo a un array uniforme
+		let recipientsArray: RecipientWithParams[] = [];
+
+		if (Array.isArray(datos.recipients) && datos.recipients.length > 0) {
+			if (typeof datos.recipients[0] === "string") {
+				// Es un array de strings - convertir a RecipientWithParams[]
+				recipientsArray = (datos.recipients as string[]).map((phone) => ({
+					phone,
+					params:
+						datos.parameterFormat === "named"
+							? datos.templateParams || {}
+							: datos.templateParamsPositional || [],
+				}));
+			} else {
+				// Ya es un array de RecipientWithParams
+				recipientsArray = datos.recipients as RecipientWithParams[];
+			}
+		} else {
+			// Si no es array o está vacío
+			return [null, { results, summary: { total: 0, success: 0, failed: 0 } }];
+		}
+
+		const totalRecipients = recipientsArray.length;
 
 		// Procesar en lotes
 		for (let i = 0; i < totalRecipients; i += batchSize) {
-			const lote = datos.recipients.slice(i, i + batchSize);
+			const lote = recipientsArray.slice(i, i + batchSize);
 
-			// Crear promesas para el lote actual
+			// Crear promesas para el lote actual - pasamos el objeto recipient completo
 			const promesasLote = lote.map((recipient) =>
 				enviarMensajeIndividual(recipient, datos, accessToken, phoneNumberId)
 			);
@@ -44,7 +67,7 @@ export const sendMessagesToAPI = async (
 					results.push(resultado.value);
 				} else {
 					results.push({
-						recipient,
+						recipient: recipient.phone,
 						status: "error",
 						errorMessage:
 							resultado.reason?.message || "Error desconocido en el envío",

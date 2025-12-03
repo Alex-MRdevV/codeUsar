@@ -96,6 +96,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		const hasErrors = result?.results.some((item) => item.status === "error");
 
 		if (hasErrors && result?.results.every((item) => item.status === "error")) {
+			console.log(result);
 			// Todos los mensajes fallaron
 			return res(
 				{

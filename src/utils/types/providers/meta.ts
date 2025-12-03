@@ -33,7 +33,7 @@ export interface RecipientWithParams {
 
 export interface SendMessageRequest {
 	templateId: string;
-	recipients: string[];
+	recipients: string[] | RecipientWithParams[];
 	messageType: "text" | "template";
 	content?: string;
 	templateName?: string;

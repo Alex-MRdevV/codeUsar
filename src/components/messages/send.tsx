@@ -62,36 +62,42 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	} = useBatchSender<string>(10);
 
 	const currentTemplate = useMemo(
-		() => templates.find((t) => t.id === selectedTemplate),
+		() => templates.find((t) => t.id === selectedTemplate) || null,
 		[templates, selectedTemplate]
 	);
 
-	const vars = currentTemplate?.variables;
-	const hasVars = !!(vars && Array.isArray(vars.params) && vars.params.length > 0);
+	// Variables de la plantilla
+	const vars = currentTemplate?.variables ?? null;
+
+	const hasVars = Array.isArray(vars?.params) && vars.params.length > 0;
 
 	// Mapea plantillas a estados
 	const getTargetStatusForTemplate = (templateName: string) => {
 		switch (templateName) {
 			case "pedidos_no_planeados":
-				return "aplazado" as const;
+				return "aplazado";
 			case "pedidos_retrasados":
-				return "segundoViaje" as const;
+				return "segundoViaje";
 			case "confirmar_pedido":
 			case "confirmacion_de_pedido":
-				return "enRuta" as const;
+				return "enRuta";
 			default:
-				return "enRuta" as const;
+				return "enRuta";
 		}
 	};
 
-	// ❗ NUEVO: recipients memoizado basado en dataMensajes y template seleccionado
+	// Recipients filtrados por plantilla
 	const recipients = useMemo(() => {
 		if (!dataMensajes || !currentTemplate) return [];
 
-		const templateName = currentTemplate.metaTemplateName || "";
+		const templateName =
+			currentTemplate.metaTemplateName ??
+			currentTemplate.name ??
+			"";
 
-		// Filtrar mensajes por tipo que coincida con la plantilla
-		const filtered = dataMensajes.filter((msg) => msg.typeMessage === templateName);
+		const filtered = dataMensajes.filter(
+			(msg) => msg.typeMessage === templateName
+		);
 
 		return filtered.map((msg) => msg.phone).filter(Boolean);
 	}, [dataMensajes, currentTemplate]);
@@ -102,36 +108,40 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		return dataMensajes.find((msg) => msg.phone === phoneNumber) ?? null;
 	};
 
-	// Buscar cliente reducido por teléfono (mantener para datos adicionales si es necesario)
+	// Buscar cliente reducido por teléfono
 	const getClientData = (phoneNumber: string) => {
 		if (!dataConsolidado) return null;
+
 		const all = [
 			...(dataConsolidado.byStatus.enRuta ?? []),
 			...(dataConsolidado.byStatus.segundoViaje ?? []),
-			...(dataConsolidado.byStatus.aplazado ?? [])
+			...(dataConsolidado.byStatus.aplazado ?? []),
 		];
+
 		return all.find((c) => c.phoneNumber === phoneNumber) ?? null;
 	};
 
-	// Construye variables automáticas según plantilla y datos del mensaje
-	const buildTemplateVariables = (phoneNumber: string): Record<string, string> => {
+	// Construye variables automáticas según plantilla y datos
+	const buildTemplateVariables = (
+		phoneNumber: string
+	): Record<string, string> => {
 		const messageData = getMessageData(phoneNumber);
+
 		if (!messageData) return {};
 
-		const nombreCliente = messageData.name || "Cliente";
+		const nombreCliente = messageData?.name || "Cliente";
 
-		switch (messageData.typeMessage) {
+		switch (messageData?.typeMessage) {
 			case "pedidos_no_planeados":
 			case "pedidos_retrasados":
 			case "confirmar_pedido":
 				return { "1": nombreCliente };
 
 			case "confirmacion_de_pedido":
-				// Para este tipo, buscar datos adicionales del cliente si existen
 				const clientData = getClientData(phoneNumber);
 				return {
 					"1": clientData?.horaInicial ?? "6:00 am",
-					"2": clientData?.horaFinal ?? "6:30 am"
+					"2": clientData?.horaFinal ?? "6:30 am",
 				};
 
 			default:
@@ -139,29 +149,87 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		}
 	};
 
-	// Construye payload para un destinatario
+	// ==============================
+	// *** buildPayload FINAL ***
+	// ==============================
+
 	const buildPayload = (recipient: string): SendMessageRequest => {
 		if (!currentTemplate) throw new Error("No template selected");
 
-		const paramFormatRaw = currentTemplate?.variables?.format;
+		const templateVars = currentTemplate.variables ?? {};
+
+		// Aseguramos que templateVars.params exista y sea un array
+		const paramsList =
+			Array.isArray((templateVars as any).params)
+				? (templateVars as any).params
+				: [];
+
+		const hasParams = paramsList.length > 0;
+
+		// Aseguramos acceso seguro a format
+		const paramFormatRaw =
+			typeof (templateVars as any).format === "string"
+				? (templateVars as any).format
+				: undefined;
+
 		const isPositional =
-			(typeof paramFormatRaw === "string" && paramFormatRaw.toUpperCase() === "POSITIONAL") ||
+			(typeof paramFormatRaw === "string" &&
+				paramFormatRaw.toUpperCase() === "POSITIONAL") ||
 			paramFormatRaw === "positional";
 
+		// Variables finales
 		const finalVariableValues =
 			Object.keys(variableValues ?? {}).length > 0
 				? variableValues
 				: buildTemplateVariables(recipient);
 
+		// Si la plantilla NO tiene variables → recipients: string[]
+		if (!hasParams) {
+			return {
+				templateId: currentTemplate.id,
+				recipients: [recipient],
+				messageType: "template",
+				templateName: currentTemplate.name,
+				templateLanguage: currentTemplate.language || "es",
+				parameterFormat: "named",
+			};
+		}
+
+		// --------------------------
+		// Plantilla CON variables
+		// --------------------------
+
+		let formattedParams: string[] | Record<string, string> = {};
+
+		if (isPositional) {
+			// Ordenar variables por order
+			const ordered = [...paramsList]
+				.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
+				.map((p) => finalVariableValues[p?.name] || "");
+
+			formattedParams = ordered;
+		} else {
+			formattedParams = finalVariableValues;
+		}
+
 		return {
 			templateId: currentTemplate.id,
-			recipients: [recipient],
+			recipients: [
+				{
+					phone: recipient,
+					params: formattedParams,
+				},
+			],
 			messageType: "template",
 			templateName: currentTemplate.name,
 			templateLanguage: currentTemplate.language || "es",
 			parameterFormat: isPositional ? "positional" : "named",
-			templateParamsPositional: isPositional ? Object.values(finalVariableValues) : undefined,
-			templateParams: !isPositional ? finalVariableValues : undefined
+			templateParamsPositional: isPositional
+				? (formattedParams as string[])
+				: undefined,
+			templateParams: !isPositional
+				? (formattedParams as Record<string, string>)
+				: undefined,
 		};
 	};
 

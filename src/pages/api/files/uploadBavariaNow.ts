@@ -1,22 +1,29 @@
-import { processConsolidadoData } from "@/lib/schemas/files/validateConsolidado";
+import { addClientMensajes } from "@/lib/drizzle/data";
 import { res } from "@/utils/responseAstro";
-import { getSheetByName } from "@/utils/utilities";
-import { validateRow } from "@/utils/validateNumbersRutas";
+import { validateRow } from "@/utils/validateNumbers";
 import type { APIRoute } from "astro";
 import * as XLSX from "xlsx";
-/*
+
 export const POST: APIRoute = async ({ request }) => {
-	const data = await request.formData();
-	const file = data.get("file") as File;
+	const formData = await request.formData();
+	const file = formData.get("file") as File;
+	const status = formData.get("status") as string;
 
 	if (!file) {
 		return res({ message: "No se ha cargado ningún archivo" }, { status: 400 });
 	}
 
+	if (!status) {
+		return res(
+			{ message: "No se ha proporcionado el status" },
+			{ status: 400 }
+		);
+	}
+
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-		const sheetName = workbook.SheetNames[0];
+		const sheetName = workbook.SheetNames[2];
 
 		// Verificar que la hoja exista
 		if (!workbook.Sheets[sheetName]) {
@@ -38,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
 				errors.push(`Fila ${i + 2}: Datos inválidos o incompletos`);
 				continue;
 			}
-/*
+
 			try {
 				const record = await addClientMensajes({
 					nombre: validatedRow.Nombre,
@@ -57,14 +64,22 @@ export const POST: APIRoute = async ({ request }) => {
 
 		return res(
 			{
-				message: "Archivo cargado correctamente",
-				dataPorStatus: byStatus,
-				summary,
+				message: "Procesamiento completado",
+				hojaProcesada: sheetName,
+				data: savedRecords,
+				total: jsonData.length,
+				guardados: savedRecords.length,
+				errores: errors.length > 0 ? errors : undefined,
 			},
-			{ status: 200 }
+			{ status: savedRecords.length > 0 ? 200 : 400 }
 		);
 	} catch (error) {
-		return res({ message: "Ha ocurrido un error inesperado" }, { status: 500 });
+		return res(
+			{
+				message: "Ha ocurrido un error inesperado",
+				error: error instanceof Error ? error.message : "Error desconocido",
+			},
+			{ status: 500 }
+		);
 	}
 };
-*/

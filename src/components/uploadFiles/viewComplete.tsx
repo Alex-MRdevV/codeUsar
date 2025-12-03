@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadZone } from "@/components/uploadFiles/uploadZone";
-import { UploadPhonesRequest } from "@/utils/services/files/addPhones"
-import { UploadConsolidadoRequest } from "@/utils/services/files/uploadConsolidado";
+import { UploadPhonesRequestBavariaNow } from "@/utils/services/files/addMensajeBavariaNow";
+import { UploadPhonesRequestRechazados } from "@/utils/services/files/addMensajesRechazados";
+import { UploadPhonesRequestRutas } from "@/utils/services/files/addMensajesRuta";
+import { UploadPhonesRequestReasignados } from "@/utils/services/files/addReasinagdos";
 import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 export const ViewUploadComplete = () => {
 	const [file1, setFile1] = useState<File | null>(null);
@@ -34,17 +36,16 @@ export const ViewUploadComplete = () => {
 
 		try {
 			let hasError = false;
-			let dataConsolidado;
 			let dataPhones1;
 			let dataPhones2;
 			let dataPhones3;
 
 			// === 1. Procesar archivo 1 (Pedidos rechazados) ===
 			if (file1) {
-				const [errorFile1, parsedFile1] = await UploadPhonesRequest(file1, "pedidos_no_planeados");
+				const [errorFile1, parsedFile1] = await UploadPhonesRequestRechazados(file1, "pedidos_no_planeados");
 
 				if (errorFile1) {
-					toast.error(`Error en archivo 1: ${errorFile1.message}`);
+					toast.error("Error al cargar el archivo 1");
 					hasError = true;
 				} else {
 					dataPhones1 = parsedFile1;
@@ -54,10 +55,10 @@ export const ViewUploadComplete = () => {
 
 			// === 2. Procesar archivo 2 ===
 			if (file2) {
-				const [errorFile2, parsedFile2] = await UploadPhonesRequest(file2, "pedidos_no_planeados");
+				const [errorFile2, parsedFile2] = await UploadPhonesRequestReasignados(file2, "pedidos_retrasados");
 
 				if (errorFile2) {
-					toast.error(`Error en archivo 2: ${errorFile2.message}`);
+					toast.error("Error al cargar el archivo 2");
 					hasError = true;
 				} else {
 					dataPhones2 = parsedFile2;
@@ -67,10 +68,10 @@ export const ViewUploadComplete = () => {
 
 			// === 3. Procesar archivo 3 ===
 			if (file3) {
-				const [errorFile3, parsedFile3] = await UploadPhonesRequest(file3, "confirmar_pedido");
+				const [errorFile3, parsedFile3] = await UploadPhonesRequestBavariaNow(file3, "confirmar_pedido");
 
 				if (errorFile3) {
-					toast.error(`Error en archivo 3: ${errorFile3.message}`);
+					toast.error("Error al cargar el archivo");
 					hasError = true;
 				} else {
 					dataPhones3 = parsedFile3;
@@ -78,23 +79,15 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
-			// === 4. Procesar archivo 4 (Consolidado) ===
 			if (file4) {
-				const [errorConsolidado, parsedConsolidado] = await UploadConsolidadoRequest(file4);
+				const [errorConsolidado, parsedConsolidado] = await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
 
 				if (errorConsolidado) {
-					toast.error(`Error en archivo consolidado: ${errorConsolidado.message}`);
+					toast.error("Ocurrió un error inesperado");
 					hasError = true;
-				} else if (parsedConsolidado) {
-					if (parsedConsolidado.invalidRows && parsedConsolidado.invalidRows.length > 0) {
-						toast.error(
-							`Archivo consolidado tiene ${parsedConsolidado.invalidRows.length} filas inválidas.`
-						);
-						hasError = true;
-					} else {
-						dataConsolidado = parsedConsolidado;
-						toast.success(`Archivo consolidado: ${parsedConsolidado.summary.valid} registros válidos`);
-					}
+				} else {
+					dataPhones3 = parsedConsolidado;
+					toast.success("Archivo 4 procesado correctamente");
 				}
 			}
 
@@ -114,7 +107,7 @@ export const ViewUploadComplete = () => {
 			}
 
 			if (dataPhones3) {
-				toast.success("Datos de Bavaria Now guardados");
+				toast.success("Datos para promocionar Bavaria Now guardados");
 			}
 
 			// 🎉 TODO EXITOSO - Limpiar formulario
@@ -123,16 +116,13 @@ export const ViewUploadComplete = () => {
 			setFile2(null);
 			setFile3(null);
 			setFile4(null);
-
 		} catch (error) {
 			toast.error("Error inesperado al procesar los archivos");
-			console.error(error);
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	// ✅ RETURN MOVIDO AQUÍ (nivel del componente)
 	return (
 		<div className="min-h-screen bg-gray-50 py-12 px-4">
 			<div className="max-w-3xl mx-auto">
@@ -171,7 +161,7 @@ export const ViewUploadComplete = () => {
 								onFileChange={setFile2}
 							/>
 							<FileUploadZone
-								label="ARchivo para la promoción de BavariaNow (Opcional)"
+								label="Archivo para la promoción de BavariaNow (Opcional)"
 								file={file3}
 								onFileChange={setFile3}
 							/>

@@ -3,24 +3,27 @@ import { CreateTemplateModal } from "@/components/messages/editor/modalTemplates
 import { PreviewCard } from "@/components/messages/editor/previewCard";
 import { TemplateSelector } from "@/components/messages/editor/templaterSelector";
 import { VariableEditor } from "@/components/messages/editor/variablesEditor";
+import { Header } from "@/components/messages/header";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
-import { allDataTransitoria } from "@/utils/services/dataTransitoria/allData";
-import type { dataUsar, PersistedConsolidado } from "@/utils/types/messages";
+import { allDataClientesMensajes } from "@/utils/services/dataTransitoria/allData";
+import { allDataRuta } from "@/utils/services/dataTransitoria/allDataRutas";
+import { cleanData } from "@/utils/services/dataTransitoria/cleanData";
+import { cleanDataRuta } from "@/utils/services/dataTransitoria/cleanDataRuta";
+import type { clientsInRuta, dataUsar } from "@/utils/types/messages";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ProgressComponent } from "../progress";
-import { Header } from "./header";
 
 interface Props {
 	templates: Template[];
 }
 
 export const SendMessages = ({ templates: initialTemplates }: Props) => {
-	const [dataConsolidado, setDataConsolidado] = useState<PersistedConsolidado | null>(null);
+	const [dataClientesRuta, setDataClientesRuta] = useState<clientsInRuta[] | null>(null);
 	const [dataMensajes, setDataMensajes] = useState<dataUsar[] | null>(null);
 	const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 	const [templates, setTemplates] = useState<Template[]>(initialTemplates);
@@ -32,12 +35,11 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 	useEffect(() => {
 		async function load() {
 			try {
-				const res = await allDataTransitoria();
-				setDataConsolidado(res.dataConsolidado);
-				// Asume que dataMensajes viene en la respuesta
-				setDataMensajes(res.dataMessage ?? null);
+				const res = await allDataRuta();
+				const resClientesMensajes = await allDataClientesMensajes();
+				setDataClientesRuta(res);
+				setDataMensajes(resClientesMensajes);
 			} catch (err) {
-				console.error("Error cargando data transitoria", err);
 				toast.error("No se pudo cargar la data transitoria");
 			}
 		}
@@ -68,8 +70,15 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	// Variables de la plantilla
 	const vars = currentTemplate?.variables ?? null;
-
 	const hasVars = Array.isArray(vars?.params) && vars.params.length > 0;
+
+	const getMessageData = (phoneNumber: string) => {
+		return dataMensajes?.find((msg) => msg.phone === phoneNumber) || null;
+	};
+
+	const getClientData = (phoneNumber: string) => {
+		return dataClientesRuta?.find((client) => client.phoneNumber === phoneNumber) || null;
+	};
 
 	// Mapea plantillas a estados
 	const getTargetStatusForTemplate = (templateName: string) => {
@@ -102,25 +111,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		return filtered.map((msg) => msg.phone).filter(Boolean);
 	}, [dataMensajes, currentTemplate]);
 
-	// Buscar datos del mensaje por teléfono
-	const getMessageData = (phoneNumber: string) => {
-		if (!dataMensajes) return null;
-		return dataMensajes.find((msg) => msg.phone === phoneNumber) ?? null;
-	};
-
-	// Buscar cliente reducido por teléfono
-	const getClientData = (phoneNumber: string) => {
-		if (!dataConsolidado) return null;
-
-		const all = [
-			...(dataConsolidado.byStatus.enRuta ?? []),
-			...(dataConsolidado.byStatus.segundoViaje ?? []),
-			...(dataConsolidado.byStatus.aplazado ?? []),
-		];
-
-		return all.find((c) => c.phoneNumber === phoneNumber) ?? null;
-	};
-
 	// Construye variables automáticas según plantilla y datos
 	const buildTemplateVariables = (
 		phoneNumber: string
@@ -149,9 +139,30 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		}
 	};
 
-	// ==============================
-	// *** buildPayload FINAL ***
-	// ==============================
+	const buildTemplateParamsArray = (phoneNumber: string): string[] => {
+		const messageData = getMessageData(phoneNumber);
+
+		if (!messageData) return [];
+
+		const nombreCliente = messageData?.name || "Cliente";
+
+		switch (messageData?.typeMessage) {
+			case "pedidos_no_planeados":
+			case "pedidos_retrasados":
+			case "confirmar_pedido":
+				return [nombreCliente];
+
+			case "confirmacion_de_pedido":
+				const clientData = getClientData(phoneNumber);
+				return [
+					clientData?.horaInicial ?? "6:00 am",
+					clientData?.horaFinal ?? "6:30 am"
+				];
+
+			default:
+				return [];
+		}
+	};
 
 	const buildPayload = (recipient: string): SendMessageRequest => {
 		if (!currentTemplate) throw new Error("No template selected");
@@ -177,12 +188,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 				paramFormatRaw.toUpperCase() === "POSITIONAL") ||
 			paramFormatRaw === "positional";
 
-		// Variables finales
-		const finalVariableValues =
-			Object.keys(variableValues ?? {}).length > 0
-				? variableValues
-				: buildTemplateVariables(recipient);
-
 		// Si la plantilla NO tiene variables → recipients: string[]
 		if (!hasParams) {
 			return {
@@ -195,22 +200,26 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			};
 		}
 
-		// --------------------------
-		// Plantilla CON variables
-		// --------------------------
+		let formattedParams: string[];
 
-		let formattedParams: string[] | Record<string, string> = {};
-
-		if (isPositional) {
-			// Ordenar variables por order
-			const ordered = [...paramsList]
-				.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
-				.map((p) => finalVariableValues[p?.name] || "");
-
-			formattedParams = ordered;
+		if (Object.keys(variableValues ?? {}).length > 0) {
+			// Hay valores manuales ingresados por el usuario
+			if (isPositional) {
+				// Ordenar variables por order
+				formattedParams = [...paramsList]
+					.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
+					.map((p) => variableValues[p?.name] || "");
+			} else {
+				// Convertir objeto a array en orden
+				formattedParams = Object.values(variableValues);
+			}
 		} else {
-			formattedParams = finalVariableValues;
+			// Usar valores automáticos de buildTemplateParamsArray
+			formattedParams = buildTemplateParamsArray(recipient);
 		}
+
+		const templateName = currentTemplate.metaTemplateName ?? currentTemplate.name ?? "";
+		const needsHeaderParams = ["confirmar_pedido"].includes(templateName);
 
 		return {
 			templateId: currentTemplate.id,
@@ -223,13 +232,9 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			messageType: "template",
 			templateName: currentTemplate.name,
 			templateLanguage: currentTemplate.language || "es",
-			parameterFormat: isPositional ? "positional" : "named",
-			templateParamsPositional: isPositional
-				? (formattedParams as string[])
-				: undefined,
-			templateParams: !isPositional
-				? (formattedParams as Record<string, string>)
-				: undefined,
+			parameterFormat: "positional",
+			templateParamsPositional: formattedParams,
+			...(needsHeaderParams && { headerParams: formattedParams }),
 		};
 	};
 
@@ -279,14 +284,28 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 				toast.warning(`Envío parcial: ${successCount} exitosos, ${errorCount} fallidos`);
 			} else if (errorCount > 0) {
 				setResultados({ ok: false, error: `Todos los envíos fallaron (${errorCount})` });
-				toast.error(`Error: No se pudo enviar ningún mensaje`);
+				toast.error("Ocurrió un error, no se pudo enviar ningún mensaje");
 			} else {
 				setResultados({ ok: true, enviados: successCount });
 				toast.success(`✓ ${successCount} mensajes enviados exitosamente`);
 			}
 
 			if (errorCount === 0 && !isCancelled) {
-				setDataConsolidado(null);
+				try {
+					// Limpiar datos en paralelo
+					await Promise.all([
+						cleanData(),
+						cleanDataRuta()
+					]);
+
+					toast.success("✓ Datos limpiados correctamente");
+				} catch (cleanError) {
+					console.error("Error limpiando datos:", cleanError);
+					toast.warning("Mensajes enviados, pero hubo un error al limpiar los datos");
+				}
+
+				// Limpiar estados locales
+				setDataClientesRuta(null);
 				setDataMensajes(null);
 				setSelectedTemplate("");
 				setVariableValues({});
@@ -294,7 +313,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			}
 
 		} catch (err: any) {
-			console.error("Error crítico enviando mensajes", err);
 			setResultados({ ok: false, error: err?.message || String(err) });
 			toast.error("Error crítico en el envío de mensajes");
 		} finally {
@@ -318,7 +336,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	const handleNewSend = () => {
 		resetResultados();
-		setDataConsolidado(null);
+		setDataClientesRuta(null);
 		setDataMensajes(null);
 		setSelectedTemplate("");
 		setVariableValues({});
@@ -371,7 +389,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 								onChange={handleTemplateChange}
 							/>
 
-							{selectedTemplate && dataConsolidado && (
+							{/* ✅ CORRECCIÓN 3: Cambio de 'clientes' a 'dataMensajes' */}
+							{selectedTemplate && dataMensajes && (
 								<div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs">
 									<p className="text-blue-600">
 										📊 Se enviarán mensajes a{" "}
@@ -410,7 +429,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 							{!canSend() && selectedTemplate && (
 								<div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
 									<p className="text-xs text-yellow-600">
-										{!dataConsolidado
+										{!dataClientesRuta
 											? "⚠️ No hay datos cargados. Carga un archivo primero."
 											: recipients.length === 0
 												? "⚠️ No hay clientes en el estado correspondiente para esta plantilla."
@@ -469,4 +488,3 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		</article>
 	);
 };
-

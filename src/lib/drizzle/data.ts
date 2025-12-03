@@ -1,23 +1,23 @@
 import { db } from "@/db/db";
 import {
+	clientesEnRuta,
 	clientsMensajes,
-	consolidated_clients,
 } from "@/db/schemaTransitional/dataUsar";
 
-export async function addConsolidatedClient(data: {
+export async function addClienteEnRuta(data: {
+	nameEstablecimiento: string;
 	phoneNumber: string;
-	clienteId: string;
-	nameEstablecimiento?: string | null;
 	horaInicial?: string | null;
 	horaFinal?: string | null;
-	status: "enRuta" | "segundoViaje" | "aplazado";
 }) {
-	return await db.insert(consolidated_clients).values(data);
+	return await db.insert(clientesEnRuta).values(data);
 }
 
-export async function getAllConsolidatedClients() {
-	return await db.select().from(consolidated_clients);
+export async function getAllClientesByRuta() {
+	return await db.select().from(clientesEnRuta);
 }
+
+export const cleanTablaByRutas = db.delete(clientesEnRuta);
 
 export async function addClientMensajes(data: {
 	nombre: string;
@@ -36,3 +36,5 @@ export async function allClientMensajes() {
 		})
 		.from(clientsMensajes);
 }
+
+export const cleanTablaMensajes = db.delete(clientesEnRuta);

@@ -7,7 +7,7 @@ export const Templates = sqliteTable(
 		id: text("id").primaryKey(),
 		name: text("name").notNull().unique(),
 		icon: text("icon").notNull(),
-		color: text("color", { length: 20 }),
+		color: text("color"),
 		// Meta Template Info
 		metaStatus: text("metaStatus", {
 			enum: ["PENDING", "APPROVED", "REJECTED"],
@@ -28,7 +28,6 @@ export const Templates = sqliteTable(
 				example: string;
 			}>;
 		}>(),
-		// Botones como JSON
 		// Botones como JSON (ARRAY)
 		buttons: text("buttons", { mode: "json" }).$type<
 			Array<{
@@ -39,7 +38,6 @@ export const Templates = sqliteTable(
 			}>
 		>(),
 		// Métricas
-		usageCount: integer("usage_count").default(0).notNull(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
 			sql`(unixepoch() * 1000)`
 		),

@@ -1,9 +1,7 @@
-import type { dataUsar } from "@/utils/types/messages";
-
-export const allDataClientesMensajes = async (): Promise<dataUsar[]> => {
+export const cleanDataRuta = async () => {
 	try {
-		const response = await fetch("/api/data/allData", {
-			method: "GET",
+		const response = await fetch("/api/data/cleanDataRuta", {
+			method: "DELETE",
 			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",

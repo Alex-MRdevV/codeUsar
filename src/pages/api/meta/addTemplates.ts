@@ -6,9 +6,8 @@ import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request, locals }) => {
-	const { env } = locals.runtime;
-	const WABA_ID = env.WHATSAPP_WABA_ID; // WhatsApp Business Account ID
-	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
+	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
+	const WABA_ID = import.meta.env.WHATSAPP_WABA_ID;
 
 	if (!WABA_ID || !ACCESS_TOKEN) {
 		return res(

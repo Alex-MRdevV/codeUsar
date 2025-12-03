@@ -14,9 +14,7 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		const { enRuta, segundoViaje, aplazado } = body.byStatus;
-
 		const collected = [...enRuta, ...segundoViaje, ...aplazado];
-
 		const results: any[] = [];
 
 		const mapStatus = (
@@ -30,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
 				case "APLAZADO":
 					return "aplazado";
 				default:
-					throw new Error(`Estado no reconocido: ${estado}`);
+					throw new Error(`Estado no reconocido: ${estado}`); // ✅ Corregido
 			}
 		};
 
@@ -39,10 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
 				idCliente: cliente.idCliente,
 				nameEstablecimiento: cliente.nameEstablecimiento ?? null,
 				phoneNumber: cliente.phoneNumber ?? null,
-
-				// 👇 Normalizamos
 				status: mapStatus(cliente.Estado),
-
 				clienteId: cliente.clienteId ?? null,
 				horaInicial: cliente.horaInicial ?? null,
 				horaFinal: cliente.horaFinal ?? null,
@@ -62,7 +57,6 @@ export const POST: APIRoute = async ({ request }) => {
 		);
 	} catch (error) {
 		console.error(error);
-
 		return new Response(
 			JSON.stringify({
 				message: "Error interno al insertar consolidado",

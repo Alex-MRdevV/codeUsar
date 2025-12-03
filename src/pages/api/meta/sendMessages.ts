@@ -48,9 +48,8 @@ async function trackMessagesSent(
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-	const { env } = locals.runtime;
-	const PHONE_NUMBER_ID = env.WHATSAPP_PHONE_ID;
-	const ACCESS_TOKEN = env.WHATSAPP_ACCESS_TOKEN;
+	const PHONE_NUMBER_ID = import.meta.env.WHATSAPP_PHONE_ID;
+	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
 
 	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {

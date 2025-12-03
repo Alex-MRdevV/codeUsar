@@ -1,13 +1,15 @@
-import type { ResultadoAgrupado } from "@/utils/types/consolidadoData";
+import type { dataUsar } from "@/utils/types/messages";
 
-export const UploadConsolidadoRequest = async (
-	file: File
-): Promise<[Error, null] | [null, ResultadoAgrupado]> => {
+export const UploadPhonesRequestReasignados = async (
+	file: File,
+	status: "pedidos_retrasados"
+): Promise<[Error, null] | [null, dataUsar[]]> => {
 	try {
 		const formData = new FormData();
 		formData.append("file", file);
+		formData.append("status", status);
 
-		const response = await fetch(`/api/files/upload`, {
+		const response = await fetch(`/api/files/uploadReasignados`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",
@@ -18,7 +20,7 @@ export const UploadConsolidadoRequest = async (
 			return [new Error(errorData.message), null];
 		}
 
-		const data: ResultadoAgrupado = await response.json();
+		const data: dataUsar[] = await response.json();
 		return [null, data];
 	} catch (error) {
 		const errorMessage =

@@ -1,15 +1,16 @@
-import { getCalendarData } from "@/lib/drizzle/history";
+import { getAllClientesByRuta } from "@/lib/drizzle/data";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({}) => {
 	try {
 		// Obtener ambas fuentes de datos
-		const response = await getCalendarData.execute();
+		const dataClientes = await getAllClientesByRuta();
 
 		return res(
 			{
-				data: response,
+				message: "Todo salio bien",
+				data: dataClientes,
 			},
 			{
 				status: 200,
@@ -17,12 +18,9 @@ export const GET: APIRoute = async ({}) => {
 		);
 	} catch (error) {
 		return res(
+			{ message: "Error al obtener los datos" },
 			{
-				error: "Error al obtener los datos",
-				message: error instanceof Error ? error.message : "Error desconocido",
-			},
-			{
-				status: 200,
+				status: 500,
 			}
 		);
 	}

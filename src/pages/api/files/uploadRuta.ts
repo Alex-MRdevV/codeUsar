@@ -1,10 +1,9 @@
-import { processConsolidadoData } from "@/lib/schemas/files/validateConsolidado";
+import { addClienteEnRuta } from "@/lib/drizzle/data";
 import { res } from "@/utils/responseAstro";
-import { getSheetByName } from "@/utils/utilities";
 import { validateRow } from "@/utils/validateNumbersRutas";
 import type { APIRoute } from "astro";
 import * as XLSX from "xlsx";
-/*
+
 export const POST: APIRoute = async ({ request }) => {
 	const data = await request.formData();
 	const file = data.get("file") as File;
@@ -38,14 +37,15 @@ export const POST: APIRoute = async ({ request }) => {
 				errors.push(`Fila ${i + 2}: Datos inválidos o incompletos`);
 				continue;
 			}
-/*
+
 			try {
-				const record = await addClientMensajes({
-					nombre: validatedRow.Nombre,
+				const record = await addClienteEnRuta({
+					nameEstablecimiento: validatedRow.Nombre,
 					phoneNumber: validatedRow.Celular,
-					tipoMensaje: status,
+					horaInicial: validatedRow["Hora inicial"],
+					horaFinal: validatedRow["Hora Final"],
 				});
-				savedRecords.push(record[0]);
+				savedRecords.push(record);
 			} catch (error) {
 				errors.push(
 					`Fila ${i + 2}: Error al guardar - ${
@@ -58,8 +58,11 @@ export const POST: APIRoute = async ({ request }) => {
 		return res(
 			{
 				message: "Archivo cargado correctamente",
-				dataPorStatus: byStatus,
-				summary,
+				hojaProcesada: sheetName,
+				data: savedRecords,
+				total: jsonData.length,
+				guardados: savedRecords.length,
+				errores: errors.length > 0 ? errors : undefined,
 			},
 			{ status: 200 }
 		);
@@ -67,4 +70,3 @@ export const POST: APIRoute = async ({ request }) => {
 		return res({ message: "Ha ocurrido un error inesperado" }, { status: 500 });
 	}
 };
-*/

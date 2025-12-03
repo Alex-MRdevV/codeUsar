@@ -1,19 +1,15 @@
 import type { dataUsar } from "@/utils/types/messages";
 
-export const UploadPhonesRequest = async (
+export const UploadPhonesRequestRechazados = async (
 	file: File,
-	status:
-		| "pedidos_no_planeados"
-		| "pedidos_retrasados"
-		| "confirmar_pedido"
-		| "confirmacion_de_pedido"
+	status: "pedidos_no_planeados"
 ): Promise<[Error, null] | [null, dataUsar[]]> => {
 	try {
 		const formData = new FormData();
 		formData.append("file", file);
-		formData.append("status", status); // Agregar el status aquí
+		formData.append("status", status);
 
-		const response = await fetch(`/api/files/upload`, {
+		const response = await fetch(`/api/files/uploadRechazados`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",

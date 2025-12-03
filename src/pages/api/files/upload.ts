@@ -23,17 +23,15 @@ export const POST: APIRoute = async ({ request }) => {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
 
-		// Mapeo de status a nombre de hoja
-		const sheetNameMap: Record<string, string> = {
-			"NO PLAN": "NO PLAN",
-			"BAVARIA NOW": "BAVARIA NOW",
-			// Puedes agregar más mapeos según necesites
+		const sheetIndexMap: Record<string, number> = {
+			"NO PLAN": 1, // Segunda hoja (índice 1)
+			"BAVARIA NOW": 2, // Tercera hoja (índice 2)
 		};
 
 		// Obtener el nombre de la hoja según el status
-		const sheetName = sheetNameMap[status];
+		const sheetIndex = sheetIndexMap["NO PLAN"];
 
-		if (!sheetName) {
+		if (!sheetIndex) {
 			return res(
 				{ message: `No se encontró una hoja para el status: ${status}` },
 				{ status: 400 }
@@ -41,14 +39,14 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		// Verificar que la hoja exista
-		if (!workbook.Sheets[sheetName]) {
+		if (!workbook.Sheets[sheetIndex]) {
 			return res(
-				{ message: `La hoja "${sheetName}" no existe en el archivo` },
+				{ message: `La hoja "${sheetIndex}" no existe en el archivo` },
 				{ status: 400 }
 			);
 		}
 
-		const sheet = workbook.Sheets[sheetName];
+		const sheet = workbook.Sheets[sheetIndex];
 		const jsonData = XLSX.utils.sheet_to_json(sheet);
 
 		interface ExcelRow {
@@ -137,7 +135,7 @@ export const POST: APIRoute = async ({ request }) => {
 		return res(
 			{
 				message: "Procesamiento completado",
-				hojaProcesada: sheetName,
+				hojaProcesada: sheetIndex,
 				data: savedRecords,
 				total: jsonData.length,
 				guardados: savedRecords.length,

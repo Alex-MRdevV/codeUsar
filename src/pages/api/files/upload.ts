@@ -23,30 +23,38 @@ export const POST: APIRoute = async ({ request }) => {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
 
+		// Mapeo de status a índice de hoja (posición)
 		const sheetIndexMap: Record<string, number> = {
-			"NO PLAN": 1, // Segunda hoja (índice 1)
-			"BAVARIA NOW": 2, // Tercera hoja (índice 2)
+			pedidos_no_planeados: 1, // Segunda hoja (índice 1)
+			confirmar_pedido: 2, // Segunda hoja (índice 1)
 		};
 
-		// Obtener el nombre de la hoja según el status
-		const sheetIndex = sheetIndexMap["NO PLAN"];
+		// Obtener el índice de la hoja según el status
+		const sheetIndex = sheetIndexMap[status];
 
-		if (!sheetIndex) {
+		if (sheetIndex === undefined) {
 			return res(
-				{ message: `No se encontró una hoja para el status: ${status}` },
+				{
+					message: `No se encontró una hoja configurada para el status: ${status}`,
+				},
 				{ status: 400 }
 			);
 		}
+
+		// Obtener el nombre de la hoja por su índice
+		const sheetName = workbook.SheetNames[sheetIndex];
 
 		// Verificar que la hoja exista
-		if (!workbook.Sheets[sheetIndex]) {
+		if (!sheetName || !workbook.Sheets[sheetName]) {
 			return res(
-				{ message: `La hoja "${sheetIndex}" no existe en el archivo` },
+				{
+					message: `La hoja en la posición ${sheetIndex} no existe en el archivo`,
+				},
 				{ status: 400 }
 			);
 		}
 
-		const sheet = workbook.Sheets[sheetIndex];
+		const sheet = workbook.Sheets[sheetName];
 		const jsonData = XLSX.utils.sheet_to_json(sheet);
 
 		interface ExcelRow {
@@ -122,6 +130,7 @@ export const POST: APIRoute = async ({ request }) => {
 					phoneNumber: validatedRow.Celular,
 					tipoMensaje: status,
 				});
+
 				savedRecords.push(record[0]);
 			} catch (error) {
 				errors.push(
@@ -135,7 +144,8 @@ export const POST: APIRoute = async ({ request }) => {
 		return res(
 			{
 				message: "Procesamiento completado",
-				hojaProcesada: sheetIndex,
+				hojaProcesada: sheetName,
+				posicionHoja: sheetIndex,
 				data: savedRecords,
 				total: jsonData.length,
 				guardados: savedRecords.length,

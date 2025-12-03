@@ -67,7 +67,7 @@ export const ViewUploadComplete = () => {
 
 			// === 3. Procesar archivo 3 ===
 			if (file3) {
-				const [errorFile3, parsedFile3] = await UploadPhonesRequest(file3, "pedidos_no_planeados");
+				const [errorFile3, parsedFile3] = await UploadPhonesRequest(file3, "confirmar_pedido");
 
 				if (errorFile3) {
 					toast.error(`Error en archivo 3: ${errorFile3.message}`);

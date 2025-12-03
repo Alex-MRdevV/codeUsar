@@ -1,8 +1,5 @@
 import { addClientMensajes } from "@/lib/drizzle/data";
-import { processConsolidadoData } from "@/lib/schemas/files/validateConsolidado";
 import { res } from "@/utils/responseAstro";
-import type { dataUsar } from "@/utils/types/messages";
-import { getSheetByName } from "@/utils/utilities";
 import type { APIRoute } from "astro";
 import * as XLSX from "xlsx";
 
@@ -25,16 +22,39 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-		const sheet = getSheetByName(workbook, "Hoja 1");
 
-		// Convertir la hoja a JSON
+		// Mapeo de status a nombre de hoja
+		const sheetNameMap: Record<string, string> = {
+			"NO PLAN": "NO PLAN",
+			"BAVARIA NOW": "BAVARIA NOW",
+			// Puedes agregar más mapeos según necesites
+		};
+
+		// Obtener el nombre de la hoja según el status
+		const sheetName = sheetNameMap[status];
+
+		if (!sheetName) {
+			return res(
+				{ message: `No se encontró una hoja para el status: ${status}` },
+				{ status: 400 }
+			);
+		}
+
+		// Verificar que la hoja exista
+		if (!workbook.Sheets[sheetName]) {
+			return res(
+				{ message: `La hoja "${sheetName}" no existe en el archivo` },
+				{ status: 400 }
+			);
+		}
+
+		const sheet = workbook.Sheets[sheetName];
 		const jsonData = XLSX.utils.sheet_to_json(sheet);
 
 		interface ExcelRow {
 			Nombre: string;
-			Telefono: string;
-			phoneNumber?: string;
-			[key: string]: unknown; // Para otras columnas opcionales
+			Celular: string;
+			[key: string]: unknown;
 		}
 
 		// Función para validar y normalizar una fila
@@ -45,22 +65,47 @@ export const POST: APIRoute = async ({ request }) => {
 
 			const validRow = row as Record<string, unknown>;
 
-			// Validar que tenga al menos nombre y teléfono
-			const nombre = validRow.Nombre || validRow.nombre;
-			const telefono =
-				validRow.Telefono || validRow.telefono || validRow.phoneNumber;
+			// Buscar nombre (flexible con diferentes variaciones)
+			const nombre = validRow.Nombre || validRow.nombre || validRow.NOMBRE;
 
-			if (!nombre || !telefono) {
+			// Buscar teléfono (flexible con diferentes variaciones)
+			const celular =
+				validRow.Celular ||
+				validRow.celular ||
+				validRow.CELULAR ||
+				validRow.Telefono ||
+				validRow.telefono ||
+				validRow.TELEFONO ||
+				validRow.phoneNumber;
+
+			if (!nombre || !celular) {
+				return null;
+			}
+
+			// Limpiar el número de teléfono (remover espacios, guiones, etc.)
+			let celularLimpio = String(celular).trim().replace(/[\s-]/g, "");
+
+			// Si el número es 0, es inválido
+			if (celularLimpio === "0" || celularLimpio === "") {
+				return null;
+			}
+
+			// Si tiene 11 dígitos, eliminar el primero (generalmente el código de país)
+			if (celularLimpio.length === 11) {
+				celularLimpio = celularLimpio.substring(1);
+			}
+
+			// Validar que tenga 10 dígitos después de la limpieza
+			if (celularLimpio.length !== 10) {
 				return null;
 			}
 
 			return {
 				Nombre: String(nombre).trim(),
-				Telefono: String(telefono).trim(),
+				Celular: celularLimpio,
 			};
 		}
 
-		// En tu código del POST:
 		const savedRecords = [];
 		const errors = [];
 
@@ -76,7 +121,7 @@ export const POST: APIRoute = async ({ request }) => {
 			try {
 				const record = await addClientMensajes({
 					nombre: validatedRow.Nombre,
-					phoneNumber: validatedRow.Telefono,
+					phoneNumber: validatedRow.Celular,
 					tipoMensaje: status,
 				});
 				savedRecords.push(record[0]);
@@ -92,6 +137,7 @@ export const POST: APIRoute = async ({ request }) => {
 		return res(
 			{
 				message: "Procesamiento completado",
+				hojaProcesada: sheetName,
 				data: savedRecords,
 				total: jsonData.length,
 				guardados: savedRecords.length,

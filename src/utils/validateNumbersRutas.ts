@@ -55,7 +55,6 @@ export function validateRow(row: unknown): ExcelRowRutas | null {
 		validRow["final"] ||
 		validRow["FINAL"];
 
-	// ERROR CORREGIDO: Cambiar "horaFinal" por "!horaFinal"
 	if (!nombre || !celular || !horaInicial || !horaFinal) {
 		return null;
 	}
@@ -84,10 +83,69 @@ export function validateRow(row: unknown): ExcelRowRutas | null {
 		return null;
 	}
 
+	// 🔥 Convertir horas de formato decimal a formato HH:MM
+	const horaInicialFormateada = parseHora(horaInicial);
+	const horaFinalFormateada = parseHora(horaFinal);
+
+	// Validar que las horas se hayan convertido correctamente
+	if (!horaInicialFormateada || !horaFinalFormateada) {
+		return null;
+	}
+
 	return {
 		Nombre: String(nombre).trim(),
 		Celular: celularLimpio,
-		"Hora inicial": String(horaInicial).trim(),
-		"Hora Final": String(horaFinal).trim(),
+		"Hora inicial": horaInicialFormateada,
+		"Hora Final": horaFinalFormateada,
 	};
+}
+
+// Función auxiliar para parsear horas
+function parseHora(value: unknown): string {
+	if (value === null || value === undefined) return "";
+
+	// Convertir a texto limpio
+	let raw = String(value).trim();
+
+	// 1. Intentar convertir a número decimal (formato Excel)
+	const asNumber = Number(raw);
+	const isDecimal = !isNaN(asNumber) && asNumber > 0 && asNumber < 1;
+
+	if (isDecimal) {
+		// Si es decimal tipo Excel (0.333, 0.5, etc.) -> convertir
+		return decimalToHora24(asNumber);
+	}
+
+	// 2. Si no es decimal, puede ser "8:36" o "08:36"
+	if (/^\d{1,2}:\d{1,2}$/.test(raw)) {
+		let [h, m] = raw.split(":");
+		h = h.padStart(2, "0");
+		m = m.padStart(2, "0");
+		return `${h}:${m}`;
+	}
+
+	// 3. Si es un número entero (como 8 o 14), asumimos que son horas
+	const asInteger = parseInt(raw);
+	if (!isNaN(asInteger) && asInteger >= 0 && asInteger < 24) {
+		return `${asInteger.toString().padStart(2, "0")}:00`;
+	}
+
+	// Último recurso: vacío si no se puede parsear
+	return "";
+}
+
+// Función para convertir decimal de Excel a formato HH:MM
+function decimalToHora24(decimal: number): string {
+	if (typeof decimal !== "number" || isNaN(decimal)) return "";
+
+	const totalMinutes = Math.round(decimal * 24 * 60);
+
+	let hours = Math.floor(totalMinutes / 60);
+	let minutes = totalMinutes % 60;
+
+	// Asegurar 2 dígitos
+	const h = hours.toString().padStart(2, "0");
+	const m = minutes.toString().padStart(2, "0");
+
+	return `${h}:${m}`;
 }

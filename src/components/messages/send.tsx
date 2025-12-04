@@ -116,7 +116,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 		// 🔥 Para TODAS las otras plantillas, usar dataMensajes
 		if (!Array.isArray(dataMensajes)) return [];
-		console.log(dataMensajes)
 
 		return dataMensajes
 			.filter((msg) => msg.typeMessage === templateName)
@@ -191,12 +190,8 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			rawFormat?.toUpperCase?.() === "POSITIONAL" ||
 			rawFormat === "positional";
 
-		console.log(currentTemplate.metaTemplateName)
-
 		const templateNameToUse =
 			currentTemplate.metaTemplateName ?? currentTemplate.name;
-
-		console.log(templateNameToUse)
 
 		const shouldUseVariableValues =
 			templateNameToUse !== "confirmacion_de_pedido" &&
@@ -220,7 +215,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		}
 
 		const needsHeaderParams = templateNameToUse === "confirmar_pedido";
-		console.log(needsHeaderParams)
 
 		return {
 			templateId: currentTemplate.id,

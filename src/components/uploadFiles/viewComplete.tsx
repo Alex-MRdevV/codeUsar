@@ -40,7 +40,6 @@ export const ViewUploadComplete = () => {
 			let dataPhones2;
 			let dataPhones3;
 
-			// === 1. Procesar archivo 1 (Pedidos rechazados) ===
 			if (file1) {
 				const [errorFile1, parsedFile1] = await UploadPhonesRequestRechazados(
 					file1,
@@ -48,15 +47,12 @@ export const ViewUploadComplete = () => {
 				);
 
 				if (errorFile1) {
-					toast.error("Error al cargar el archivo 1");
 					hasError = true;
 				} else {
 					dataPhones1 = parsedFile1;
-					toast.success("Archivo 1 procesado correctamente");
 				}
 			}
 
-			// === 2. Procesar archivo 2 ===
 			if (file2) {
 				const [errorFile2, parsedFile2] = await UploadPhonesRequestReasignados(
 					file2,
@@ -64,15 +60,12 @@ export const ViewUploadComplete = () => {
 				);
 
 				if (errorFile2) {
-					toast.error("Error al cargar el archivo 2");
 					hasError = true;
 				} else {
 					dataPhones2 = parsedFile2;
-					toast.success("Archivo 2 procesado correctamente");
 				}
 			}
 
-			// === 3. Procesar archivo 3 ===
 			if (file3) {
 				const [errorFile3, parsedFile3] = await UploadPhonesRequestBavariaNow(
 					file3,
@@ -80,44 +73,24 @@ export const ViewUploadComplete = () => {
 				);
 
 				if (errorFile3) {
-					toast.error("Error al cargar el archivo 3");
 					hasError = true;
 				} else {
 					dataPhones3 = parsedFile3;
-					toast.success("Archivo 3 procesado correctamente");
 				}
 			}
 
-			// === 4. Procesar archivo 4 ===
 			if (file4) {
 				const [errorConsolidado, parsedConsolidado] =
 					await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
 
 				if (errorConsolidado) {
-					toast.error("Error al cargar el archivo 4");
 					hasError = true;
-				} else {
-					toast.success("Archivo 4 procesado correctamente");
 				}
 			}
 
-			// Si hubo errores al cargar/parsing → no continuamos
 			if (hasError) {
 				setIsLoading(false);
 				return;
-			}
-
-			// === 5. Guardar datos en la BD ===
-			if (dataPhones1) {
-				toast.success("Datos de pedidos rechazados guardados");
-			}
-
-			if (dataPhones2) {
-				toast.success("Datos de pedidos reasignados guardados");
-			}
-
-			if (dataPhones3) {
-				toast.success("Datos para promocionar Bavaria Now guardados");
 			}
 
 			// 🎉 TODO EXITOSO - Limpiar formulario
@@ -127,7 +100,6 @@ export const ViewUploadComplete = () => {
 			setFile3(null);
 			setFile4(null);
 		} catch (error) {
-			console.error("Error en handleSubmit:", error);
 			toast.error("Error inesperado al procesar los archivos");
 		} finally {
 			setIsLoading(false);

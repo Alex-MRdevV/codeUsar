@@ -24,16 +24,20 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 	};
 
 	const getIntensity = (count: number) => {
-		if (count === 0) return "bg-muted";
+		if (count === 0) return "bg-muted dark:bg-muted/40";
+
 		const intensity = Math.ceil((count / maxCount) * 4);
+
 		const intensities = {
-			1: "bg-primary/20",
-			2: "bg-primary/40",
-			3: "bg-primary/60",
-			4: "bg-primary",
+			1: "bg-primary/25 dark:bg-primary/30",
+			2: "bg-primary/40 dark:bg-primary/45",
+			3: "bg-primary/60 dark:bg-primary/70",
+			4: "bg-primary dark:bg-primary/90",
 		};
-		return intensities[intensity as keyof typeof intensities] || "bg-primary";
+
+		return intensities[intensity as keyof typeof intensities] || "bg-primary dark:bg-primary/80";
 	};
+
 
 	const weeks = [];
 	for (let i = 0; i < days.length; i += 7) {
@@ -48,9 +52,9 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 	});
 
 	return (
-		<Card className="shadow-elegant border-border/50">
+		<Card className="shadow-lg border-0 bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 backdrop-blur-sm">
 			<CardHeader>
-				<CardTitle className="font-display">Actividad de mensajes</CardTitle>
+				<CardTitle className="font-display text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-600">Actividad de mensajes</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<section className="space-y-2">

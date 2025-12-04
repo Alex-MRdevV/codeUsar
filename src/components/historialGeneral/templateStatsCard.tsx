@@ -15,9 +15,9 @@ export const TemplateStatsCard = ({
 	const IconComponent = (Icons[icon as keyof typeof Icons] as LucideIcon) || Icons.FileText;
 
 	const statusColors = {
-		APPROVED: "bg-primary/10 text-primary border-primary/20",
-		PENDING: "bg-accent/10 text-accent border-accent/20",
-		REJECTED: "bg-destructive/10 text-destructive border-destructive/20",
+		APPROVED: "bg-green-500/15 text-green-600 dark:text-green-400 border-green-500/30",
+		PENDING: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+		REJECTED: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30",
 	};
 
 	return (

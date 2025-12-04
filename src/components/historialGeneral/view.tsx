@@ -8,6 +8,7 @@ import type { CalendarHeatmapProps, DayData, } from "@/utils/types/historyGenera
 
 export const ViewHistoryGeneral = () => {
 	const [data, setData] = useState<TemplateForMetrics[] | null>(null);
+	console.log(data)
 	const [dataDays, setDataDays] = useState<DayData[] | null>(null);
 	const [error, setError] = useState<boolean>(false);
 

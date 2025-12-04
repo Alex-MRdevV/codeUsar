@@ -9,6 +9,7 @@ export async function addClienteEnRuta(data: {
 	phoneNumber: string;
 	horaInicial?: string | null;
 	horaFinal?: string | null;
+	tipoMensaje: string
 }) {
 	return await db.insert(clientesEnRuta).values(data);
 }

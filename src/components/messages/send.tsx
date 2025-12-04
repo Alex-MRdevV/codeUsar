@@ -86,8 +86,9 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			case "pedidos_no_planeados":
 				return "aplazado";
 			case "pedidos_retrasados":
-				return "segundoViaje";
+				return "Reasignados";
 			case "confirmar_pedido":
+				return "Para confirmar"
 			case "confirmacion_de_pedido":
 				return "enRuta";
 			default:
@@ -97,24 +98,34 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 	// Recipients filtrados por plantilla
 	const recipients = useMemo(() => {
-		if (!dataMensajes || !currentTemplate) return [];
+		if (!currentTemplate) return [];
 
 		const templateName =
 			currentTemplate.metaTemplateName ??
 			currentTemplate.name ??
 			"";
 
-		const filtered = dataMensajes.filter(
-			(msg) => msg.typeMessage === templateName
-		);
+		if (templateName === "confirmacion_de_pedido") {
+			if (!Array.isArray(dataClientesRuta)) return [];
 
-		return filtered.map((msg) => msg.phone).filter(Boolean);
-	}, [dataMensajes, currentTemplate]);
+			return dataClientesRuta
+				.filter((c) => c.tipoMensaje === "confirmacion_de_pedido")
+				.map((c) => c.phoneNumber)
+				.filter(Boolean);
+		}
+
+		// 🔥 Para TODAS las otras plantillas, usar dataMensajes
+		if (!Array.isArray(dataMensajes)) return [];
+		console.log(dataMensajes)
+
+		return dataMensajes
+			.filter((msg) => msg.typeMessage === templateName)
+			.map((msg) => msg.phone)
+			.filter(Boolean);
+	}, [dataMensajes, dataClientesRuta, currentTemplate]);
 
 	// Construye variables automáticas según plantilla y datos
-	const buildTemplateVariables = (
-		phoneNumber: string
-	): Record<string, string> => {
+	const buildTemplateVariables = (phoneNumber: string): Record<string, string> => {
 		const messageData = getMessageData(phoneNumber);
 
 		if (!messageData) return {};
@@ -139,9 +150,21 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 		}
 	};
 
+	// Construcción de array posicional
 	const buildTemplateParamsArray = (phoneNumber: string): string[] => {
-		const messageData = getMessageData(phoneNumber);
+		const templateName = currentTemplate?.metaTemplateName ?? currentTemplate?.name ?? "";
 
+		// 🔥 Para confirmacion_de_pedido, usar dataClientesRuta directamente
+		if (templateName === "confirmacion_de_pedido") {
+			const clientData = getClientData(phoneNumber);
+			return [
+				clientData?.horaInicial ?? "6:00 am",
+				clientData?.horaFinal ?? "6:30 am",
+			];
+		}
+
+		// Para las demás plantillas, usar dataMensajes
+		const messageData = getMessageData(phoneNumber);
 		if (!messageData) return [];
 
 		const nombreCliente = messageData?.name || "Cliente";
@@ -151,88 +174,66 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 			case "pedidos_retrasados":
 			case "confirmar_pedido":
 				return [nombreCliente];
-
-			case "confirmacion_de_pedido":
-				const clientData = getClientData(phoneNumber);
-				return [
-					clientData?.horaInicial ?? "6:00 am",
-					clientData?.horaFinal ?? "6:30 am"
-				];
-
 			default:
 				return [];
 		}
 	};
 
 	const buildPayload = (recipient: string): SendMessageRequest => {
-		if (!currentTemplate) throw new Error("No template selected");
+		if (!currentTemplate) throw new Error("No hay template seleccionado");
 
 		const templateVars = currentTemplate.variables ?? {};
-
-		// Aseguramos que templateVars.params exista y sea un array
-		const paramsList =
-			Array.isArray((templateVars as any).params)
-				? (templateVars as any).params
-				: [];
-
-		const hasParams = paramsList.length > 0;
-
-		// Aseguramos acceso seguro a format
-		const paramFormatRaw =
-			typeof (templateVars as any).format === "string"
-				? (templateVars as any).format
-				: undefined;
-
+		const paramsList = Array.isArray((templateVars as any).params)
+			? (templateVars as any).params
+			: [];
+		const rawFormat = (templateVars as any).format;
 		const isPositional =
-			(typeof paramFormatRaw === "string" &&
-				paramFormatRaw.toUpperCase() === "POSITIONAL") ||
-			paramFormatRaw === "positional";
+			rawFormat?.toUpperCase?.() === "POSITIONAL" ||
+			rawFormat === "positional";
 
-		// Si la plantilla NO tiene variables → recipients: string[]
-		if (!hasParams) {
-			return {
-				templateId: currentTemplate.id,
-				recipients: [recipient],
-				messageType: "template",
-				templateName: currentTemplate.name,
-				templateLanguage: currentTemplate.language || "es",
-				parameterFormat: "named",
-			};
-		}
+		console.log(currentTemplate.metaTemplateName)
+
+		const templateNameToUse =
+			currentTemplate.metaTemplateName ?? currentTemplate.name;
+
+		console.log(templateNameToUse)
+
+		const shouldUseVariableValues =
+			templateNameToUse !== "confirmacion_de_pedido" &&
+			Object.keys(variableValues ?? {}).length > 0;
 
 		let formattedParams: string[];
 
-		if (Object.keys(variableValues ?? {}).length > 0) {
-			// Hay valores manuales ingresados por el usuario
-			if (isPositional) {
-				// Ordenar variables por order
+		if (isPositional) {
+			if (shouldUseVariableValues) {
 				formattedParams = [...paramsList]
-					.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
-					.map((p) => variableValues[p?.name] || "");
+					.sort((a, b) => Number(a.name) - Number(b.name))
+					.map((p) => variableValues[p.name] || "");
 			} else {
-				// Convertir objeto a array en orden
-				formattedParams = Object.values(variableValues);
+				const params = buildTemplateParamsArray(recipient);
+				formattedParams = params;
 			}
 		} else {
-			// Usar valores automáticos de buildTemplateParamsArray
-			formattedParams = buildTemplateParamsArray(recipient);
+			formattedParams = shouldUseVariableValues
+				? Object.values(variableValues)
+				: Object.values(buildTemplateVariables(recipient));
 		}
 
-		const templateName = currentTemplate.metaTemplateName ?? currentTemplate.name ?? "";
-		const needsHeaderParams = ["confirmar_pedido"].includes(templateName);
+		const needsHeaderParams = templateNameToUse === "confirmar_pedido";
+		console.log(needsHeaderParams)
 
 		return {
 			templateId: currentTemplate.id,
+			messageType: "template",
+			templateName: templateNameToUse,
+			templateLanguage: currentTemplate.language || "es_CO",
+			parameterFormat: "positional",
 			recipients: [
 				{
 					phone: recipient,
 					params: formattedParams,
 				},
 			],
-			messageType: "template",
-			templateName: currentTemplate.name,
-			templateLanguage: currentTemplate.language || "es",
-			parameterFormat: "positional",
 			templateParamsPositional: formattedParams,
 			...(needsHeaderParams && { headerParams: formattedParams }),
 		};
@@ -264,10 +265,10 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 					for (const phone of batch) {
 						try {
 							const payload = buildPayload(phone);
+							console.log(payload)
 							await sendWhatsAppMessage(payload);
 							successCount++;
 						} catch (err) {
-							console.error(`Error enviando a ${phone}:`, err);
 							errorCount++;
 						}
 					}
@@ -300,7 +301,6 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 					toast.success("✓ Datos limpiados correctamente");
 				} catch (cleanError) {
-					console.error("Error limpiando datos:", cleanError);
 					toast.warning("Mensajes enviados, pero hubo un error al limpiar los datos");
 				}
 
@@ -408,7 +408,7 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 									<div className="mb-3 p-3 bg-green-500/10 border border-green-500/20 rounded">
 										<p className="text-xs text-green-600">
 											✨ Las variables se completarán automáticamente con los datos de cada cliente.
-											Puedes sobrescribirlas manualmente si lo necesitas.
+											Puedes sobrescribirías manualmente si lo necesitas.
 										</p>
 									</div>
 									<VariableEditor

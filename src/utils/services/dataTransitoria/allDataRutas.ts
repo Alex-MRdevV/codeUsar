@@ -14,7 +14,8 @@ export const allDataRuta = async (): Promise<clientsInRuta[]> => {
 			throw new Error(`Error ${response.status}: ${response.statusText}`);
 		}
 
-		return await response.json();
+		const result = await response.json();
+		return result.data;
 	} catch (error) {
 		throw error;
 	}

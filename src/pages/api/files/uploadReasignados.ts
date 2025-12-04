@@ -64,7 +64,6 @@ export const POST: APIRoute = async ({ request }) => {
 
 		return res(
 			{
-				message: "Procesamiento completado",
 				hojaProcesada: sheetName,
 				data: savedRecords,
 				total: jsonData.length,

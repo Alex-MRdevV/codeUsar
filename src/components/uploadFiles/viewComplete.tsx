@@ -42,7 +42,10 @@ export const ViewUploadComplete = () => {
 
 			// === 1. Procesar archivo 1 (Pedidos rechazados) ===
 			if (file1) {
-				const [errorFile1, parsedFile1] = await UploadPhonesRequestRechazados(file1, "pedidos_no_planeados");
+				const [errorFile1, parsedFile1] = await UploadPhonesRequestRechazados(
+					file1,
+					"pedidos_no_planeados"
+				);
 
 				if (errorFile1) {
 					toast.error("Error al cargar el archivo 1");
@@ -55,7 +58,10 @@ export const ViewUploadComplete = () => {
 
 			// === 2. Procesar archivo 2 ===
 			if (file2) {
-				const [errorFile2, parsedFile2] = await UploadPhonesRequestReasignados(file2, "pedidos_retrasados");
+				const [errorFile2, parsedFile2] = await UploadPhonesRequestReasignados(
+					file2,
+					"pedidos_retrasados"
+				);
 
 				if (errorFile2) {
 					toast.error("Error al cargar el archivo 2");
@@ -68,10 +74,13 @@ export const ViewUploadComplete = () => {
 
 			// === 3. Procesar archivo 3 ===
 			if (file3) {
-				const [errorFile3, parsedFile3] = await UploadPhonesRequestBavariaNow(file3, "confirmar_pedido");
+				const [errorFile3, parsedFile3] = await UploadPhonesRequestBavariaNow(
+					file3,
+					"confirmar_pedido"
+				);
 
 				if (errorFile3) {
-					toast.error("Error al cargar el archivo");
+					toast.error("Error al cargar el archivo 3");
 					hasError = true;
 				} else {
 					dataPhones3 = parsedFile3;
@@ -79,14 +88,15 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
+			// === 4. Procesar archivo 4 ===
 			if (file4) {
-				const [errorConsolidado, parsedConsolidado] = await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
+				const [errorConsolidado, parsedConsolidado] =
+					await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
 
 				if (errorConsolidado) {
-					toast.error("Ocurrió un error inesperado");
+					toast.error("Error al cargar el archivo 4");
 					hasError = true;
 				} else {
-					dataPhones3 = parsedConsolidado;
 					toast.success("Archivo 4 procesado correctamente");
 				}
 			}
@@ -117,6 +127,7 @@ export const ViewUploadComplete = () => {
 			setFile3(null);
 			setFile4(null);
 		} catch (error) {
+			console.error("Error en handleSubmit:", error);
 			toast.error("Error inesperado al procesar los archivos");
 		} finally {
 			setIsLoading(false);
@@ -142,16 +153,14 @@ export const ViewUploadComplete = () => {
 					<CardHeader>
 						<CardTitle>Formulario de Carga</CardTitle>
 						<CardDescription>
-							Selecciona o arrastra al menos un archivo Excel. Puedes subir varios archivos.
+							Selecciona o arrastra al menos un archivo Excel. Puedes subir
+							varios archivos.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<form
-							onSubmit={handleSubmit}
-							className="space-y-6"
-						>
+						<form onSubmit={handleSubmit} className="space-y-6">
 							<FileUploadZone
-								label="Archivo para los pedidos rechazados (Opcional)"
+								label="Archivo para los pedidos no planeados (Opcional)"
 								file={file1}
 								onFileChange={setFile1}
 							/>

@@ -44,6 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
 					phoneNumber: validatedRow.Celular,
 					horaInicial: validatedRow["Hora inicial"],
 					horaFinal: validatedRow["Hora Final"],
+					tipoMensaje: "confirmacion_de_pedido",
 				});
 				savedRecords.push(record);
 			} catch (error) {
@@ -57,7 +58,6 @@ export const POST: APIRoute = async ({ request }) => {
 
 		return res(
 			{
-				message: "Archivo cargado correctamente",
 				hojaProcesada: sheetName,
 				data: savedRecords,
 				total: jsonData.length,

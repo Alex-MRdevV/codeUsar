@@ -2,6 +2,11 @@ export interface clientsInRuta {
 	phoneNumber: string;
 	horaInicial: string;
 	horaFinal: string;
+	tipoMensaje: "confirmacion_de_pedido";
+}
+
+export interface ClientsInRutaResponse {
+  data: clientsInRuta[];
 }
 
 export interface dataUsar {

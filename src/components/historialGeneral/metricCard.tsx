@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { MetricCardProps } from "@/utils/types/historyGeneral";
 
+
 export const MetricCard = ({ title, value, icon: Icon, trend, gradient = "primary" }: MetricCardProps) => {
 	return (
 		<Card className="shadow-elegant border-border/50 overflow-hidden transition-smooth hover:shadow-lg">

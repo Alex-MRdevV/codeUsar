@@ -1,12 +1,19 @@
 import { Templates } from "@/db/schemaTransitional/templates";
 import { sql } from "drizzle-orm";
-import { check, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	check,
+	index,
+	integer,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 
 export const HistoryGeneral = sqliteTable(
 	"HistoryGeneral",
 	{
 		id: text("id").primaryKey(),
 		messagesSend: integer("messagesSend").default(0),
+		phoneNumber: text("phoneNumber", { length: 20 }),
 		templateId: text("templateId", { length: 100 }).references(
 			() => Templates.id,
 			{

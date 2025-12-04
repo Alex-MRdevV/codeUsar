@@ -1,12 +1,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { HeatmapTooltipSectionProps } from "@/utils/types/history";
 
-export interface TooltipSectionProps {
-	getCountForDate: (date: Date) => number
-	days: Date[]
-	getIntensity: (count: number) => string
-}
-
-export const TooltipSection = ({ getCountForDate, days, getIntensity }: TooltipSectionProps) => {
+export const TooltipSection = ({ getCountForDate, days, getIntensity }: HeatmapTooltipSectionProps) => {
 	return (
 		<TooltipProvider>
 			<article className="grid grid-flow-col gap-1" style={{ gridTemplateRows: "repeat(7, minmax(0, 1fr))" }}>
@@ -15,12 +10,19 @@ export const TooltipSection = ({ getCountForDate, days, getIntensity }: TooltipS
 					return (
 						<Tooltip key={i}>
 							<TooltipTrigger asChild>
-								<div
+								<button
+									type="button"
 									className={`w-3 h-3 rounded-sm transition-smooth hover:ring-2 hover:ring-primary hover:scale-110 cursor-pointer ${getIntensity(count)}`}
 								/>
 							</TooltipTrigger>
 							<TooltipContent>
-								<p className="font-medium">{day.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+								<p className="font-medium">
+									{day.toLocaleDateString('es', {
+										day: 'numeric',
+										month: 'long',
+										year: 'numeric'
+									})}
+								</p>
 								<p className="text-sm text-muted-foreground">{count} mensajes</p>
 							</TooltipContent>
 						</Tooltip>
@@ -28,5 +30,5 @@ export const TooltipSection = ({ getCountForDate, days, getIntensity }: TooltipS
 				})}
 			</article>
 		</TooltipProvider>
-	)
-}
+	);
+};

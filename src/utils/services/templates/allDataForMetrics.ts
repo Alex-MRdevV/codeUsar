@@ -4,7 +4,7 @@ export async function getTemplatesForMetrics(): Promise<
 	[Error | null, TemplateForMetrics[] | null]
 > {
 	try {
-		const response = await fetch("/api/template/data", {
+		const response = await fetch("/api/data/allDataTemplatesForMetrics", {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -12,11 +12,13 @@ export async function getTemplatesForMetrics(): Promise<
 			credentials: "include",
 		});
 
-		const data: TemplateForMetrics[] = await response.json();
-
 		if (!response.ok) {
-			return [new Error(), null];
+			return [new Error("Error en la respuesta"), null];
 		}
+
+		const result = await response.json();
+		const data: TemplateForMetrics[] = result.data;
+
 		return [null, data];
 	} catch (error) {
 		return [error as Error, null];

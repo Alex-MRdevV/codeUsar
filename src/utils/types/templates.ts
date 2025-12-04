@@ -157,3 +157,4 @@ export interface TemplateForMetrics {
   messagesSent: number;
   status: TemplateStatus;
 }
+

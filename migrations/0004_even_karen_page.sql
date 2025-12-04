@@ -1,0 +1,1 @@
+ALTER TABLE `consolidated_clients` RENAME TO `clientesEnRuta`;

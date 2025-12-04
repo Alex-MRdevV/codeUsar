@@ -50,4 +50,5 @@ export const TrendChart = ({ data }: TrendChartProps) => {
 			</CardContent>
 		</Card>
 	);
-}
+};
+

@@ -1,7 +1,7 @@
-import type { DayData } from "@/utils/types/historyGeneral";
+import type { HeatmapDataPoint } from "@/utils/types/history";
 
 export async function getDataForDays(): Promise<
-	[Error | null, DayData[] | null]
+	[Error | null, HeatmapDataPoint[] | null]
 > {
 	try {
 		const response = await fetch("/api/data/allDataDays", {
@@ -12,11 +12,13 @@ export async function getDataForDays(): Promise<
 			credentials: "include",
 		});
 
-		const data: DayData[] = await response.json();
-
 		if (!response.ok) {
-			return [new Error(), null];
+			return [new Error("Error en la respuesta del servidor"), null];
 		}
+
+		const result = await response.json();
+		const data: HeatmapDataPoint[] = result.data;
+
 		return [null, data];
 	} catch (error) {
 		return [error as Error, null];

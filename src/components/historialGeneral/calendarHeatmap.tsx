@@ -4,9 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CalendarHeatmapProps } from "@/utils/types/historyGeneral";
 
 export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
-	if (!data || !Array.isArray(data)) {
+	const dataArray = data ? Array.from(data) : [];
+
+	if (!dataArray || dataArray.length === 0) {
 		return <p>Cargando datos del calendario...</p>;
 	}
+
 	const days = Array.from({ length: 120 }, (_, i) => {
 		const date = new Date();
 		date.setDate(date.getDate() - (83 - i));

@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e501b355-ca51-4dfe-9d60-a88ac66534df",
-  "prevId": "42a83059-7cdc-476f-9a20-a015cdaa0a30",
+  "id": "431a3848-c041-4407-ace8-7aea2d939bbe",
+  "prevId": "e501b355-ca51-4dfe-9d60-a88ac66534df",
   "tables": {
-    "consolidated_clients": {
-      "name": "consolidated_clients",
+    "clientesEnRuta": {
+      "name": "clientesEnRuta",
       "columns": {
         "id": {
           "name": "id",
@@ -293,7 +293,9 @@
   "enums": {},
   "_meta": {
     "schemas": {},
-    "tables": {},
+    "tables": {
+      "\"consolidated_clients\"": "\"clientesEnRuta\""
+    },
     "columns": {}
   },
   "internal": {

@@ -1,34 +1,8 @@
-import { CalendarHeatmap } from "@/components/historialGeneral/calendarHeatmap";
 import { MetricCard } from "@/components/historialGeneral/metricCard";
 import { TemplateStatsCard } from "@/components/historialGeneral/templateStatsCard";
 import { TrendChart } from "@/components/historialGeneral/trendChart";
-import type { TemplateStatsCardProps } from "@/utils/types/historyGeneral";
+import type { MetricCardSectionProps } from "@/utils/types/history";
 import { Calendar, FileText, MessageSquare } from "lucide-react";
-
-export interface MetricCardSectionProps {
-	templatesData: TemplateStatsCardProps[]
-	totalMessages: number
-	heatmapData?: HeatmapDataPoint[]
-	trendData?: TrendDataPoint[]
-	totalTrend?: { value: number; isPositive: boolean }
-}
-
-export interface HeatmapDataPoint {
-	date: string
-	count: number
-	templates: Array<{
-		id: string
-		name: string
-		color: string
-		messagesSent: number
-	}>
-	uniqueNumbers: number
-}
-
-export interface TrendDataPoint {
-	date: string
-	messages: number
-}
 
 export const MetricCardSection = ({
 	templatesData,
@@ -70,11 +44,19 @@ export const MetricCardSection = ({
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 						{templatesData.map((template) => (
-							<TemplateStatsCard key={template.id} {...template} />
+							<TemplateStatsCard
+								key={template.id}
+								color={template.color}
+								icon={template.icon}
+								id={template.id}
+								messagesSent={template.messagesSent}
+								name={template.name}
+								status={template.status}
+							/>
 						))}
 					</div>
 				</section>
 			)}
 		</>
-	)
-}
+	);
+};

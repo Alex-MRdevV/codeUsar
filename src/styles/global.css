@@ -118,3 +118,44 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@keyframes cardFlyUp {
+	0% {
+		opacity: 0;
+		transform: translateY(100px) translateX(0) scale(0.8)
+			rotateZ(var(--rotation));
+	}
+	10% {
+		opacity: 1;
+	}
+	85% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-500px) translateX(var(--x)) scale(0.5)
+			rotateZ(var(--rotation-end));
+	}
+}
+
+@keyframes cardError {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-10px);
+	}
+	75% {
+		transform: translateX(10px);
+	}
+}
+
+.flying-card {
+	animation: cardFlyUp var(--duration) ease-out var(--delay) forwards;
+}
+
+.flying-card-error {
+	animation: cardError 0.5s ease-in-out,
+		cardFlyUp var(--duration) ease-out var(--delay) forwards;
+}

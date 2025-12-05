@@ -9,7 +9,6 @@ export function validateRow(row: unknown): ExcelRowRutas | null {
 
 	// Buscar nombre (flexible con diferentes variaciones)
 	const nombre = validRow.Nombre || validRow.nombre || validRow.NOMBRE;
-
 	// Buscar teléfono (flexible con diferentes variaciones)
 	const celular =
 		validRow.Celular ||

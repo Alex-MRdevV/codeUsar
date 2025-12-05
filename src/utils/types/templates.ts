@@ -1,3 +1,5 @@
+import type { SetStateAction } from "react";
+
 export interface Template {
 	id: string;
 	name: string;
@@ -35,6 +37,15 @@ export interface Template {
 }
 
 export interface PreviewCardProps {
+	processText: (text: string, component: "header" | "body" | "footer") => string
+	setShowExamples: (value: SetStateAction<boolean>) => void
+	showExamples: boolean
+	getTotalCharacters: () => number
+	template: Partial<Pick<Template, "structure" | "variables">>;
+	recipients: string[];
+}
+
+export interface PreviewCardContainerProps {
 	template: Partial<Pick<Template, "structure" | "variables">>;
 	variableValues?: Record<string, string>;
 	recipients: string[];
@@ -150,11 +161,10 @@ export interface CreateTemplateResponse {
 type TemplateStatus = "APPROVED" | "PENDING" | "REJECTED";
 
 export interface TemplateForMetrics {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  messagesSent: number;
-  status: TemplateStatus;
+	id: string;
+	name: string;
+	icon: string;
+	color: string;
+	messagesSent: number;
+	status: TemplateStatus;
 }
-

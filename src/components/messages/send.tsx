@@ -1,6 +1,5 @@
 import { ButtonEnvio } from "@/components/messages/buttonEnvio";
 import { CreateTemplateModal } from "@/components/messages/editor/modalTemplates";
-import { PreviewCard } from "@/components/messages/editor/previewCard";
 import { TemplateSelector } from "@/components/messages/editor/templaterSelector";
 import { VariableEditor } from "@/components/messages/editor/variablesEditor";
 import { Header } from "@/components/messages/header";
@@ -17,6 +16,7 @@ import type { Template } from "@/utils/types/templates";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ProgressComponent } from "../progress";
+import { PreviewCardContainer } from "./editor/previewCardContainer";
 
 interface Props {
 	templates: Template[];
@@ -459,14 +459,9 @@ export const SendMessages = ({ templates: initialTemplates }: Props) => {
 
 					{!resultados && currentTemplate && (
 						<div className="sticky top-4">
-							<PreviewCard
-								template={currentTemplate}
-								variableValues={
-									Object.keys(variableValues).length > 0
-										? variableValues
-										: buildTemplateVariables(recipients[0] || "")
-								}
+							<PreviewCardContainer
 								recipients={recipients}
+								template={currentTemplate}
 							/>
 						</div>
 					)}

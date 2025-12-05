@@ -1,9 +1,8 @@
+import { MetricCardSection } from "@/components/historialGeneral/sections/metricCards";
 import { getDataForDays } from "@/utils/services/templates/allDataByDate";
 import { getTemplatesForMetrics } from "@/utils/services/templates/allDataForMetrics";
 import type { HeatmapDataPoint, TemplateStats } from "@/utils/types/history";
 import { useEffect, useState } from "react";
-import { MetricCardSection } from "./sections/metricCards";
-import { CalendarHeatmap } from "./calendarHeatmap";
 
 export const ViewHistoryGeneral = () => {
 	const [data, setData] = useState<TemplateStats[] | null>(null);
@@ -58,7 +57,6 @@ export const ViewHistoryGeneral = () => {
 				heatmapData={dataDays}
 				trendData={trendData}
 			/>
-			<CalendarHeatmap data={dataDays} />
 		</section>
 	);
 };

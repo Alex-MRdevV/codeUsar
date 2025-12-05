@@ -38,6 +38,7 @@ export const Templates = sqliteTable(
 			}>
 		>(),
 		// Métricas
+		messagesSendByDay: integer("messagesSend").default(0),
 		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
 			sql`(unixepoch() * 1000)`
 		),

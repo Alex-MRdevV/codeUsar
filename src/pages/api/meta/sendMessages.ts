@@ -40,10 +40,6 @@ async function trackMessagesSent(
 				templateId: templateId,
 			});
 		}
-
-		console.log(
-			`📊 Historial actualizado: ${messageCount} mensaje(s) para ${todayId}`
-		);
 	} catch (error) {}
 }
 

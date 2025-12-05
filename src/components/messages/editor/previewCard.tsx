@@ -1,48 +1,16 @@
-import { replaceVariables, type PreviewCardProps } from "@/utils/types/templates";
-import React from "react";
+import { type PreviewCardProps } from "@/utils/types/templates";
 
-export const PreviewCard: React.FC<PreviewCardProps> = ({
+export const PreviewCard = ({
 	template,
-	variableValues = {},
-	recipients
-}) => {
-	const [showExamples, setShowExamples] = React.useState(false);
+	recipients,
+	getTotalCharacters,
+	processText,
+	setShowExamples,
+	showExamples
+}: PreviewCardProps) => {
 	const { structure, variables } = template;
-
-	// Obtener variables por componente
-	const getVariablesByComponent = (component: 'header' | 'body' | 'footer') => {
-		return variables?.params.filter(p => p.component === component) || [];
-	};
-
-	// Procesar texto con variables
-	const processText = (text: string, component: 'header' | 'body' | 'footer') => {
-		const componentVars = {
-			format: variables?.format || 'positional',
-			params: getVariablesByComponent(component)
-		};
-
-		if (componentVars.params.length === 0) return text;
-
-		return replaceVariables(text, componentVars, variableValues, showExamples);
-	};
-
-	// Calcular caracteres totales
-	const getTotalCharacters = () => {
-		let total = 0;
-		if (structure?.header?.text) {
-			total += processText(structure.header.text, 'header').length;
-		}
-		if (structure?.body.text) {
-			total += processText(structure.body.text, 'body').length;
-		}
-		if (structure?.footer?.text) {
-			total += processText(structure?.footer.text, 'footer').length;
-		}
-		return total;
-	};
-
 	return (
-		<div className="bg-card border-border p-6 h-fit">
+		<article className="bg-card border-border p-6 h-fit">
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-sm font-semibold text-foreground">Vista Previa</h3>
 
@@ -58,11 +26,11 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 			</div>
 
 			{/* Preview del mensaje */}
-			<div
+			<section
 				className="bg-muted/30 rounded-lg p-4 min-h-40 max-h-60 overflow-y-auto"
 				style={{ wordBreak: "break-word" }}
 			>
-				<div className="space-y-3">
+				<section className="space-y-3">
 					{/* Header */}
 					{structure?.header?.text && (
 						<div className="font-bold text-foreground text-base mb-3">
@@ -83,16 +51,16 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 							{processText(structure.footer.text, 'footer')}
 						</div>
 					)}
-				</div>
-			</div>
+				</section>
+			</section>
 
 			{/* Variables Info */}
 			{variables && variables.params.length > 0 && (
-				<div className="mt-4 p-3 bg-muted/20 rounded-lg">
+				<section className="mt-4 p-3 bg-muted/20 rounded-lg">
 					<p className="text-xs font-semibold text-foreground mb-2">
 						Variables detectadas:
 					</p>
-					<div className="space-y-1">
+					<section className="space-y-1">
 						{variables.params.map((param, index) => (
 							<div
 								key={index}
@@ -109,12 +77,12 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 								</span>
 							</div>
 						))}
-					</div>
-				</div>
+					</section>
+				</section>
 			)}
 
 			{/* Información del envío */}
-			<div className="mt-6 pt-4 border-t border-border">
+			<section className="mt-6 pt-4 border-t border-border">
 				<p className="text-xs text-muted-foreground mb-2">Información del envío:</p>
 				<ul className="space-y-2 text-xs text-foreground">
 					<li className="flex justify-between">
@@ -132,7 +100,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 						</li>
 					)}
 				</ul>
-			</div>
-		</div>
+			</section>
+		</article>
 	);
 };

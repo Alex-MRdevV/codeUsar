@@ -3,6 +3,7 @@ import { TemplateStatsCard } from "@/components/historialGeneral/templateStatsCa
 import { TrendChart } from "@/components/historialGeneral/trendChart";
 import type { MetricCardSectionProps } from "@/utils/types/history";
 import { Calendar, FileText, MessageSquare } from "lucide-react";
+import { CalendarHeatmap } from "../calendarHeatmap";
 
 export const MetricCardSection = ({
 	templatesData,
@@ -32,6 +33,7 @@ export const MetricCardSection = ({
 			{(heatmapData.length > 0 || trendData.length > 0) && (
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 					{trendData.length > 0 && <TrendChart data={trendData} />}
+					<CalendarHeatmap data={heatmapData} />
 				</div>
 			)}
 

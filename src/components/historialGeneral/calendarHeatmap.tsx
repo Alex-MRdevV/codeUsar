@@ -52,7 +52,7 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 	});
 
 	return (
-		<Card className="shadow-lg border-0 bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 backdrop-blur-sm">
+		<Card className="shadow-lg border-0 backdrop-blur-sm bg-linear-to-r from-purple-400 to-pink-800">
 			<CardHeader>
 				<CardTitle className="font-display text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-600">Actividad de mensajes</CardTitle>
 			</CardHeader>

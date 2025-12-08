@@ -13,7 +13,7 @@ export const HistoryGeneral = sqliteTable(
 	{
 		id: text("id").primaryKey(),
 		messagesSend: integer("messagesSend").default(0),
-		phoneNumber: text("phoneNumber", { length: 20 }),
+		messagesAlcanzados: integer("messagesAlcanzados").default(0),
 		templateId: text("templateId", { length: 100 }).references(
 			() => Templates.id,
 			{

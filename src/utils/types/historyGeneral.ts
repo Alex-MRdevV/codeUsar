@@ -9,6 +9,7 @@ export interface DayData {
 	count: number;
 }
 
+
 export interface CalendarHeatmapProps {
 	data: DayData[];
 }

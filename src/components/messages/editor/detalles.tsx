@@ -1,7 +1,6 @@
 import type { EventDetailsProps } from "@/utils/types/editorMessages";
-import React from "react";
 
-export const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
+export const EventDetails = ({ event }: EventDetailsProps) => {
 	return (
 		<article className="mt-4 pt-4 border-t border-border space-y-3">
 			<div>

@@ -1,7 +1,6 @@
 import type { MessageInputProps } from "@/utils/types/editorMessages";
-import React from "react";
 
-export const MessageInput: React.FC<MessageInputProps> = ({ message, onMessageChange }) => {
+export const MessageInput = ({ message, onMessageChange }: MessageInputProps) => {
 	return (
 		<div>
 			<label className="text-sm font-semibold text-foreground mb-3 block">Mensaje</label>

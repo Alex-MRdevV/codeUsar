@@ -215,14 +215,7 @@ export interface DayStats {
 }
 
 export interface DayStatsPanelProps {
-	goToPreviousDay: () => void;
-	setIsCalendarOpen: Dispatch<SetStateAction<boolean>>;
-	isCalendarOpen: boolean;
-	goToNextDay: () => void;
-	handleDateSelect: (date: Date | undefined) => void;
-	isToday: boolean;
-	selectedDate: Date;
-	dayStats: DayStats | null;
+	getDayStats: (date: Date) => DayStats | null;
 }
 
 export interface HeaderPanelProps {
@@ -236,5 +229,5 @@ export interface HeaderPanelProps {
 }
 
 export interface TemplatePanelProps {
-	dayStats: DayStats | null;
+	templates: TemplateBreakdown[];
 }

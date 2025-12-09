@@ -1,10 +1,11 @@
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import type { TemplatePanelProps } from "@/utils/types/historyGeneral"
-import { TrendingUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import type { TemplatePanelProps } from "@/utils/types/historyGeneral";
+import { TrendingUp } from "lucide-react";
 
-export const TemplateList = ({ dayStats }: TemplatePanelProps) => {
-	if (!dayStats) return null
+export const TemplateList = ({ templates }: TemplatePanelProps) => {
+	if (!templates || !Array.isArray(templates)) return null;
+
 	return (
 		<article className="space-y-4">
 			<section className="flex items-center justify-between">
@@ -13,13 +14,13 @@ export const TemplateList = ({ dayStats }: TemplatePanelProps) => {
 					Desglose por Plantilla
 				</h3>
 				<Badge variant="outline" className="font-display">
-					{dayStats.templates.length} plantillas
+					{templates.length} plantillas
 				</Badge>
 			</section>
 
 			{/* Visual Breakdown Bar */}
 			<section className="h-3 rounded-full overflow-hidden flex bg-muted">
-				{dayStats.templates.map((template, idx) => (
+				{templates.map((template) => (
 					<div
 						key={template.id}
 						className="h-full transition-all duration-500"
@@ -33,7 +34,7 @@ export const TemplateList = ({ dayStats }: TemplatePanelProps) => {
 
 			{/* Template List */}
 			<article className="space-y-3">
-				{dayStats.templates
+				{templates
 					.sort((a, b) => b.messagesSent - a.messagesSent)
 					.map((template, index) => (
 						<div
@@ -86,5 +87,5 @@ export const TemplateList = ({ dayStats }: TemplatePanelProps) => {
 					))}
 			</article>
 		</article>
-	)
-}
+	);
+};

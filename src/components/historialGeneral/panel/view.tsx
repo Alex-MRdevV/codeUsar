@@ -1,12 +1,10 @@
 import { DayStatsPanel } from "@/components/historialGeneral/panel/panelStatsByDay";
 import { getDataForPanel } from "@/utils/services/history/allDataPanel";
 import type { DayStats } from "@/utils/types/historyGeneral";
-import { addDays, isAfter, startOfDay, subDays } from "date-fns";
-import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { useCallback, useEffect, useState } from "react";
 
 export const PanelStatsByDay = () => {
-	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [data, setData] = useState<DayStats | null>(null);
 	const [error, setError] = useState<boolean>(false);
 
@@ -27,37 +25,26 @@ export const PanelStatsByDay = () => {
 
 	if (error) return <p>Error al cargar los datos</p>;
 
-	const goToPreviousDay = () => {
-		setSelectedDate(prev => subDays(prev, 1));
-	};
+	const getDayStats = useCallback(
+		(date: Date) => {
+			if (!data) return null;
 
-	const goToNextDay = () => {
-		const nextDay = addDays(selectedDate, 1);
-		if (!isAfter(startOfDay(nextDay), startOfDay(new Date()))) {
-			setSelectedDate(nextDay);
-		}
-	};
+			const dateStr = format(date, "yyyy-MM-dd");
 
-	const isToday = startOfDay(selectedDate).getTime() === startOfDay(new Date()).getTime();
+			// Busca en tu respuesta real del backend
+			if (data.date === dateStr) {
+				return data;
+			}
 
-	const handleDateSelect = (date: Date | undefined) => {
-		if (date) {
-			setSelectedDate(date);
-			setIsCalendarOpen(false);
-		}
-	};
+			return null;
+		},
+		[data]
+	);
 
 	return (
 		<section className="mb-8">
 			<DayStatsPanel
-				dayStats={data}
-				goToNextDay={goToNextDay}
-				goToPreviousDay={goToPreviousDay}
-				handleDateSelect={handleDateSelect}
-				isCalendarOpen={isCalendarOpen}
-				isToday={isToday}
-				selectedDate={selectedDate}
-				setIsCalendarOpen={setIsCalendarOpen}
+				getDayStats={getDayStats}
 			/>
 		</section>
 	)

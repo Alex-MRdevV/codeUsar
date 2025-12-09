@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import { Templates } from "@/db/schemaTransitional/templates";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { buildUpdateSet } from "@/utils/utilities";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
 import type { TemplateBreakdown } from "@/utils/types/historyGeneral";
@@ -97,38 +97,57 @@ export const getUniqueNumbersByDay = db
 	.groupBy(sql`DATE(${HistoryGeneral.date})`)
 	.prepare();
 
-export const getDayStats = db
+// Subquery: agrupa por fecha + template
+const sub = db
 	.select({
-		date: sql<string>`DATE(${HistoryGeneral.date})`,
-		totalMessages: sql<number>`COALESCE(SUM(${HistoryGeneral.messagesSend}), 0)`,
-		uniqueNumbers: sql<number>`COALESCE(MAX(${HistoryGeneral.messagesAlcanzados}), 0)`,
-		templates: sql<TemplateBreakdown[]>`
-      json_group_array(
-        json_object(
-          'id', ${Templates.id},
-          'name', ${Templates.name},
-          'color', ${Templates.color},
-          'messagesSent', COALESCE(SUM(${HistoryGeneral.messagesSend}), 0),
-          'percentage',
-            CASE 
-              WHEN SUM(${HistoryGeneral.messagesSend}) = 0 THEN 0
-              ELSE ROUND(
-                (SUM(${HistoryGeneral.messagesSend}) * 100.0) /
-                (SELECT SUM(messagesSend)
-                 FROM HistoryGeneral h2
-                 WHERE DATE(h2.created_at) = DATE(${HistoryGeneral.date})
-                ), 2
-              )
-            END
-        )
+		date: sql<string>`DATE(${HistoryGeneral.date})`.as("date"),
+		templateId: HistoryGeneral.templateId,
+		name: Templates.name,
+		color: Templates.color,
+		messagesSent: sql<number>`SUM(${HistoryGeneral.messagesSend})`.as(
+			"messagesSent"
+		),
+		totalMessages: sql<number>`
+      SUM(${HistoryGeneral.messagesSend}) OVER (PARTITION BY DATE(${HistoryGeneral.date}))
+    `.as("totalMessages"),
+		uniqueNumbers: sql<number>`
+      MAX(${HistoryGeneral.messagesAlcanzados}) OVER (PARTITION BY DATE(${HistoryGeneral.date}))
+    `.as("uniqueNumbers"),
+		percentage: sql<number>`
+      ROUND(
+        SUM(${HistoryGeneral.messagesSend}) * 100.0 /
+        SUM(${HistoryGeneral.messagesSend}) OVER (PARTITION BY DATE(${HistoryGeneral.date})),
+        2
       )
-    `,
+    `.as("percentage"),
 	})
 	.from(HistoryGeneral)
 	.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
 	.where(eq(Templates.metaStatus, "APPROVED"))
-	.groupBy(sql`DATE(${HistoryGeneral.date})`)
-	.orderBy(sql`DATE(${HistoryGeneral.date}) DESC`)
+	.groupBy(sql`DATE(${HistoryGeneral.date}), ${HistoryGeneral.templateId}`)
+	.as("sub");
+
+// Query final: agrupa por fecha y genera JSON
+export const getDayStats = db
+	.select({
+		date: sub.date,
+		totalMessages: sub.totalMessages,
+		uniqueNumbers: sub.uniqueNumbers,
+		templates: sql<TemplateBreakdown[]>`
+      json_group_array(
+        json_object(
+          'id', ${sub.templateId},
+          'name', ${sub.name},
+          'color', ${sub.color},
+          'messagesSent', ${sub.messagesSent},
+          'percentage', ${sub.percentage}
+        )
+      )
+    `.as("templates"),
+	})
+	.from(sub)
+	.groupBy(sql`date`)
+	.orderBy(desc(sub.date))
 	.prepare();
 
 export const getTemplatesForMetrics = db

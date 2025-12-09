@@ -1,13 +1,13 @@
 import Logo from "@/assets/logo.webp";
 import { SwitchTheme } from "@/components/switchTheme";
-import { Separator } from "../ui/separator";
-import { SidebarTrigger } from "../ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export const HeaderAuthenticated = ({ }) => {
+export const HeaderAuthenticated = () => {
 	return (
 		<header className="flex h-16 shrink-0 items-center gap-2 transition-all ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-16 fixed z-20 w-full backdrop-blur-md bg-sky-600/80 dark:bg-slate-900/80 border-b border-sky-700/50 dark:border-slate-700/50 shadow-sm">
 			<nav className="w-full px-4 lg:px-6 py-2.5">
-				<div className="flex justify-between items-center max-w-full">
+				<section className="flex justify-between items-center max-w-full">
 					<span className="flex items-center gap-2">
 						<SidebarTrigger
 							id="sidebar-trigger"
@@ -29,27 +29,24 @@ export const HeaderAuthenticated = ({ }) => {
 							/>
 						</a>
 					</span>
-
-					<div className="flex items-center gap-2 md:gap-3 -mr-2">
+					<section className="flex items-center gap-2 md:gap-3 -mr-2">
 						<div className="hidden md:flex items-center gap-1">
 							<a
-								href={`/users/`}
+								href="/users/"
 								className="px-3 py-2 text-sm font-medium text-white dark:text-slate-200 hover:bg-white/10 dark:hover:bg-slate-700/50 rounded-md transition-colors"
 							>
 								Ir a tu panel
 							</a>
 						</div>
-
 						<div className="hidden md:block">
 							<Separator
 								orientation="vertical"
 								className="h-6 bg-white/30 dark:bg-slate-600/50"
 							/>
 						</div>
-
 						<SwitchTheme />
-					</div>
-				</div>
+					</section>
+				</section>
 			</nav>
 		</header>
 	);

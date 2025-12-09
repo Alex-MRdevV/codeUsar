@@ -1,11 +1,12 @@
-import { $userStore } from "@clerk/astro/client";
-import { HeaderAuthenticated } from "./autenticado";
-import { HeaderUnauthenticated } from "./noAutenticado";
+import { HeaderAuthenticated } from "@/components/headers/autenticado";
+import { HeaderUnauthenticated } from "@/components/headers/noAutenticado";
+import { userContext } from "@/stores/user";
+import { useStore } from "@nanostores/react";
 
 export const HeaderApp = () => {
-	const user = $userStore.get();
+	const user = useStore(userContext);
 
-	return user ? (
+	return user?.isLoggedIn ? (
 		<HeaderAuthenticated />
 	) : (
 		<HeaderUnauthenticated />

@@ -1,13 +1,16 @@
 import Logo from "@/assets/logo.webp";
 import { SwitchTheme } from "@/components/switchTheme";
-import { SignInButton } from "@clerk/astro/react";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
+import { userContext } from "@/stores/user";
+import { useStore } from "@nanostores/react";
 
 export const HeaderUnauthenticated = () => {
+	const user = useStore(userContext);
+
 	return (
 		<header className="flex h-16 shrink-0 items-center gap-2 transition-all ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-16 fixed z-20 w-full backdrop-blur-md bg-sky-600/80 dark:bg-slate-900/80 border-b border-sky-700/50 dark:border-slate-700/50 shadow-sm">
 			<nav className="w-full px-4 lg:px-6 py-2.5">
-				<div className="flex justify-between items-center max-w-full">
+				<section className="flex justify-between items-center max-w-full">
 					<span className="flex items-center gap-2">
 						<Separator
 							orientation="vertical"
@@ -21,19 +24,18 @@ export const HeaderUnauthenticated = () => {
 							/>
 						</a>
 					</span>
-
-					<div className="flex items-center gap-2 md:gap-3 -mr-2">
+					<section className="flex items-center gap-2 md:gap-3 -mr-2">
 						<div className="hidden md:flex items-center gap-1">
-							<SignInButton mode="modal" fallbackRedirectUrl={"/users/"} forceRedirectUrl={"/users/"}>
-								<span className="px-3 py-2 text-sm font-medium text-white dark:text-slate-200 hover:bg-white/10 dark:hover:bg-slate-700/50 rounded-md transition-colors">
-									Iniciar sesión
-								</span>
-							</SignInButton>
+							<a
+								href={user?.isLoggedIn ? "/users" : "/login"}
+								className="px-3 py-2 text-sm font-medium text-white dark:text-slate-200 hover:bg-white/10 dark:hover:bg-slate-700/50 rounded-md transition-colors"
+							>
+								{user?.isLoggedIn ? "Ir a tu panel" : "Iniciar sesión"}
+							</a>
 						</div>
-
 						<SwitchTheme />
-					</div>
-				</div>
+					</section>
+				</section>
 			</nav>
 		</header>
 	);

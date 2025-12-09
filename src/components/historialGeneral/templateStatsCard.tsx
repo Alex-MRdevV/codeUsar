@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { TemplateStats } from "@/utils/types/history";
+import type { TemplateStatsCardProps } from "@/utils/types/historyGeneral";
 import * as Icons from "lucide-react";
 import { type LucideIcon } from "lucide-react";
 
@@ -10,7 +10,7 @@ export const TemplateStatsCard = ({
 	color,
 	status,
 	messagesSent
-}: TemplateStats) => {
+}: TemplateStatsCardProps) => {
 	// Get icon component dynamically
 	const IconComponent = (Icons[icon as keyof typeof Icons] as LucideIcon) || Icons.FileText;
 

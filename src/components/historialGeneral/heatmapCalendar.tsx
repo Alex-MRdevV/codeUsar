@@ -1,60 +1,46 @@
-
-/*import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScalaSection } from "@/components/historialGeneral/sections/scaleSection";
+import { TooltipSection } from "@/components/historialGeneral/tooltipSection";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, FileText, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { CalendarHeatmapProps, DayData } from "@/utils/types/historyGeneral";
+import { FileText, MessageSquare, Users } from "lucide-react";
+import { useState } from "react";
 
-interface TemplateDetail {
-	id: string;
-	name: string;
-	color: string;
-	messagesSent: number;
-}
-
-interface DayData {
-	date: string;
-	count: number;
-	templates?: TemplateDetail[];
-	uniqueNumbers?: number;
-}
-
-interface CalendarHeatmapProps {
-	data: DayData[];
-}
-
-export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
+export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 	const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
 
-	// Get last 84 days (12 weeks)
-	const days = Array.from({ length: 84 }, (_, i) => {
+	const days = Array.from({ length: 120 }, (_, i) => {
 		const date = new Date();
 		date.setDate(date.getDate() - (83 - i));
 		return date;
 	});
 
+	const maxCount = Math.max(...data.map(d => d.count), 1);
+	const getCountForDate = (date: Date) => {
+		const dateStr = date.toISOString().split('T')[0];
+		const found = data.find(d => d.date === dateStr);
+		return found?.count || 0;
+	};
+
+	const getIntensity = (count: number) => {
+		if (count === 0) return "bg-muted dark:bg-muted/40";
+
+		const intensity = Math.ceil((count / maxCount) * 4);
+
+		const intensities = {
+			1: "bg-primary/25 dark:bg-primary/30",
+			2: "bg-primary/40 dark:bg-primary/45",
+			3: "bg-primary/60 dark:bg-primary/70",
+			4: "bg-primary dark:bg-primary/90",
+		};
+
+		return intensities[intensity as keyof typeof intensities] || "bg-primary dark:bg-primary/80";
+	};
+
 	const getDataForDate = (date: Date) => {
 		const dateStr = date.toISOString().split('T')[0];
 		return data.find(d => d.date === dateStr);
-	};
-
-	const getCountForDate = (date: Date) => {
-		return getDataForDate(date)?.count || 0;
-	};
-
-	const maxCount = Math.max(...data.map(d => d.count), 1);
-
-	const getIntensity = (count: number) => {
-		if (count === 0) return "bg-muted";
-		const intensity = Math.ceil((count / maxCount) * 4);
-		const intensities = {
-			1: "bg-primary/20",
-			2: "bg-primary/40",
-			3: "bg-primary/60",
-			4: "bg-primary",
-		};
-		return intensities[intensity as keyof typeof intensities] || "bg-primary";
 	};
 
 	const weeks = [];
@@ -75,7 +61,7 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 				<CardTitle className="font-display">Actividad de mensajes</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="space-y-2">
+				<section className="space-y-2">
 					<div className="flex gap-1 text-xs text-muted-foreground mb-2">
 						{monthLabels.map((label, i) => (
 							<div key={i} style={{ width: "calc(100% / 12)" }}>
@@ -84,41 +70,16 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 						))}
 					</div>
 
-					<TooltipProvider>
-						<div className="grid grid-flow-col gap-1" style={{ gridTemplateRows: "repeat(7, minmax(0, 1fr))" }}>
-							{days.map((day, i) => {
-								const count = getCountForDate(day);
-								const dayData = getDataForDate(day);
-								return (
-									<Tooltip key={i}>
-										<TooltipTrigger asChild>
-											<div
-												className={`w-3 h-3 rounded-sm transition-smooth hover:ring-2 hover:ring-primary hover:scale-110 cursor-pointer ${getIntensity(count)}`}
-												onClick={() => dayData && setSelectedDay(dayData)}
-											/>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p className="font-medium">{day.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-											<p className="text-sm text-muted-foreground">{count} mensajes</p>
-										</TooltipContent>
-									</Tooltip>
-								);
-							})}
-						</div>
-					</TooltipProvider>
+					<TooltipSection
+						days={days}
+						getCountForDate={getCountForDate}
+						getIntensity={getIntensity}
+						getDataForDate={getDataForDate}
+						setSelectedDay={setSelectedDay}
+					/>
 
-					<div className="flex items-center gap-2 text-xs text-muted-foreground mt-4">
-						<span>Menos</span>
-						<div className="flex gap-1">
-							<div className="w-3 h-3 rounded-sm bg-muted" />
-							<div className="w-3 h-3 rounded-sm bg-primary/20" />
-							<div className="w-3 h-3 rounded-sm bg-primary/40" />
-							<div className="w-3 h-3 rounded-sm bg-primary/60" />
-							<div className="w-3 h-3 rounded-sm bg-primary" />
-						</div>
-						<span>Más</span>
-					</div>
-				</div>
+					<ScalaSection />
+				</section>
 			</CardContent>
 
 			<Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
@@ -135,8 +96,8 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 
 					{selectedDay && (
 						<div className="space-y-6">
-							{/* Resumen General *//*}
-							<div className="grid grid-cols-3 gap-4">
+							{/* Resumen General */}
+							<section className="grid grid-cols-3 gap-4">
 								<div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-primary/5 border border-primary/10">
 									<MessageSquare className="h-5 w-5 text-primary" />
 									<div className="text-center">
@@ -160,13 +121,13 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 										<p className="text-xs text-muted-foreground">Números</p>
 									</div>
 								</div>
-							</div>
+							</section>
 
-							{/* Desglose por Template *//*}
+							{/* Desglose por Template */}
 							{selectedDay.templates && selectedDay.templates.length > 0 && (
-								<div className="space-y-3">
+								<section className="space-y-3">
 									<h3 className="font-display font-semibold text-sm">Mensajes por Template</h3>
-									<div className="space-y-2">
+									<section className="space-y-2">
 										{selectedDay.templates.map((template) => (
 											<div
 												key={template.id}
@@ -184,8 +145,8 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 												</Badge>
 											</div>
 										))}
-									</div>
-								</div>
+									</section>
+								</section>
 							)}
 						</div>
 					)}
@@ -194,4 +155,3 @@ export function CalendarHeatmap({ data }: CalendarHeatmapProps) {
 		</Card>
 	);
 }
-*/

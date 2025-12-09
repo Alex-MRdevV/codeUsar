@@ -1,16 +1,18 @@
+import { CalendarHeatmap } from "@/components/historialGeneral/heatmapCalendar";
 import { MetricCard } from "@/components/historialGeneral/metricCard";
+import { PanelStatsByDay } from "@/components/historialGeneral/panel/view";
 import { TemplateStatsCard } from "@/components/historialGeneral/templateStatsCard";
 import { TrendChart } from "@/components/historialGeneral/trendChart";
-import type { MetricCardSectionProps } from "@/utils/types/history";
-import { Calendar, FileText, MessageSquare } from "lucide-react";
-import { CalendarHeatmap } from "../calendarHeatmap";
+import type { MetricCardSectionProps } from "@/utils/types/historyGeneral";
+import { Calendar, FileText, MessageSquare, Users } from "lucide-react";
 
 export const MetricCardSection = ({
 	templatesData,
 	totalMessages,
 	heatmapData = [],
 	trendData = [],
-	totalTrend
+	totalTrend,
+	uniqueNumbers
 }: MetricCardSectionProps) => {
 	return (
 		<>
@@ -28,7 +30,15 @@ export const MetricCardSection = ({
 					icon={FileText}
 					gradient="warm"
 				/>
+				<MetricCard
+					title="Números únicos"
+					value={uniqueNumbers.toLocaleString()}
+					icon={Users}
+					gradient="primary"
+				/>
 			</section>
+
+			<PanelStatsByDay />
 
 			{(heatmapData.length > 0 || trendData.length > 0) && (
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

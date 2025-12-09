@@ -85,7 +85,7 @@ export const CalendarHeatmap = ({ data }: CalendarHeatmapProps) => {
 			</CardContent>
 
 			<Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
-				<DialogContent className="sm:max-w-lg">
+				<DialogContent className="sm:max-w-lg" aria-describedby="Contenido del modal">
 					<DialogHeader>
 						<DialogTitle className="font-display text-2xl">
 							{selectedDay && new Date(selectedDay.date).toLocaleDateString('es', {

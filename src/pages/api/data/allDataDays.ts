@@ -3,7 +3,7 @@ import {
 	getUniqueNumbersByDay,
 } from "@/lib/drizzle/templates";
 import { res } from "@/utils/responseAstro";
-import type { HeatmapDataPoint } from "@/utils/types/history";
+import type { HeatmapDataPoint } from "@/utils/types/historyGeneral";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async () => {
@@ -52,7 +52,7 @@ export const GET: APIRoute = async () => {
 
 		return res(
 			{
-				data: heatmapData, // Este es HeatmapDataPoint[]
+				data: heatmapData,
 			},
 			{
 				status: 200,

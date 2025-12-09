@@ -4,7 +4,6 @@ import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({}) => {
 	try {
-		// Obtener ambas fuentes de datos
 		const dataClientes = await getAllClientesByRuta();
 
 		return res(

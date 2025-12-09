@@ -2,9 +2,9 @@ import { getTemplates } from "@/lib/drizzle/templates";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async () => {
 	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
-	const WABA_ID = import.meta.env.WHATSAPP_WABA_ID; // WhatsApp Business Account ID
+	const WABA_ID = import.meta.env.WHATSAPP_WABA_ID; 
 
 	if (!WABA_ID || !ACCESS_TOKEN) {
 		return res(

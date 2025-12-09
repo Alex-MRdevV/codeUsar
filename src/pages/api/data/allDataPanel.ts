@@ -1,14 +1,14 @@
-import { getTemplatesForMetrics } from "@/lib/drizzle/templates";
+import { getDayStats } from "@/lib/drizzle/templates";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async () => {
 	try {
-		const response = await getTemplatesForMetrics.execute();
+		const [data] = await getDayStats.execute();
 
 		return res(
 			{
-				data: response,
+				data: data,
 			},
 			{
 				status: 200,

@@ -4,7 +4,7 @@ import type { CreateTemplateRequest } from "@/utils/types/templates";
 import { uuid } from "@/utils/uuid";
 import type { APIRoute } from "astro";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
 	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
 	const WABA_ID = import.meta.env.WHATSAPP_WABA_ID;
 

@@ -1,21 +1,89 @@
-import type { LucideIcon } from "lucide-react";
+import { CheckCircle, Clock, XCircle, type LucideProps } from "lucide-react";
+import type {
+	Dispatch,
+	ForwardRefExoticComponent,
+	RefAttributes,
+	SetStateAction,
+} from "react";
+import type { TemplateForMetrics } from "./templates";
 
 export interface TrendChartProps {
 	data: Array<{ date: string; messages: number }>;
 }
 
+export interface TrendDataPoint {
+	date: string; // ISO format: YYYY-MM-DD
+	messages: number;
+}
+
+export interface TrendMetric {
+	value: number; // Porcentaje de cambio
+	isPositive: boolean;
+}
+
+export interface MetricCardProps {
+	title: string;
+	value: string | number;
+	icon: React.ComponentType<{ className?: string }>; // LucideIcon
+	trend?: TrendMetric;
+	gradient?: "primary" | "warm";
+}
+
+export interface TrendChartProps {
+	data: TrendDataPoint[];
+	showGrid?: boolean;
+	height?: number;
+}
+
+export interface HeatmapDataPoint {
+	date: string; // ISO format: YYYY-MM-DD
+	count: number; // Total de mensajes ese día
+	templates: Array<{
+		id: string;
+		name: string;
+		color: string;
+		messagesSent: number;
+	}>;
+	uniqueNumbers: number; // Números únicos contactados
+}
+
+export interface MetricCardSectionProps {
+	templatesData: TemplateForMetrics[];
+	totalMessages: number;
+	totalTrend?: TrendMetric;
+	heatmapData?: HeatmapDataPoint[];
+	trendData?: TrendDataPoint[];
+	uniqueNumbers: number;
+}
+
+interface TemplateDetail {
+	id: string;
+	name: string;
+	color: string;
+	messagesSent: number;
+}
+
 export interface DayData {
 	date: string;
 	count: number;
+	templates?: TemplateDetail[];
+	uniqueNumbers?: number;
 }
 
+export interface HeatmapTooltipSectionProps {
+	getCountForDate: (date: Date) => number;
+	days: Date[];
+	getIntensity: (count: number) => string;
+	getDataForDate: (date: Date) => DayData | undefined;
+	setSelectedDay: Dispatch<SetStateAction<DayData | null>>;
+}
 
 export interface CalendarHeatmapProps {
 	data: DayData[];
 }
 
 export interface TemplateStatsCardProps {
-	id: string
+	id: string;
 	name: string;
 	icon: string;
 	color?: string;
@@ -30,24 +98,12 @@ export interface HistoryStatsParams {
 	limit?: number; // Limitar cantidad de días a mostrar
 }
 
-export interface MetricCardProps {
-	title: string;
-	value: string | number;
-	icon: LucideIcon;
-	trend?: {
-		value: number;
-		isPositive: boolean;
-	};
-	gradient?: "primary" | "warm";
-}
-
 export interface DayMessageHistory {
 	id?: string; // Opcional para creación, requerido para actualización
 	templateId: string;
 	messagesSend: number; // Cantidad de mensajes enviados ese día
 }
 
-// Respuesta del servidor
 export interface DayHistoryResponse {
 	success: boolean;
 	message: string;
@@ -77,4 +133,108 @@ export interface HistoryStatsResponse {
 			averagePerDay: number; // Promedio de mensajes por día
 		};
 	};
+}
+
+export const statusConfig = {
+	APPROVED: {
+		icon: CheckCircle,
+		label: "Aprobada",
+		className:
+			"bg-green-500/15 text-green-600 dark:text-green-400 border-green-500/30",
+	},
+	PENDING: {
+		icon: Clock,
+		label: "Pendiente",
+		className:
+			"bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+	},
+	REJECTED: {
+		icon: XCircle,
+		label: "Rechazada",
+		className: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30",
+	},
+};
+
+export interface TemplatesOverviewAdminProps {
+	templates: TemplateStatsCardProps[];
+}
+
+export interface MessagesChartsAdminProps {
+	data: {
+		date: string;
+		enviados: number;
+		entregados: number;
+	}[];
+}
+
+export interface DeliveryStatusChartsProps {
+	data: {
+		name: "Entregados" | "Fallidos" | "Programados";
+		value: number;
+		color: "--color-primary" | "--color-error" | "--color-purple";
+	}[];
+}
+
+export interface RecentACtivitiesProps {
+	activities: {
+		id: string;
+		phone: string;
+		template: string;
+		status: string;
+		time: string;
+	}[];
+}
+
+export interface StatsCardsUserProps {
+	stats: {
+		title: string;
+		value: string;
+		change: string;
+		trend: string;
+		icon: ForwardRefExoticComponent<
+			Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+		>;
+		description: string;
+		colorClass: string;
+	}[];
+}
+
+export interface TemplateBreakdown {
+	id: string;
+	name: string;
+	color: string;
+	messagesSent: number;
+	percentage: number;
+}
+
+export interface DayStats {
+	date: string;
+	totalMessages: number;
+	uniqueNumbers: number;
+	templates: TemplateBreakdown[];
+}
+
+export interface DayStatsPanelProps {
+	goToPreviousDay: () => void;
+	setIsCalendarOpen: Dispatch<SetStateAction<boolean>>;
+	isCalendarOpen: boolean;
+	goToNextDay: () => void;
+	handleDateSelect: (date: Date | undefined) => void;
+	isToday: boolean;
+	selectedDate: Date;
+	dayStats: DayStats | null;
+}
+
+export interface HeaderPanelProps {
+	goToPreviousDay: () => void;
+	setIsCalendarOpen: Dispatch<SetStateAction<boolean>>;
+	isCalendarOpen: boolean;
+	goToNextDay: () => void;
+	handleDateSelect: (date: Date | undefined) => void;
+	isToday: boolean;
+	selectedDate: Date;
+}
+
+export interface TemplatePanelProps {
+	dayStats: DayStats | null;
 }

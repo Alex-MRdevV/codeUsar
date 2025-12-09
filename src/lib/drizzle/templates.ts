@@ -3,30 +3,7 @@ import { Templates } from "@/db/schemaTransitional/templates";
 import { eq, sql } from "drizzle-orm";
 import { buildUpdateSet } from "@/utils/utilities";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
-
-// Consulta para obtener datos agrupados por fecha y template
-export const getCalendarDataWithTemplates = db
-  .select({
-    date: sql<string>`date(${HistoryGeneral.date})`,
-    count: sql<number>`sum(${HistoryGeneral.messagesSend})`,
-    templateId: Templates.id,
-    templateName: Templates.name,
-    templateColor: Templates.color,
-    templateIcon: Templates.icon,
-    templateMessages: sql<number>`sum(${HistoryGeneral.messagesSend})`,
-  })
-  .from(HistoryGeneral)
-  .leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
-  .where(eq(Templates.metaStatus, "APPROVED"))
-  .groupBy(
-    sql`date(${HistoryGeneral.date})`,
-    Templates.id,
-    Templates.name,
-    Templates.color,
-    Templates.icon
-  )
-  .orderBy(sql`date(${HistoryGeneral.date})`)
-  .prepare();
+import type { TemplateBreakdown } from "@/utils/types/historyGeneral";
 
 export const createTemplate = db
 	.insert(Templates)
@@ -61,40 +38,98 @@ export const getTemplates = db
 	.where(eq(Templates.metaStatus, "APPROVED"))
 	.prepare();
 
+// Consulta para obtener datos agrupados por fecha y template
+export const getCalendarDataWithTemplates = db
+	.select({
+		date: sql<string>`date(${HistoryGeneral.date})`,
+		count: sql<number>`sum(${HistoryGeneral.messagesSend})`,
+		templateId: Templates.id,
+		templateName: Templates.name,
+		templateColor: Templates.color,
+		templateIcon: Templates.icon,
+		templateMessages: sql<number>`sum(${HistoryGeneral.messagesSend})`,
+	})
+	.from(HistoryGeneral)
+	.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+	.where(eq(Templates.metaStatus, "APPROVED"))
+	.groupBy(
+		sql`date(${HistoryGeneral.date})`,
+		Templates.id,
+		Templates.name,
+		Templates.color,
+		Templates.icon
+	)
+	.orderBy(sql`date(${HistoryGeneral.date})`)
+	.prepare();
+
 // Nueva consulta para datos del heatmap con información completa
 export const getDataForDaysWithTemplates = db
-  .select({
-    date: sql<string>`DATE(${HistoryGeneral.date})`,
-    count: sql<number>`COALESCE(SUM(${HistoryGeneral.messagesSend}), 0)`,
-    templateId: Templates.id,
-    templateName: Templates.name,
-    templateColor: Templates.color,
-    templateIcon: Templates.icon,
-  })
-  .from(HistoryGeneral)
-  .leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
-  .where(eq(Templates.metaStatus, "APPROVED"))
-  .groupBy(
-    sql`DATE(${HistoryGeneral.date})`,
-    Templates.id,
-    Templates.name,
-    Templates.color,
-    Templates.icon
-  )
-  .orderBy(sql`DATE(${HistoryGeneral.date}) DESC`)
-  .prepare();
+	.select({
+		date: sql<string>`DATE(${HistoryGeneral.date})`,
+		count: sql<number>`COALESCE(SUM(${HistoryGeneral.messagesSend}), 0)`,
+		templateId: Templates.id,
+		templateName: Templates.name,
+		templateColor: Templates.color,
+		templateIcon: Templates.icon,
+	})
+	.from(HistoryGeneral)
+	.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+	.where(eq(Templates.metaStatus, "APPROVED"))
+	.groupBy(
+		sql`DATE(${HistoryGeneral.date})`,
+		Templates.id,
+		Templates.name,
+		Templates.color,
+		Templates.icon
+	)
+	.orderBy(sql`DATE(${HistoryGeneral.date}) DESC`)
+	.prepare();
 
 // Consulta adicional para obtener números únicos por día
 export const getUniqueNumbersByDay = db
-  .select({
-    date: sql<string>`DATE(${HistoryGeneral.date})`,
-    uniqueNumbers: sql<number>`COUNT(DISTINCT ${HistoryGeneral.phoneNumber})`,
-  })
-  .from(HistoryGeneral)
-  .leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
-  .where(eq(Templates.metaStatus, "APPROVED"))
-  .groupBy(sql`DATE(${HistoryGeneral.date})`)
-  .prepare();
+	.select({
+		date: sql<string>`DATE(${HistoryGeneral.date})`,
+		uniqueNumbers: sql<number>`${HistoryGeneral.messagesAlcanzados}`,
+	})
+	.from(HistoryGeneral)
+	.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+	.where(eq(Templates.metaStatus, "APPROVED"))
+	.groupBy(sql`DATE(${HistoryGeneral.date})`)
+	.prepare();
+
+export const getDayStats = db
+	.select({
+		date: sql<string>`DATE(${HistoryGeneral.date})`,
+		totalMessages: sql<number>`COALESCE(SUM(${HistoryGeneral.messagesSend}), 0)`,
+		uniqueNumbers: sql<number>`COALESCE(MAX(${HistoryGeneral.messagesAlcanzados}), 0)`,
+		templates: sql<TemplateBreakdown[]>`
+      json_group_array(
+        json_object(
+          'id', ${Templates.id},
+          'name', ${Templates.name},
+          'color', ${Templates.color},
+          'messagesSent', COALESCE(SUM(${HistoryGeneral.messagesSend}), 0),
+          'percentage',
+            CASE 
+              WHEN SUM(${HistoryGeneral.messagesSend}) = 0 THEN 0
+              ELSE ROUND(
+                (SUM(${HistoryGeneral.messagesSend}) * 100.0) /
+                (SELECT SUM(messagesSend)
+                 FROM HistoryGeneral h2
+                 WHERE DATE(h2.created_at) = DATE(${HistoryGeneral.date})
+                ), 2
+              )
+            END
+        )
+      )
+    `,
+	})
+	.from(HistoryGeneral)
+	.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+	.where(eq(Templates.metaStatus, "APPROVED"))
+	.groupBy(sql`DATE(${HistoryGeneral.date})`)
+	.orderBy(sql`DATE(${HistoryGeneral.date}) DESC`)
+	.prepare();
 
 export const getTemplatesForMetrics = db
 	.select({
@@ -117,15 +152,12 @@ export const updateTemplate = (
 		name?: string;
 		icon?: string;
 		color?: string;
-
 		metaTemplateId?: string;
 		metaStatus?: "PENDING" | "APPROVED" | "REJECTED";
-
 		headerType?: "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT" | "NONE";
 		headerText?: string;
 		bodyText?: string;
 		footerText?: string;
-
 		variables?: {
 			type: "named" | "positional";
 			list: Array<{
@@ -134,7 +166,6 @@ export const updateTemplate = (
 				example: string;
 			}>;
 		};
-
 		buttons?: Array<{
 			type: "QUICK_REPLY" | "URL" | "PHONE_NUMBER";
 			text: string;

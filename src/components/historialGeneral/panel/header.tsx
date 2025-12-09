@@ -9,15 +9,15 @@ import { CalendarIcon, ChevronLeft, ChevronRight, PieChart } from "lucide-react"
 
 export const HeaderPanel = ({ goToPreviousDay, isCalendarOpen, setIsCalendarOpen, selectedDate, handleDateSelect, goToNextDay, isToday }: HeaderPanelProps) => {
 	return (
-		<CardHeader className="bg-linear-to-r from-primary/5 to-accent/5 border-b border-border/30">
-			<article className="flex items-center justify-between">
+		<CardHeader className="">
+			<div className="flex items-center justify-between">
 				<CardTitle className="font-display flex items-center gap-2">
 					<PieChart className="h-5 w-5 text-primary" />
 					Estadísticas del Día
 				</CardTitle>
 
 				{/* Date Navigation */}
-				<section className="flex items-center gap-2">
+				<div className="flex items-center gap-2">
 					<Button
 						variant="ghost"
 						size="icon"
@@ -43,6 +43,7 @@ export const HeaderPanel = ({ goToPreviousDay, isCalendarOpen, setIsCalendarOpen
 								selected={selectedDate}
 								onSelect={handleDateSelect}
 								disabled={(date) => isAfter(startOfDay(date), startOfDay(new Date()))}
+								initialFocus
 								locale={es}
 							/>
 						</PopoverContent>
@@ -57,8 +58,8 @@ export const HeaderPanel = ({ goToPreviousDay, isCalendarOpen, setIsCalendarOpen
 					>
 						<ChevronRight className="h-4 w-4" />
 					</Button>
-				</section>
-			</article>
-		</CardHeader>
+				</div>
+			</div>
+		</CardHeader >
 	)
 }

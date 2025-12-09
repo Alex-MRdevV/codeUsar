@@ -5,38 +5,40 @@ import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 
 export const PanelStatsByDay = () => {
-	const [data, setData] = useState<DayStats | null>(null);
+	const [data, setData] = useState<Record<string, DayStats>>({});
 	const [error, setError] = useState<boolean>(false);
 
 	useEffect(() => {
 		let mounted = true;
+
 		getDataForPanel().then(([err, days]) => {
 			if (!mounted) return;
+			if (!days) return
+
 			if (err) {
 				setError(true);
 			} else {
-				setData(days);
+				// days: DayStats[]
+				const map = Object.fromEntries(
+					days.map(d => [d.date, d])
+				);
+
+				setData(map);
 			}
 		});
+
 		return () => {
 			mounted = false;
 		};
 	}, []);
 
+	if (!data) return null
 	if (error) return <p>Error al cargar los datos</p>;
 
 	const getDayStats = useCallback(
 		(date: Date) => {
-			if (!data) return null;
-
 			const dateStr = format(date, "yyyy-MM-dd");
-
-			// Busca en tu respuesta real del backend
-			if (data.date === dateStr) {
-				return data;
-			}
-
-			return null;
+			return data[dateStr] ?? null;
 		},
 		[data]
 	);

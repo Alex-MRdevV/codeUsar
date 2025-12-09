@@ -1,7 +1,7 @@
 import type { DayStats } from "@/utils/types/historyGeneral";
 
 export async function getDataForPanel(): Promise<
-	[Error | null, DayStats | null]
+	[Error | null, DayStats[] | null]
 > {
 	try {
 		const response = await fetch("/api/data/allDataPanel", {
@@ -17,7 +17,7 @@ export async function getDataForPanel(): Promise<
 		}
 
 		const result = await response.json();
-		const data: DayStats = result.data;
+		const data: DayStats[] = result.data;
 
 		return [null, data];
 	} catch (error) {

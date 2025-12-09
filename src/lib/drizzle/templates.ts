@@ -133,7 +133,7 @@ export const getDayStats = db
 		date: sub.date,
 		totalMessages: sub.totalMessages,
 		uniqueNumbers: sub.uniqueNumbers,
-		templates: sql<TemplateBreakdown[]>`
+		templates: sql<string>`
       json_group_array(
         json_object(
           'id', ${sub.templateId},
@@ -143,7 +143,7 @@ export const getDayStats = db
           'percentage', ${sub.percentage}
         )
       )
-    `.as("templates"),
+    `,
 	})
 	.from(sub)
 	.groupBy(sql`date`)

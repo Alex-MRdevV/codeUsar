@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { DayStatsPanelProps } from "@/utils/types/historyGeneral";
 import { addDays, format, isAfter, startOfDay, subDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export const DayStatsPanel = ({ getDayStats }: DayStatsPanelProps) => {
@@ -52,9 +52,43 @@ export const DayStatsPanel = ({ getDayStats }: DayStatsPanelProps) => {
 
 			<CardContent className="pt-6">
 				{dayStats && dayStats.totalMessages > 0 ? (
-					<TemplateList
-						templates={dayStats.templates}
-					/>
+					<div className="space-y-6">
+						{/* Summary Stats */}
+						<div className="grid grid-cols-2 gap-4">
+							<div className="group relative p-4 rounded-xl bg-linear-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-smooth">
+								<div className="flex items-center gap-3">
+									<div className="p-2 rounded-lg bg-primary/20">
+										<MessageSquare className="h-5 w-5 text-primary" />
+									</div>
+									<div>
+										<p className="text-3xl font-bold font-display text-primary">
+											{dayStats.totalMessages.toLocaleString()}
+										</p>
+										<p className="text-sm text-muted-foreground">Mensajes enviados</p>
+									</div>
+								</div>
+							</div>
+
+							<div className="group relative p-4 rounded-xl bg-linear-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-smooth">
+								<div className="flex items-center gap-3">
+									<div className="p-2 rounded-lg bg-accent/20">
+										<Users className="h-5 w-5 text-accent" />
+									</div>
+									<div>
+										<p className="text-3xl font-bold font-display text-primary">
+											{dayStats.uniqueNumbers.toLocaleString()}
+										</p>
+										<p className="text-sm text-muted-foreground">Números alcanzados</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* Template Breakdown */}
+						<TemplateList
+							templates={dayStats.templates}
+						/>
+					</div>
 				) : (
 					<div className="flex flex-col items-center justify-center py-12 text-center">
 						<div className="p-4 rounded-full bg-muted/50 mb-4">

@@ -16,9 +16,11 @@ export const TooltipSection = ({ getCountForDate, days, getIntensity, getDataFor
 									onClick={() => dayData && setSelectedDay(dayData)}
 								/>
 							</TooltipTrigger>
-							<TooltipContent>
-								<p className="font-medium">{day.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-								<p className="text-sm text-muted-foreground">{count} mensajes</p>
+							<TooltipContent className="px-3 py-2 rounded-xl bg-[#2d0a44]/80 dark:bg-[#1a0b2e]/85 text-white shadow-lg backdrop-blur-md border border-purple-400/20">
+								<p className="font-display font-semibold text-sm leading-tight">
+									{day.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}
+								</p>
+								<p className="text-sm text-zinc-300">{count} mensajes</p>
 							</TooltipContent>
 						</Tooltip>
 					);

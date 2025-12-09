@@ -43,7 +43,6 @@ export const HeaderPanel = ({ goToPreviousDay, isCalendarOpen, setIsCalendarOpen
 								selected={selectedDate}
 								onSelect={handleDateSelect}
 								disabled={(date) => isAfter(startOfDay(date), startOfDay(new Date()))}
-								initialFocus
 								locale={es}
 							/>
 						</PopoverContent>

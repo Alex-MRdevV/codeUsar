@@ -12,7 +12,7 @@ export const FlyingCard = ({ message, index }: { message: FlyingMessage; index: 
 		if (message.status === "sent") {
 			const timer = setTimeout(() => {
 				setIsVisible(false)
-			}, 2000)
+			}, 5000)
 			return () => clearTimeout(timer)
 		}
 	}, [message.status])
@@ -73,22 +73,16 @@ export const FlyingCard = ({ message, index }: { message: FlyingMessage; index: 
 	)
 }
 
-export const MessagesFlyingCards = ({ messages, isActive }: MessagesFlyingCardsProps) => {
+export const MessagesFlyingCards = ({ messages }: MessagesFlyingCardsProps) => {
 	const { open } = useSidebar()
-
-	if (!open) {
-		return null
-	}
-
-	if (messages.length === 0) {
-		return null
-	}
+	if (!open) return null
+	if (messages.length === 0) return null
 
 	return (
-		<div className="fixed inset-0 pointer-events-none z-40">
+		<section className="fixed inset-0 pointer-events-none z-40">
 			{messages.map((message, index) => (
 				<FlyingCard key={message.id} message={message} index={index} />
 			))}
-		</div>
+		</section>
 	)
 }

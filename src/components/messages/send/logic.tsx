@@ -1,39 +1,23 @@
-import { allDataClientesMensajes } from "@/utils/services/dataTransitoria/allData";
-import { allDataRuta } from "@/utils/services/dataTransitoria/allDataRutas";
-import { getTemplates } from "@/utils/services/templates/all";
-import type { clientsInRuta, dataUsar } from "@/utils/types/messages";
+import { getTargetStatusForTemplate, type clientsInRuta, type dataUsar } from "@/utils/types/messages";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { SendViewComponent } from "./sendViewComponent";
 
+export interface ViewLogicComponentProps {
+	data: Template[]
+	dataMensajes: dataUsar[]
+	dataClientesRuta: clientsInRuta[]
+	selectedTemplate: string
+	variableValues: Record<string, string>
+	setSelectedTemplate: Dispatch<SetStateAction<string>>
+	setVariableValues: Dispatch<SetStateAction<Record<string, string>>>
+}
 
-export const SendMessagesContainer = () => {
-	const [data, setData] = useState<Template[] | null>(null)
-	const [dataClientesRuta, setDataClientesRuta] = useState<clientsInRuta[] | null>(null);
-	const [dataMensajes, setDataMensajes] = useState<dataUsar[] | null>(null);
-	const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
-
-	useEffect(() => {
-		async function load() {
-			try {
-				const res = await allDataRuta();
-				const resClientesMensajes = await allDataClientesMensajes();
-				setDataClientesRuta(res);
-				setDataMensajes(resClientesMensajes);
-				const [err, data] = await getTemplates();
-				if (err) return toast.error("Ha sucedido un error")
-				setData(data);
-			} catch (err) {
-				toast.error("Ocurrió un error imprevisto");
-			}
-		}
-
-		load();
-	}, []);
-
-	if (!data) return null
+export const SendLogic = ({ data, dataClientesRuta, dataMensajes, selectedTemplate, variableValues, setSelectedTemplate, setVariableValues }:
+	ViewLogicComponentProps) => {
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const currentTemplate = useMemo(
 		() => data.find((t) => t.id === selectedTemplate) || null,
@@ -43,6 +27,11 @@ export const SendMessagesContainer = () => {
 	// Variables de la plantilla
 	const vars = currentTemplate?.variables ?? null;
 	const hasVars = Array.isArray(vars?.params) && vars.params.length > 0;
+
+	const handleCreateTemplate = async (newTemplate: Template) => {
+		setSelectedTemplate((prev) => [...prev, newTemplate]);
+		setShowCreateModal(false);
+	};
 
 	const getMessageData = (phoneNumber: string) => {
 		return dataMensajes?.find((msg) => msg.phone === phoneNumber) || null;
@@ -105,6 +94,32 @@ export const SendMessagesContainer = () => {
 		}
 	};
 
+	const recipients = useMemo(() => {
+		if (!currentTemplate) return [];
+
+		const templateName =
+			currentTemplate.metaTemplateName ??
+			currentTemplate.name ??
+			"";
+
+		if (templateName === "pedidos_in_ruta") {
+			if (!Array.isArray(dataClientesRuta)) return [];
+
+			return dataClientesRuta
+				.filter((c) => c.tipoMensaje === "pedidos_in_ruta")
+				.map((c) => c.phoneNumber)
+				.filter(Boolean);
+		}
+
+		// 🔥 Para TODAS las otras plantillas, usar dataMensajes
+		if (!Array.isArray(dataMensajes)) return [];
+
+		return dataMensajes
+			.filter((msg) => msg.typeMessage === templateName)
+			.map((msg) => msg.phone)
+			.filter(Boolean);
+	}, [dataMensajes, dataClientesRuta, currentTemplate]);
+
 	const buildPayload = (recipient: string): SendMessageRequest => {
 		if (!currentTemplate) throw new Error("No hay template seleccionado");
 
@@ -160,9 +175,46 @@ export const SendMessagesContainer = () => {
 		};
 	};
 
+	const getRecipientCount = () => recipients.length;
+
+	const canSend = (): boolean => {
+		if (!selectedTemplate || isSubmitting) return false;
+		if (!dataMensajes) return false;
+
+		if (recipients.length === 0) return false;
+
+		if (currentTemplate?.variables && Object.keys(variableValues).length > 0) {
+			return currentTemplate.variables.params.every(
+				(param: any) => (variableValues[param.name] ?? "").trim().length > 0
+			);
+		}
+
+		return true;
+	};
+
 	return (
-		<>
-			
-		</>
+		<SendViewComponent
+			canSend={canSend}
+			currentTemplate={currentTemplate}
+			dataClientesRuta={dataClientesRuta}
+			dataMensajes={dataMensajes}
+			getRecipientCount={getRecipientCount}
+			getTargetStatusForTemplate={getTargetStatusForTemplate}
+			handleCreateTemplate={handleCreateTemplate}
+			handleNewSend={ }
+			handleSendMessage={ }
+			handleTemplateChange={ }
+			hasVars={hasVars}
+			isSubmitting={isSubmitting}
+			recipients={recipients}
+			resultados={ }
+			selectedTemplate={selectedTemplate}
+			setVariableValues={setVariableValues}
+			setShowCreateModal={setShowCreateModal}
+			showCreateModal={showCreateModal}
+			templates={data}
+			variableValues={variableValues}
+			vars={vars}
+		/>
 	)
 }

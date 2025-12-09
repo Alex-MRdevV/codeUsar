@@ -13,7 +13,7 @@ export const ButtonEnvio = ({ handleSendMessage, canSend, isSubmitting, recipien
 		<Button
 			onClick={handleSendMessage}
 			disabled={!canSend()}
-			className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+			className="bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
 		>
 			{isSubmitting ? (
 				<>

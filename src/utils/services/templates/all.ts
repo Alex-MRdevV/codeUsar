@@ -1,7 +1,7 @@
-import type { MetaTemplatesResponse } from "@/utils/types/providers/templatesData";
+import type { Template } from "@/utils/types/templates";
 
 export async function getTemplates(): Promise<
-	[Error | null, MetaTemplatesResponse | null]
+	[Error | null, Template[] | null]
 > {
 	try {
 		const response = await fetch("/api/template/all", {
@@ -12,7 +12,7 @@ export async function getTemplates(): Promise<
 			credentials: "include",
 		});
 
-		const data: MetaTemplatesResponse = await response.json();
+		const data: Template[] = await response.json();
 
 		if (!response.ok) {
 			return [new Error(), null];

@@ -10,3 +10,7 @@ export interface MessagesFlyingCardsProps {
 	messages: FlyingMessage[]
 	isActive: boolean
 }
+
+export interface MessagesFlyingSendCardsProps {
+	messages: FlyingMessage[]
+}

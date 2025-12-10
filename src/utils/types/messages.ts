@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { Template } from "./templates";
+import type { FlyingMessage } from "./flyingCards";
 
 export interface clientsInRuta {
 	phoneNumber: string;
@@ -109,4 +110,17 @@ export interface SendViewComponentProps {
 	recipients: string[];
 	handleCreateTemplate: (newTemplate: Template) => Promise<void>;
 	dataClientesRuta: clientsInRuta[];
+	progress: number;
+	isProcessing: boolean;
+	completed: boolean;
+	currentBatch: number;
+	totalBatches: number;
+	error: string | null;
+	isCancelled: boolean;
+	isPaused: boolean;
+	cancel: () => void;
+	pause: () => void;
+	resume: () => void;
+	reset: () => void;
+	flyingMessages: FlyingMessage[]
 }

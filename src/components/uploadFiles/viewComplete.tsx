@@ -36,51 +36,42 @@ export const ViewUploadComplete = () => {
 
 		try {
 			let hasError = false;
-			let dataPhones1;
-			let dataPhones2;
-			let dataPhones3;
 
 			if (file1) {
-				const [errorFile1, parsedFile1] = await UploadPhonesRequestRechazados(
+				const [errorFile1] = await UploadPhonesRequestRechazados(
 					file1,
 					"pedidos_no_planeados"
 				);
 
 				if (errorFile1) {
 					hasError = true;
-				} else {
-					dataPhones1 = parsedFile1;
 				}
 			}
 
 			if (file2) {
-				const [errorFile2, parsedFile2] = await UploadPhonesRequestReasignados(
+				const [errorFile2] = await UploadPhonesRequestReasignados(
 					file2,
 					"pedidos_retrasados"
 				);
 
 				if (errorFile2) {
 					hasError = true;
-				} else {
-					dataPhones2 = parsedFile2;
 				}
 			}
 
 			if (file3) {
-				const [errorFile3, parsedFile3] = await UploadPhonesRequestBavariaNow(
+				const [errorFile3] = await UploadPhonesRequestBavariaNow(
 					file3,
 					"confirmar_pedido"
 				);
 
 				if (errorFile3) {
 					hasError = true;
-				} else {
-					dataPhones3 = parsedFile3;
 				}
 			}
 
 			if (file4) {
-				const [errorConsolidado, parsedConsolidado] =
+				const [errorConsolidado] =
 					await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
 
 				if (errorConsolidado) {
@@ -93,7 +84,6 @@ export const ViewUploadComplete = () => {
 				return;
 			}
 
-			// 🎉 TODO EXITOSO - Limpiar formulario
 			toast.success("¡Proceso completado con éxito!");
 			setFile1(null);
 			setFile2(null);
@@ -107,8 +97,8 @@ export const ViewUploadComplete = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50 py-12 px-4">
-			<div className="max-w-3xl mx-auto">
+		<article className="min-h-screen bg-gray-50 py-12 px-4">
+			<section className="max-w-3xl mx-auto">
 				<div className="text-center mb-8">
 					<div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-2xl mb-4">
 						<FileSpreadsheet className="w-8 h-8 text-blue-600" />
@@ -151,7 +141,7 @@ export const ViewUploadComplete = () => {
 								file={file4}
 								onFileChange={setFile4}
 							/>
-							<div className="flex gap-3 pt-4">
+							<section className="flex gap-3 pt-4">
 								<Button
 									type="submit"
 									className="flex-1"
@@ -175,11 +165,11 @@ export const ViewUploadComplete = () => {
 								>
 									Reiniciar
 								</Button>
-							</div>
+							</section>
 						</form>
 					</CardContent>
 				</Card>
-			</div>
-		</div>
+			</section>
+		</article>
 	);
 };

@@ -2,6 +2,7 @@ import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import { cleanData } from "@/utils/services/dataTransitoria/cleanData";
 import { cleanDataRuta } from "@/utils/services/dataTransitoria/cleanDataRuta";
+import type { FlyingMessage } from "@/utils/types/flyingCards";
 import type { clientsInRuta, dataUsar } from "@/utils/types/messages";
 import type { ApiResponse, SendMessageRequest } from "@/utils/types/providers/meta";
 import type { Template } from "@/utils/types/templates";
@@ -25,8 +26,9 @@ export const useSendMessagesLogic = ({
 }: UseSendMessagesLogicProps) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [resultados, setResultados] = useState<ApiResponse | null>(null);
+	const [flyingMessages, setFlyingMessages] = useState<FlyingMessage[]>([])
 
-	const { isCancelled, sendInBatches, reset } = useBatchSender<string>(20);
+	const { isCancelled, sendInBatches, reset, cancel, completed, currentBatch, error, isPaused, isProcessing, pause, progress, resume, totalBatches } = useBatchSender<string>(20);
 
 	// Recipients filtrados por plantilla
 	const recipients = useMemo(() => {
@@ -183,6 +185,37 @@ export const useSendMessagesLogic = ({
 		return true;
 	};
 
+	const createInitialFlyingMessages = (list: string[]) => {
+		setFlyingMessages((prev) => [
+			...prev,
+			...list.map((phone) => ({
+				id: crypto.randomUUID(),
+				recipient: phone,
+			})),
+		]);
+	};
+
+	const markFlyingSent = (recipient: string) => {
+		setFlyingMessages((prev) =>
+			prev.map((m) =>
+				m.recipient === recipient && m.status === "sending"
+					? { ...m, status: "sent" }
+					: m
+			)
+		);
+	};
+
+	const markFlyingError = (recipient: string) => {
+		setFlyingMessages((prev) =>
+			prev.map((m) =>
+				m.recipient === recipient && m.status === "sending"
+					? { ...m, status: "error", errorCode: 500 }
+					: m
+			)
+		);
+	};
+
+
 	const handleSendMessages = async () => {
 		if (!currentTemplate) {
 			toast.error("Selecciona una plantilla");
@@ -194,6 +227,8 @@ export const useSendMessagesLogic = ({
 			toast.error("No hay destinatarios para esta plantilla");
 			return;
 		}
+
+		createInitialFlyingMessages(recipientsList);
 
 		setIsSubmitting(true);
 		setResultados(null);
@@ -211,8 +246,10 @@ export const useSendMessagesLogic = ({
 							console.log(payload)
 							await sendWhatsAppMessage(payload);
 							successCount++;
+							markFlyingSent(phone);
 						} catch (err) {
 							errorCount++;
+							markFlyingError(phone);
 						}
 					}
 					await new Promise((r) => setTimeout(r, 500));
@@ -265,5 +302,8 @@ export const useSendMessagesLogic = ({
 		resetResultados,
 		getRecipientCount,
 		reset,
+		cancel, completed, currentBatch, error, isPaused, isProcessing, pause, progress, resume, totalBatches,
+		isCancelled,
+		flyingMessages
 	};
 };

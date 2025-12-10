@@ -21,13 +21,15 @@ function getTodayId(): string {
 // Función para trackear mensajes enviados
 async function trackMessagesSent(
 	templateId: string | null = null,
-	messageCount: number = 1
+	messageCount: number = 1,
+	deliveredCount: number = 1,
+	templateName: string
 ): Promise<void> {
 	const todayId = getTodayId();
 
 	try {
 		// Verificar si ya existe un registro para hoy
-		const exists = await historyExists(todayId);
+		const exists = await historyExists(todayId, templateName);
 
 		if (exists) {
 			// Si existe, incrementar el contador
@@ -38,12 +40,13 @@ async function trackMessagesSent(
 				id: todayId,
 				messagesSend: messageCount,
 				templateId: templateId,
+				messagesAlcanzados: deliveredCount,
 			});
 		}
 	} catch (error) {}
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
 	const PHONE_NUMBER_ID = import.meta.env.WHATSAPP_PHONE_ID;
 	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
 
@@ -75,7 +78,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			jsonData,
 			ACCESS_TOKEN,
 			PHONE_NUMBER_ID,
-			15 // batchSize explícito
+			20 // batchSize explícito
 		);
 
 		if (error) {
@@ -92,8 +95,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		const hasErrors = result?.results.some((item) => item.status === "error");
 
 		if (hasErrors && result?.results.every((item) => item.status === "error")) {
-			console.log(result);
-			// Todos los mensajes fallaron
 			return res(
 				{
 					message: "Error al enviar mensajes",
@@ -103,14 +104,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			);
 		}
 
-		// ✅ REGISTRAR EN EL HISTORIAL
-		// Contar mensajes enviados exitosamente
 		const successfulMessages =
 			result?.results.filter((item) => item.status !== "error").length || 0;
 
+		const deliveredMessages =
+			result?.results.filter((item) => item.status === "success").length || 0;
+
 		if (successfulMessages > 0) {
 			// Trackear con el templateId si está disponible
-			await trackMessagesSent(jsonData.templateId || null, successfulMessages);
+			await trackMessagesSent(
+				jsonData.templateId || null,
+				successfulMessages,
+				deliveredMessages,
+				jsonData.templateName as string
+			);
 		}
 
 		return res(

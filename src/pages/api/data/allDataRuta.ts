@@ -15,6 +15,7 @@ export const GET: APIRoute = async ({}) => {
 			}
 		);
 	} catch (error) {
+		console.log(error)
 		return res(
 			{ message: "Error al obtener los datos" },
 			{

@@ -6,6 +6,7 @@ export const Templates = sqliteTable(
 	{
 		id: text("id").primaryKey(),
 		name: text("name").notNull().unique(),
+		language: text("language").default("es_CO"),
 		icon: text("icon").notNull(),
 		color: text("color"),
 		// Meta Template Info

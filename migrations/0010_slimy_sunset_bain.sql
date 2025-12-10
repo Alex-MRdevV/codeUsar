@@ -1,0 +1,1 @@
+ALTER TABLE `Templates` ADD `language` text DEFAULT 'es_CO';

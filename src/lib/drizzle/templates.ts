@@ -4,6 +4,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { buildUpdateSet } from "@/utils/utilities";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
 import type { TemplateBreakdown } from "@/utils/types/historyGeneral";
+import type { Template } from "@/utils/types/templates";
 
 export const createTemplate = db
 	.insert(Templates)
@@ -22,21 +23,57 @@ export const createTemplate = db
 	})
 	.prepare();
 
-export const getTemplates = db
-	.select({
-		id: Templates.id,
-		name: Templates.name,
-		language: sql<string>`'es'`,
-		headerType: Templates.headerType,
-		headerText: Templates.headerText,
-		bodyText: Templates.bodyText,
-		footerText: Templates.footerText,
-		variables: Templates.variables,
-		buttons: Templates.buttons,
-	})
-	.from(Templates)
-	.where(eq(Templates.metaStatus, "APPROVED"))
-	.prepare();
+export async function getTemplates(): Promise<Template[]> {
+	const rows = await db.select().from(Templates);
+
+	const templates: Template[] = rows.map((row) => ({
+		id: row.id,
+		name: row.name,
+		metaTemplateName: row.name,
+		language: row.language ?? "es_CO",
+
+		structure: {
+			header:
+				row.headerType && row.headerType !== "NONE"
+					? {
+							type: row.headerType,
+							text: row.headerText ?? undefined,
+							example: undefined,
+					  }
+					: undefined,
+
+			body: {
+				text: row.bodyText,
+				example: undefined,
+			},
+
+			footer: row.footerText ? { text: row.footerText } : undefined,
+
+			buttons: row.buttons
+				? row.buttons.map((btn) => ({
+						type: btn.type,
+						text: btn.text,
+						url: btn.url,
+						phone_number: btn.phoneNumber,
+				  }))
+				: undefined,
+		},
+
+		variables: row.variables
+			? {
+					format: row.variables.type,
+					params: row.variables.list.map((v) => ({
+						name: v.key,
+						placeholder: v.label,
+						example: v.example,
+						component: "body", // si tienes componente específico cámbialo
+					})),
+			  }
+			: undefined,
+	}));
+
+	return templates;
+}
 
 // Consulta para obtener datos agrupados por fecha y template
 export const getCalendarDataWithTemplates = db

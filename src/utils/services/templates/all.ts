@@ -1,8 +1,6 @@
 import type { Template } from "@/utils/types/templates";
 
-export async function getTemplates(): Promise<
-	[Error | null, Template[] | null]
-> {
+export async function getTemplates(): Promise<Template[]> {
 	try {
 		const response = await fetch("/api/template/all", {
 			method: "GET",
@@ -12,13 +10,13 @@ export async function getTemplates(): Promise<
 			credentials: "include",
 		});
 
-		const data: Template[] = await response.json();
-
 		if (!response.ok) {
-			return [new Error(), null];
+			throw new Error(`Error ${response.status}: ${response.statusText}`);
 		}
-		return [null, data];
+
+		const data = await response.json();
+		return data.templates;
 	} catch (error) {
-		return [error as Error, null];
+		throw error;
 	}
 }

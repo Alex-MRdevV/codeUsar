@@ -1,3 +1,4 @@
+import { LoadingWrapper } from "@/components/loading/wrapper";
 import { ContentSendComponent } from "@/components/messages/send/content";
 import { useSendMessagesLogic } from "@/hooks/use-sendMessages";
 import { allDataClientesMensajes } from "@/utils/services/dataTransitoria/allData";
@@ -26,7 +27,6 @@ export const SendMessagesContainer = () => {
 				setDataMensajes(resClientesMensajes);
 
 				const templates = await getTemplates();
-				console.log(templates)
 				setData(templates);
 
 			} catch (err) {
@@ -53,6 +53,18 @@ export const SendMessagesContainer = () => {
 		resetResultados,
 		getRecipientCount,
 		reset,
+		cancel,
+		completed,
+		currentBatch,
+		error,
+		isPaused,
+		isProcessing,
+		pause,
+		progress,
+		resume,
+		totalBatches,
+		isCancelled,
+		flyingMessages
 	} = useSendMessagesLogic({
 		currentTemplate,
 		dataClientesRuta,
@@ -65,8 +77,7 @@ export const SendMessagesContainer = () => {
 		const result = await handleSendMessages();
 
 		if (result?.shouldCleanState) {
-			setDataClientesRuta(null);
-			setDataMensajes(null);
+			resetResultados();
 			setSelectedTemplate("");
 			setVariableValues({});
 			reset();
@@ -85,15 +96,13 @@ export const SendMessagesContainer = () => {
 
 	const handleNewSend = () => {
 		resetResultados();
-		setDataClientesRuta(null);
-		setDataMensajes(null);
 		setSelectedTemplate("");
 		setVariableValues({});
 		reset();
 	};
 
 	if (!data || !dataClientesRuta || !dataMensajes) {
-		return <div>Cargando...</div>;
+		return <LoadingWrapper isLoading={true} message="Cargando..." />
 	}
 
 	return (
@@ -119,6 +128,19 @@ export const SendMessagesContainer = () => {
 			templates={data}
 			variableValues={variableValues}
 			vars={vars}
+			cancel={cancel}
+			completed={completed}
+			currentBatch={currentBatch}
+			error={error}
+			isCancelled={isCancelled}
+			isPaused={isPaused}
+			isProcessing={isProcessing}
+			pause={pause}
+			progress={progress}
+			reset={reset}
+			resume={resume}
+			totalBatches={totalBatches}
+			flyingMessages={flyingMessages}
 		/>
 	);
 };

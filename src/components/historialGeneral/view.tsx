@@ -1,4 +1,5 @@
 import { MetricCardSection } from "@/components/historialGeneral/sections/metricCards";
+import { LoadingWrapper } from "@/components/loading/wrapper";
 import { getDataForDays } from "@/utils/services/history/allDataByDate";
 import { getTemplatesForMetrics } from "@/utils/services/templates/allDataForMetrics";
 import type { HeatmapDataPoint, TrendMetric } from "@/utils/types/historyGeneral";
@@ -34,7 +35,9 @@ export const ViewHistoryGeneral = () => {
 	}, []);
 
 	if (error) return <p>Error al cargar los datos</p>;
-	if (!data || !dataDays) return <p>Cargando...</p>;
+	if (!data || !dataDays) {
+		return <LoadingWrapper isLoading={true} message="Cargando..." />
+	}
 
 	const totalMessages = data.reduce(
 		(total, template) => total + template.messagesSent,
@@ -87,7 +90,6 @@ export const ViewHistoryGeneral = () => {
 		(acc, day) => acc + (day.uniqueNumbers ?? 0),
 		0
 	);
-
 
 	return (
 		<section className="container mx-auto px-4 py-8 max-w-7xl">

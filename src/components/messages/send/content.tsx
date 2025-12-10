@@ -6,28 +6,15 @@ import { VariableEditor } from "@/components/messages/editor/variablesEditor";
 import { Header } from "@/components/messages/header";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { ProgressComponent } from "@/components/progress";
-import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import type { SendViewComponentProps } from "@/utils/types/messages";
+import { MessagesFlyingCards } from "../flyingMessages";
 
-export const ContentSendComponent = ({ canSend, currentTemplate, dataClientesRuta, dataMensajes, getRecipientCount, getTargetStatusForTemplate, handleCreateTemplate, handleNewSend, handleSendMessage, handleTemplateChange, hasVars, isSubmitting, recipients, resultados, selectedTemplate, setShowCreateModal, setVariableValues, showCreateModal, templates, variableValues, vars }: SendViewComponentProps) => {
-	const {
-		progress,
-		isProcessing,
-		completed,
-		currentBatch,
-		totalBatches,
-		error,
-		isCancelled,
-		isPaused,
-		cancel,
-		pause,
-		resume,
-		reset
-	} = useBatchSender<string>(20);
-
+export const ContentSendComponent = ({ canSend, currentTemplate, dataClientesRuta, dataMensajes, getRecipientCount, getTargetStatusForTemplate, handleCreateTemplate, handleNewSend, handleSendMessage, handleTemplateChange, hasVars, isSubmitting, recipients, resultados, selectedTemplate, setShowCreateModal, setVariableValues, showCreateModal, templates, variableValues, vars, cancel, completed, currentBatch, error, isCancelled, isPaused, isProcessing, pause, progress, reset, resume, totalBatches,flyingMessages }: SendViewComponentProps) => {
 	return (
 		<article className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 w-full max-w-[1800px] mx-auto">
 			<Header setShowCreateModal={setShowCreateModal} />
+
+			<MessagesFlyingCards messages={flyingMessages} />
 
 			<section className="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<section className="col-span-1 md:col-span-2 space-y-4">

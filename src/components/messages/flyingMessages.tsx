@@ -1,4 +1,3 @@
-import { useSidebar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import type { FlyingMessage, MessagesFlyingCardsProps } from "@/utils/types/flyingCards"
 import { AlertCircle, CheckCircle2, Mail } from "lucide-react"
@@ -74,8 +73,6 @@ export const FlyingCard = ({ message, index }: { message: FlyingMessage; index: 
 }
 
 export const MessagesFlyingCards = ({ messages }: MessagesFlyingCardsProps) => {
-	const { open } = useSidebar()
-	if (!open) return null
 	if (messages.length === 0) return null
 
 	return (

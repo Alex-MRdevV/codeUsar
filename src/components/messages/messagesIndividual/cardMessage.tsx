@@ -1,7 +1,7 @@
-import { X, Phone, User, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { MessageCardProps } from "@/utils/types/messages";
+import { MessageSquare, Phone, User, X } from "lucide-react";
 
 export const MessageCard = ({ message, onRemove, index }: MessageCardProps) => {
 	return (

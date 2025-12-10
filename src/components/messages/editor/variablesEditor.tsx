@@ -13,46 +13,51 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 	};
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
+		<div className="space-y-6">
+			<header className="flex items-center justify-between">
 				<h3 className="text-sm font-semibold text-foreground">
 					Personalizar Variables
 				</h3>
-				<span className="text-xs text-muted-foreground">
-					Formato: {variables.format === 'named' ? 'Nombrado' : 'Posicional'}
-				</span>
-			</div>
 
-			<div className="space-y-4">
+				<span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+					{variables.format === "named" ? "Variables Nombradas" : "Variables Posicionales"}
+				</span>
+			</header>
+
+			<div className="space-y-6">
 				{variables.params.map((param, index) => {
-					const hasValue = values[param.name]?.trim();
+					const error = !values[param.name]?.trim();
 
 					return (
-						<div key={index} className="space-y-2">
+						<div
+							key={index}
+							className="space-y-3 bg-muted/40 p-4 rounded-xl border border-border/50 shadow-sm"
+						>
 							<label className="text-sm font-medium text-foreground flex items-center gap-2">
-								<span className="font-mono text-xs px-2 py-1 bg-muted rounded">
-									{variables.format === 'named'
+								<span className="font-mono text-xs px-2 py-1 bg-background border rounded-lg">
+									{variables.format === "named"
 										? `{{${param.name}}}`
-										: `{{${index + 1}}}`
-									}
+										: `{{${index + 1}}}`}
 								</span>
+
 								<span>{param.placeholder}</span>
-								{!hasValue && (
-									<span className="text-red-500 text-xs">*</span>
-								)}
+								{error && <span className="text-red-500 text-xs">*</span>}
 							</label>
+
 							<input
 								type="text"
-								value={values[param.name] || ''}
+								value={values[param.name] || ""}
 								onChange={(e) => handleChange(param.name, e.target.value)}
 								placeholder={param.example}
-								className={`w-full px-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all ${hasValue
-									? 'border-border focus:ring-primary'
-									: 'border-red-300 focus:ring-red-500'
+								className={`w-full px-3 py-2 text-sm rounded-lg bg-background border transition-all outline-none
+									${error
+										? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-400/40"
+										: "border-border focus:border-primary focus:ring-2 focus:ring-primary/30"
 									}`}
 							/>
+
 							<p className="text-xs text-muted-foreground flex items-center gap-1">
-								<span>💡 Ejemplo:</span>
+								<span className="opacity-80">💡 Ejemplo:</span>
 								<span className="font-medium">{param.example}</span>
 							</p>
 						</div>
@@ -62,3 +67,4 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 		</div>
 	);
 };
+

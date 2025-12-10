@@ -3,17 +3,16 @@ import { CreateTemplateModal } from "@/components/messages/editor/modalTemplates
 import { PreviewCardContainer } from "@/components/messages/editor/previewCardContainer";
 import { TemplateSelector } from "@/components/messages/editor/templaterSelector";
 import { VariableEditor } from "@/components/messages/editor/variablesEditor";
+import { MessagesFlyingCards } from "@/components/messages/flyingMessages";
 import { Header } from "@/components/messages/header";
 import { ResultsCard } from "@/components/messages/resultsCard";
 import { ProgressComponent } from "@/components/progress";
 import type { SendViewComponentProps } from "@/utils/types/messages";
-import { MessagesFlyingCards } from "../flyingMessages";
 
-export const ContentSendComponent = ({ canSend, currentTemplate, dataClientesRuta, dataMensajes, getRecipientCount, getTargetStatusForTemplate, handleCreateTemplate, handleNewSend, handleSendMessage, handleTemplateChange, hasVars, isSubmitting, recipients, resultados, selectedTemplate, setShowCreateModal, setVariableValues, showCreateModal, templates, variableValues, vars, cancel, completed, currentBatch, error, isCancelled, isPaused, isProcessing, pause, progress, reset, resume, totalBatches,flyingMessages }: SendViewComponentProps) => {
+export const ContentSendComponent = ({ canSend, currentTemplate, dataClientesRuta, dataMensajes, getRecipientCount, getTargetStatusForTemplate, handleCreateTemplate, handleNewSend, handleSendMessage, handleTemplateChange, hasVars, isSubmitting, recipients, resultados, selectedTemplate, setShowCreateModal, setVariableValues, showCreateModal, templates, variableValues, vars, cancel, completed, currentBatch, error, isCancelled, isPaused, isProcessing, pause, progress, reset, resume, totalBatches, flyingMessages }: SendViewComponentProps) => {
 	return (
 		<article className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 w-full max-w-[1800px] mx-auto">
 			<Header setShowCreateModal={setShowCreateModal} />
-
 			<MessagesFlyingCards messages={flyingMessages} />
 
 			<section className="grid grid-cols-1 md:grid-cols-3 gap-4">

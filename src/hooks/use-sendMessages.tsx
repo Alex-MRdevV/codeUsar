@@ -215,7 +215,6 @@ export const useSendMessagesLogic = ({
 		);
 	};
 
-
 	const handleSendMessages = async () => {
 		if (!currentTemplate) {
 			toast.error("Selecciona una plantilla");

@@ -52,6 +52,10 @@ export interface MessageCardProps {
 	index: number;
 }
 
+export interface AddMessageFormProps {
+	templates?: Template[];
+}
+
 export interface MessageListProps {
 	messages: Message[];
 	onRemove: (id: string) => void;
@@ -122,5 +126,5 @@ export interface SendViewComponentProps {
 	pause: () => void;
 	resume: () => void;
 	reset: () => void;
-	flyingMessages: FlyingMessage[]
+	flyingMessages: FlyingMessage[];
 }

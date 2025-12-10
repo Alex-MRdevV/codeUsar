@@ -5,7 +5,7 @@ import { Inbox } from "lucide-react";
 export const MessageList = ({ messages, onRemove }: MessageListProps) => {
 	if (messages.length === 0) {
 		return (
-			<section className="flex flex-col items-center justify-center py-12 px-4 text-center">
+			<article className="flex flex-col items-center justify-center py-12 px-4 text-center">
 				<div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
 					<Inbox className="w-8 h-8 text-muted-foreground" />
 				</div>
@@ -13,9 +13,9 @@ export const MessageList = ({ messages, onRemove }: MessageListProps) => {
 					No hay mensajes
 				</h3>
 				<p className="text-sm text-muted-foreground max-w-xs">
-					Agrega mensajes (enfocados en mensajes individuales).
+					Agrega mensajes usando el formulario para verlos antes de enviar.
 				</p>
-			</section>
+			</article>
 		);
 	}
 

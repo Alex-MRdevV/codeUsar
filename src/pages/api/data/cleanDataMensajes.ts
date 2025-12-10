@@ -1,14 +1,15 @@
-import { cleanTablaMensajes } from "@/lib/drizzle/data";
+import { db } from "@/db/db";
+import { clientesEnRuta } from "@/db/schemaTransitional/dataUsar";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 
 export const DELETE: APIRoute = async () => {
 	try {
-		await cleanTablaMensajes.execute();
+		const results = await db.delete(clientesEnRuta);
 
 		return res(
 			{
-				message: "Data borrada correctamente",
+				data: results,
 			},
 			{
 				status: 200,

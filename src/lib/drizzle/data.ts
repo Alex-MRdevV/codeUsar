@@ -9,7 +9,7 @@ export async function addClienteEnRuta(data: {
 	phoneNumber: string;
 	horaInicial?: string | null;
 	horaFinal?: string | null;
-	tipoMensaje: string
+	tipoMensaje: string;
 }) {
 	return await db.insert(clientesEnRuta).values(data);
 }
@@ -37,5 +37,3 @@ export async function allClientMensajes() {
 		})
 		.from(clientsMensajes);
 }
-
-export const cleanTablaMensajes = db.delete(clientesEnRuta);

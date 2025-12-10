@@ -1,12 +1,13 @@
 import { db } from "@/db/db";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
-import { eq, sql } from "drizzle-orm";
+import { Templates } from "@/db/schemaTransitional/templates";
+import { and, eq, sql } from "drizzle-orm";
 
 export async function createHistory(data: {
 	id: string;
 	messagesSend?: number;
 	templateId?: string | null;
-	messagesAlcanzados: number
+	messagesAlcanzados: number;
 }) {
 	const [result] = await db
 		.insert(HistoryGeneral)
@@ -26,6 +27,7 @@ export async function incrementMessagesSend(id: string, amount: number = 1) {
 		.update(HistoryGeneral)
 		.set({
 			messagesSend: sql`${HistoryGeneral.messagesSend} + ${amount}`,
+			messagesAlcanzados: sql`${HistoryGeneral.messagesAlcanzados} + ${amount}`,
 		})
 		.where(eq(HistoryGeneral.id, id))
 		.returning();
@@ -33,11 +35,15 @@ export async function incrementMessagesSend(id: string, amount: number = 1) {
 	return result ?? null;
 }
 
-export async function historyExists(id: string): Promise<boolean> {
+export async function historyExists(
+	id: string,
+	name: string
+): Promise<boolean> {
 	const [result] = await db
 		.select({ id: HistoryGeneral.id })
 		.from(HistoryGeneral)
-		.where(eq(HistoryGeneral.id, id))
+		.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+		.where(and(eq(HistoryGeneral.id, id), eq(Templates.metaTemplateName, name)))
 		.limit(1);
 
 	return !!result;

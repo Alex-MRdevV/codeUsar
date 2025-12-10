@@ -1,10 +1,9 @@
 import { db } from "@/db/db";
-import { Templates } from "@/db/schemaTransitional/templates";
-import { desc, eq, sql } from "drizzle-orm";
-import { buildUpdateSet } from "@/utils/utilities";
 import { HistoryGeneral } from "@/db/schemaTransitional/history";
-import type { TemplateBreakdown } from "@/utils/types/historyGeneral";
+import { Templates } from "@/db/schemaTransitional/templates";
 import type { Template } from "@/utils/types/templates";
+import { buildUpdateSet } from "@/utils/utilities";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const createTemplate = db
 	.insert(Templates)

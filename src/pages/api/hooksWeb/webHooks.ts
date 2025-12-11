@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 
 const verifyToken = import.meta.env.META_VERIFY_TOKEN;
 
-export const get: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url }) => {
 	const mode = url.searchParams.get("hub.mode");
 	const challenge = url.searchParams.get("hub.challenge");
 	const token = url.searchParams.get("hub.verify_token");
@@ -18,7 +18,7 @@ export const get: APIRoute = async ({ url }) => {
 // ------------------------------
 // POST → Recepción de mensajes
 // ------------------------------
-export const post: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request }) => {
 	const body = await request.json();
 
 	const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);

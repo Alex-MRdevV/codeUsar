@@ -1,7 +1,7 @@
 import {
 	createHistory,
 	historyExistsById,
-	incrementMessagesSend
+	incrementMessagesSend,
 } from "@/lib/drizzle/history";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
@@ -114,7 +114,12 @@ export const POST: APIRoute = async ({ request }) => {
 			return res(
 				{
 					message: "Error al enviar mensajes",
-					error: "Todos los mensajes fallaron al enviarse",
+					data: {
+						...result,
+						summary: {
+							total: result?.results.length || 0,
+						},
+					},
 				},
 				{ status: 400 }
 			);

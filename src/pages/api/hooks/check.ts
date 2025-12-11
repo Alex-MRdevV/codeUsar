@@ -2,25 +2,18 @@ import type { APIRoute } from "astro";
 
 const verifyToken = import.meta.env.META_VERIFY_TOKEN;
 
-// ------------------------------
-// GET → Verificación del webhook
-// ------------------------------
 export const GET: APIRoute = async ({ url }) => {
 	const mode = url.searchParams.get("hub.mode");
 	const challenge = url.searchParams.get("hub.challenge");
 	const token = url.searchParams.get("hub.verify_token");
 
 	if (mode === "subscribe" && token === verifyToken) {
-		console.log("WEBHOOK VERIFIED");
 		return new Response(challenge, { status: 200 });
 	}
 
 	return new Response(null, { status: 403 });
 };
 
-// ------------------------------
-// POST → Recepción de mensajes
-// ------------------------------
 export const POST: APIRoute = async ({ request }) => {
 	const body = await request.json();
 

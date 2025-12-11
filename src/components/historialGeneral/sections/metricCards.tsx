@@ -30,12 +30,6 @@ export const MetricCardSection = ({
 					icon={FileText}
 					gradient="warm"
 				/>
-				<MetricCard
-					title="Números únicos"
-					value={uniqueNumbers.toLocaleString()}
-					icon={Users}
-					gradient="primary"
-				/>
 			</section>
 
 			<PanelStatsByDay />

@@ -48,3 +48,14 @@ export async function historyExists(
 
 	return !!result;
 }
+
+export const historyExistsById = async (id: string): Promise<boolean> => {
+	const [result] = await db
+		.select({ id: HistoryGeneral.id })
+		.from(HistoryGeneral)
+		.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
+		.where(eq(HistoryGeneral.id, id))
+		.limit(1);
+
+	return !!result;
+};

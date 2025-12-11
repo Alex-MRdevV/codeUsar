@@ -43,7 +43,7 @@ export async function historyExists(
 		.select({ id: HistoryGeneral.id })
 		.from(HistoryGeneral)
 		.leftJoin(Templates, eq(HistoryGeneral.templateId, Templates.id))
-		.where(and(eq(HistoryGeneral.id, id), eq(Templates.metaTemplateName, name)))
+		.where(and(eq(HistoryGeneral.id, id), eq(Templates.name, name)))
 		.limit(1);
 
 	return !!result;

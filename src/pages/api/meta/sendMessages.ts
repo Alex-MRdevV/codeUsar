@@ -1,8 +1,7 @@
 import {
 	createHistory,
-	historyExists,
 	historyExistsById,
-	incrementMessagesSend,
+	incrementMessagesSend
 } from "@/lib/drizzle/history";
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
@@ -126,7 +125,6 @@ export const POST: APIRoute = async ({ request }) => {
 
 		const deliveredMessages =
 			result?.results.filter((item) => item.status === "success").length || 0;
-
 		if (successfulMessages > 0) {
 			// Trackear con el templateId si está disponible
 			await trackMessagesSent(

@@ -242,7 +242,6 @@ export const useSendMessagesLogic = ({
 					for (const phone of batch) {
 						try {
 							const payload = buildPayload(phone);
-							console.log(payload)
 							await sendWhatsAppMessage(payload);
 							successCount++;
 							markFlyingSent(phone);

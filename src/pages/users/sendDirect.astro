@@ -1,0 +1,11 @@
+---
+import { SendMessagesView } from "@/components/messages/messagesIndividual/view";
+import Layout from "@/layouts/LayoutUsers.astro";
+---
+
+<Layout
+	title="Send Individual Message"
+	description="Send an individual message to a user."
+>
+	<SendMessagesView client:visible />
+</Layout>

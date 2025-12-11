@@ -1,6 +1,6 @@
+import type { FlyingMessage } from "@/utils/types/flyingCards";
+import type { Template } from "@/utils/types/templates";
 import type { Dispatch, SetStateAction } from "react";
-import type { Template } from "./templates";
-import type { FlyingMessage } from "./flyingCards";
 
 export interface clientsInRuta {
 	phoneNumber: string;
@@ -52,8 +52,35 @@ export interface MessageCardProps {
 	index: number;
 }
 
+export interface AddMessageFormContainerProps {
+	templates: Template[];
+	getTargetStatusForTemplate: (
+		templateName: string
+	) =>
+		| "aplazado"
+		| "Reasignados"
+		| "Para confirmar"
+		| "enRuta"
+		| "Viajes En piso";
+}
+
 export interface AddMessageFormProps {
-	templates?: Template[];
+	templates: Template[];
+	currentTemplate: Template | null;
+	selectedTemplate: string;
+	handleTemplateChange: (templateId: string) => void;
+	hasVariables: boolean | undefined;
+	variableValues: Record<string, string>;
+	handleVariableChange: (varName: string, value: string) => void;
+	content: string;
+	setContent: Dispatch<SetStateAction<string>>;
+	name: string;
+	setName: Dispatch<SetStateAction<string>>;
+	setPhone: Dispatch<SetStateAction<string>>;
+	phone: string;
+	addManualMessage: () => void;
+	addClientToRuta: () => void;
+	addDataMessageTemplates: () => void;
 }
 
 export interface MessageListProps {
@@ -70,7 +97,7 @@ export const getTargetStatusForTemplate = (templateName: string) => {
 			return "Reasignados";
 		case "bavaria_now_confirmar":
 			return "Para confirmar";
-		case "pedidos_in_ruta":
+		case "confirmacion_de_pedido":
 			return "enRuta";
 		default:
 			return "enRuta";

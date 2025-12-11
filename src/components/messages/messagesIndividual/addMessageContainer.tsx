@@ -1,44 +1,139 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { FileText, MessageSquare, Phone, Plus, Sparkles, User } from "lucide-react";
-import { useMemo, useState } from "react";
-
-import { Badge } from "@/components/ui/badge";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { ButtonEnvio } from "@/components/messages/buttonEnvio";
+import { MessagesFlyingCards } from "@/components/messages/flyingMessages";
+import { AddMessageFormComponent } from "@/components/messages/messagesIndividual/addMessageForm";
+import { PreviewCardContainer } from "@/components/messages/messagesIndividual/previewContainer";
+import { ResultsCard } from "@/components/messages/resultsCard";
+import { ProgressComponent } from "@/components/progress";
 import { useSendMessagesLogic } from "@/hooks/use-sendMessages";
-import type { AddMessageFormProps, clientsInRuta, dataUsar } from "@/utils/types/messages";
+import type { AddMessageFormContainerProps, clientsInRuta, dataUsar, Message } from "@/utils/types/messages";
+import { uuid } from "@/utils/uuid";
+import { useMemo, useState } from "react";
+import { MessageList } from "./messagesList";
+import type { Template } from "@/utils/types/templates";
 
-export const AddMessageForm = ({
-	templates = []
-}: AddMessageFormProps) => {
-	const [manualMessages, setManualMessages] = useState<dataUsar[]>([]);
+export const AddMessageFormContainer = ({
+	templates = [],
+	getTargetStatusForTemplate
+}: AddMessageFormContainerProps) => {
+	const [manualMessages, setManualMessages] = useState<Message[]>([]);
+	const [dataMessagesTemplates, setDataMessagesTemplates] = useState<dataUsar[]>([]);
 	const [dataClientsRuta, setDataClientsRuta] = useState<clientsInRuta[]>([]);
 	const [phone, setPhone] = useState("");
 	const [name, setName] = useState("");
 	const [content, setContent] = useState("");
 	const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 	const [variableValues, setVariableValues] = useState<Record<string, string>>({});
+	const [horaInicial, setHoraInicial] = useState("");
+	const [horaFinal, setHoraFinal] = useState("");
 
 	const currentTemplate = useMemo(
 		() => templates.find((t) => t.id === selectedTemplate) || null,
 		[templates, selectedTemplate]
 	);
 
-	const hasVariables = useMemo(() => {
-		return (
-			currentTemplate?.variables?.params &&
-			currentTemplate.variables.params.length > 0
-		);
-	}, [currentTemplate]);
+	const hasVariables = useMemo(
+		() => Boolean(currentTemplate?.variables?.params?.length),
+		[currentTemplate]
+	);
+
+	const buildMessageFromTemplate = (
+		template: Template,
+		variableValues: Record<string, string>
+	): string => {
+		let result = "";
+
+		// HEADER
+		if (template.structure.header?.text) {
+			result += template.structure.header.text + "\n\n";
+		}
+
+		// BODY
+		let bodyText = template.structure.body.text;
+
+		if (template.variables) {
+			const { format, params } = template.variables;
+
+			if (format === "positional") {
+				// Reemplaza {{1}}, {{2}}, etc.
+				params.forEach((p, index) => {
+					const value = variableValues[p.name] || p.example;
+					bodyText = bodyText.replace(
+						new RegExp(`{{${index + 1}}}`, "g"),
+						value
+					);
+				});
+			}
+
+			if (format === "named") {
+				// Reemplaza {{nombre}}, {{codigo}}, etc.
+				params.forEach((p) => {
+					const value = variableValues[p.name] || p.example;
+					bodyText = bodyText.replace(
+						new RegExp(`{{${p.placeholder}}}`, "g"),
+						value
+					);
+				});
+			}
+		}
+
+		result += bodyText + "\n";
+
+		// FOOTER
+		if (template.structure.footer?.text) {
+			result += "\n" + template.structure.footer.text;
+		}
+
+		return result.trim();
+	};
+
+	const uiMessages = useMemo(() => {
+		const ruta = dataClientsRuta.map((c) => {
+			// Tomamos siempre la plantilla de confirmación
+			const t = templates.find(
+				(t) => t.metaTemplateName === "confirmacion_de_pedido"
+			);
+
+			const content = t
+				? buildMessageFromTemplate(t, {
+					"Hora de inicio": c.horaInicial,
+					"Hora de fin": c.horaFinal,
+				})
+				: "";
+
+			return {
+				id: uuid.uuid,
+				phone: c.phoneNumber,
+				name: "Cliente Ruta",
+				content,
+			};
+		});
+
+		const templated = dataMessagesTemplates.map((d) => {
+			const t = templates.find((t) => t.metaTemplateName === d.typeMessage);
+
+			const content = t
+				? buildMessageFromTemplate(
+					t,
+					variableValues // se rellenan con lo que el usuario puso
+				)
+				: "";
+
+			return {
+				id: uuid.uuid,
+				phone: d.phone,
+				name: d.name,
+				content,
+			};
+		});
+
+		return [...ruta, ...templated, ...manualMessages];
+	}, [
+		dataClientsRuta,
+		dataMessagesTemplates,
+		manualMessages,
+		templates,
+		variableValues,
+	]);
 
 	const {
 		recipients,
@@ -64,10 +159,95 @@ export const AddMessageForm = ({
 	} = useSendMessagesLogic({
 		currentTemplate,
 		dataClientesRuta: dataClientsRuta,
-		dataMensajes: manualMessages,
+		dataMensajes: dataMessagesTemplates,
 		selectedTemplate,
 		variableValues,
 	});
+
+	const addClientToRuta = () => {
+		if (!phone.trim()) return;
+
+		const newClient: clientsInRuta & { __id: string } = {
+			phoneNumber: phone,
+			horaInicial: horaInicial || new Date().toISOString(),
+			horaFinal: horaFinal || "",
+			tipoMensaje: "confirmacion_de_pedido",
+			__id: uuid.uuid,
+		};
+
+		setDataClientsRuta(prev => [...prev, newClient]);
+		setPhone("");
+		setHoraInicial("");
+		setHoraFinal("");
+	};
+
+	const addManualMessage = () => {
+		if (!content.trim() || !phone.trim()) return;
+
+		const newMsg: Message = {
+			id: uuid.uuid,
+			phone,
+			name,
+			content,
+		};
+
+		setManualMessages(prev => [...prev, newMsg]);
+
+		setPhone("");
+		setName("");
+		setContent("");
+	};
+
+	const addDataMessageTemplates = () => {
+		if (!phone.trim() || !currentTemplate) return;
+
+		const newMsg: dataUsar & { __id: string } = {
+			name: name || "Sin nombre",
+			phone,
+			typeMessage: currentTemplate.name as dataUsar["typeMessage"],
+			__id: uuid.uuid,
+		};
+
+		setDataMessagesTemplates(prev => [...prev, newMsg]);
+
+		setContent("");
+		setPhone("");
+		setName("");
+	};
+
+	const removeFromOriginalSource = (id: string) => {
+		// Elimina mensajes manuales por id
+		setManualMessages(prev => prev.filter(m => m.id !== id));
+
+		// Elimina dataUsar por __id si existe
+		setDataMessagesTemplates(prev => prev.filter((d: any) => d.__id !== id));
+
+		// Elimina clientsInRuta por __id si existe
+		setDataClientsRuta(prev => prev.filter((c: any) => c.__id !== id));
+	};
+
+	const handleSendMessagesWrapper = async () => {
+		const result = await handleSendMessages();
+
+		if (result?.shouldCleanState) {
+			resetResultados();
+			setSelectedTemplate("");
+			setVariableValues({});
+			reset();
+			setDataMessagesTemplates([])
+			setManualMessages([]);
+			setDataClientsRuta([]);
+		}
+	};
+
+	const handleNewSend = () => {
+		resetResultados();
+		setSelectedTemplate("");
+		setVariableValues({});
+		reset();
+		setManualMessages([]);
+		setDataClientsRuta([]);
+	};
 
 	const handleTemplateChange = (templateId: string) => {
 		if (templateId === "manual") {
@@ -80,149 +260,124 @@ export const AddMessageForm = ({
 		}
 	};
 
-	// Cuando cambia una variable
 	const handleVariableChange = (varName: string, value: string) => {
-		setVariableValues((prev) => ({
-			...prev,
-			[varName]: value,
-		}));
+		setVariableValues((prev) => ({ ...prev, [varName]: value }));
 	};
 
 	return (
-		<Card className="bg-card border-border shadow-card">
-			<CardHeader className="pb-4">
-				<CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
-					<Plus className="w-5 h-5 text-primary" />
-					Agregar Mensaje
-				</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<form className="space-y-4">
-					{/* Selector de plantilla */}
-					{templates.length > 0 && (
-						<div className="space-y-2">
-							<Label className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-								<FileText className="w-3.5 h-3.5 text-primary" />
-								Plantilla
-							</Label>
-							<Select
-								value={selectedTemplate || "manual"}
-								onValueChange={handleTemplateChange}
-							>
-								<SelectTrigger className="bg-background border-input">
-									<SelectValue placeholder="Selecciona una plantilla" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="manual">
-										<span className="flex items-center gap-2">
-											<MessageSquare className="w-4 h-4" />
-											Escribir manualmente
-										</span>
-									</SelectItem>
-									{templates.map((template) => (
-										<SelectItem key={template.id} value={template.id}>
-											<span className="flex items-center gap-2">
-												<FileText className="w-4 h-4" />
-												{template.name}
-											</span>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					)}
+		<article className="container mx-auto p-6 space-y-6">
+			<MessagesFlyingCards messages={flyingMessages} />
 
-					{/* Variables de la plantilla */}
-					{currentTemplate && hasVariables && currentTemplate.variables?.params && (
-						<div className="space-y-3 p-3 rounded-lg bg-muted/50 border border-border">
-							<div className="flex items-center gap-2">
-								<Sparkles className="w-4 h-4 text-primary" />
-								<span className="text-sm font-medium text-foreground">
-									Variables de la plantilla
-								</span>
-								<Badge variant="secondary" className="text-xs">
-									{currentTemplate.variables.params.length} variable(s)
-								</Badge>
-							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-								{currentTemplate.variables.params.map((param, index) => (
-									<div key={param.name} className="space-y-1">
-										<Label className="text-xs text-muted-foreground">
-											<span className="font-mono text-primary">{`{{${index + 1}}}`}</span>{" "}
-											{param.name}
-										</Label>
-										<Input
-											placeholder={param.example || `Valor para ${param.name}`}
-											value={variableValues[param.name] || ""}
-											onChange={(e) => handleVariableChange(param.name, e.target.value)}
-											className="bg-background border-input text-sm h-9"
-										/>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="phone" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-								<Phone className="w-3.5 h-3.5 text-primary" />
-								Teléfono *
-							</Label>
-							<Input
-								id="phone"
-								type="tel"
-								placeholder="+52 123 456 7890"
-								value={phone}
-								onChange={(e) => setPhone(e.target.value)}
-								className="bg-background border-input focus:ring-primary"
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="name" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-								<User className="w-3.5 h-3.5 text-muted-foreground" />
-								Nombre (opcional)
-							</Label>
-							<Input
-								id="name"
-								type="text"
-								placeholder="Nombre del contacto"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								className="bg-background border-input focus:ring-primary"
-							/>
-						</div>
+			<section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				{resultados && (
+					<div className="lg:col-span-3 space-y-4">
+						<ResultsCard resultados={resultados} onClose={handleNewSend} />
+						<button
+							onClick={handleNewSend}
+							className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow"
+						>
+							Enviar nuevos mensajes
+						</button>
 					</div>
+				)}
 
-					<div className="space-y-2">
-						<Label htmlFor="content" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-							<MessageSquare className="w-3.5 h-3.5 text-primary" />
-							Mensaje *
-							{currentTemplate && (
-								<Badge variant="outline" className="text-xs ml-auto">
-									Usando: {currentTemplate.name}
-								</Badge>
-							)}
-						</Label>
-						<Textarea
-							id="content"
-							placeholder="Escribe el contenido del mensaje..."
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
-							className="bg-background border-input focus:ring-primary min-h-[100px] resize-none"
+				<section className="lg:col-span-2 space-y-4">
+					<div className="bg-card border border-border rounded-xl shadow-sm p-5 space-y-4">
+						<AddMessageFormComponent
+							currentTemplate={currentTemplate}
+							handleTemplateChange={handleTemplateChange}
+							handleVariableChange={handleVariableChange}
+							hasVariables={hasVariables}
+							selectedTemplate={selectedTemplate}
+							templates={templates}
+							variableValues={variableValues}
+							content={content}
+							setContent={setContent}
+							name={name}
+							setName={setName}
+							setPhone={setPhone}
+							phone={phone}
+							addClientToRuta={addClientToRuta}
+							addManualMessage={addManualMessage}
+							addDataMessageTemplates={addDataMessageTemplates}
 						/>
 					</div>
 
-					<Button
-						type="submit"
-						className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-					>
-						<Plus className="w-4 h-4 mr-2" />
-						Agregar a la lista
-					</Button>
-				</form>
-			</CardContent>
-		</Card>
+					{selectedTemplate && (
+						<div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs shadow-sm">
+							<p className="text-blue-600">
+								📊 Se enviarán mensajes a{" "}
+								<strong>{getRecipientCount()}</strong> clientes en estado{" "}
+								<strong>
+									{getTargetStatusForTemplate(currentTemplate?.metaTemplateName || "").toUpperCase()}
+								</strong>
+							</p>
+						</div>
+					)}
+
+					<ButtonEnvio
+						canSend={canSend}
+						handleSendMessage={handleSendMessagesWrapper}
+						isSubmitting={isSubmitting}
+						recipients={recipients}
+					/>
+
+					{!canSend() && selectedTemplate && (
+						<div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-xs shadow-sm">
+							<p className="text-yellow-700">
+								{!dataClientsRuta.length
+									? "⚠️ No hay clientes cargados."
+									: recipients.length === 0
+										? "⚠️ No hay clientes en el estado correcto para esta plantilla."
+										: "⚠️ Completa todas las variables para continuar."}
+							</p>
+						</div>
+					)}
+
+					<div className="bg-card border border-border rounded-xl shadow-sm p-5">
+						<h3 className="text-sm font-medium text-foreground mb-3">
+							Mensajes preparados
+						</h3>
+
+						<MessageList
+							messages={uiMessages}
+							onRemove={(id) => removeFromOriginalSource(id)}
+						/>
+					</div>
+				</section>
+
+				<section className="space-y-4">
+					{(isProcessing || isPaused || completed || error || isCancelled) && (
+						<div className="sticky top-4">
+							<ProgressComponent
+								error={error}
+								isCancelled={isCancelled}
+								completed={completed}
+								isProcessing={isProcessing}
+								progress={progress}
+								currentBatch={currentBatch}
+								totalBatches={totalBatches}
+								isPaused={isPaused}
+								onCancel={cancel}
+								onPause={pause}
+								onResume={resume}
+								onReset={reset}
+								title="Envío de Mensajes"
+								showCancelButton={true}
+							/>
+						</div>
+					)}
+
+					{!resultados && currentTemplate && (
+						<div className="sticky top-4">
+							<PreviewCardContainer
+								recipients={recipients}
+								template={currentTemplate}
+							/>
+						</div>
+					)}
+				</section>
+			</section>
+		</article>
 	);
 };

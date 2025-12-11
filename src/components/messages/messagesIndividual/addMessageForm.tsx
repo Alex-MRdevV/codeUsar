@@ -1,119 +1,193 @@
-import { useState } from "react";
-import { Plus, Phone, User, MessageSquare } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { AddMessageFormProps } from "@/utils/types/messages";
+import { FileText, MessageSquare, Phone, Plus, Sparkles, User } from "lucide-react";
 
-interface AddMessageFormProps {
-  onAdd: (phone: string, name: string, content: string) => void;
-  messageCount: number;
-  maxMessages: number;
-}
+export const AddMessageFormComponent = ({
+	templates,
+	currentTemplate,
+	selectedTemplate,
+	handleTemplateChange,
+	hasVariables,
+	variableValues,
+	handleVariableChange,
+	content,
+	setContent,
+	name,
+	setName,
+	phone,
+	setPhone,
+	addClientToRuta,
+	addManualMessage,
+	addDataMessageTemplates,
+}: AddMessageFormProps) => {
+	const isRutaTemplate =
+		currentTemplate?.metaTemplateName === "confirmacion_de_pedido";
 
-export const AddMessageForm = ({ onAdd, messageCount, maxMessages }: AddMessageFormProps) => {
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
-  const [content, setContent] = useState("");
+	return (
+		<Card className="bg-card border-border shadow-card">
+			<CardHeader className="pb-4">
+				<CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
+					<Plus className="w-5 h-5 text-primary" />
+					Agregar Mensaje
+				</CardTitle>
+			</CardHeader>
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+			<CardContent>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
 
-    if (!phone.trim()) {
-      toast.error("El teléfono es requerido");
-      return;
-    }
+						addManualMessage();
 
-    if (!content.trim()) {
-      toast.error("El mensaje es requerido");
-      return;
-    }
+						if (isRutaTemplate) {
+							addClientToRuta(); // clientes_en_ruta
+						} else {
+							// CORRECCIÓN: Usar addDataMessageTemplates para plantillas generales
+							addDataMessageTemplates(); // para dataUsar (resto de plantillas)
+						}
+					}}
+					className="space-y-4"
+				>
+					{templates.length > 0 && (
+						<section className="space-y-2">
+							<Label className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+								<FileText className="w-3.5 h-3.5 text-primary" />
+								Plantilla
+							</Label>
 
-    if (messageCount >= maxMessages) {
-      toast.error(`Máximo ${maxMessages} mensajes permitidos`);
-      return;
-    }
+							<Select
+								value={selectedTemplate || "manual"}
+								onValueChange={handleTemplateChange}
+							>
+								<SelectTrigger className="bg-background border-input">
+									<SelectValue placeholder="Selecciona una plantilla" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="manual">
+										<span className="flex items-center gap-2">
+											<MessageSquare className="w-4 h-4" />
+											Escribir manualmente
+										</span>
+									</SelectItem>
 
-    onAdd(phone.trim(), name.trim() || "Sin nombre", content.trim());
-    setPhone("");
-    setName("");
-    setContent("");
-    toast.success("Mensaje agregado");
-  };
+									{templates.map((template) => (
+										<SelectItem key={template.id} value={template.id}>
+											<span className="flex items-center gap-2">
+												<FileText className="w-4 h-4" />
+												{template.name}
+											</span>
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 
-  const isDisabled = messageCount >= maxMessages;
+							{/* Indicador de tipo */}
+							{currentTemplate && (
+								<p className="text-xs text-muted-foreground mt-1">
+									📌 Tipo:{" "}
+									{isRutaTemplate ? "confirmación en ruta" : "plantilla general"}
+								</p>
+							)}
+						</section>
+					)}
 
-  return (
-    <Card className="bg-card border-border shadow-card">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Plus className="w-5 h-5 text-primary" />
-          Agregar Mensaje
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                <Phone className="w-3.5 h-3.5 text-primary" />
-                Teléfono *
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+52 123 456 7890"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="bg-background border-input focus:ring-primary"
-                disabled={isDisabled}
-              />
-            </div>
+					{/* VARIABLES DE PLANTILLA */}
+					{currentTemplate && hasVariables && currentTemplate.variables?.params && (
+						<section className="space-y-3 p-3 rounded-lg bg-muted/50 border border-border">
+							<div className="flex items-center gap-2">
+								<Sparkles className="w-4 h-4 text-primary" />
+								<span className="text-sm font-medium text-foreground">
+									Variables de la plantilla
+								</span>
+								<Badge variant="secondary" className="text-xs">
+									{currentTemplate.variables.params.length} variable(s)
+								</Badge>
+							</div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                <User className="w-3.5 h-3.5 text-muted-foreground" />
-                Nombre (opcional)
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Nombre del contacto"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-background border-input focus:ring-primary"
-                disabled={isDisabled}
-              />
-            </div>
-          </div>
+							<section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+								{currentTemplate.variables.params.map((param, index) => (
+									<div key={param.name} className="space-y-1">
+										<Label className="text-xs text-muted-foreground">
+											<span className="font-mono text-primary">{`{{${index + 1}}}`}</span>{" "}
+											{param.name}
+										</Label>
+										<Input
+											placeholder={param.example ?? `Valor para ${param.name}`}
+											value={variableValues[param.name] || ""}
+											onChange={(e) =>
+												handleVariableChange(param.name, e.target.value)
+											}
+											className="bg-background border-input text-sm h-9"
+										/>
+									</div>
+								))}
+							</section>
+						</section>
+					)}
 
-          <div className="space-y-2">
-            <Label htmlFor="content" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-              <MessageSquare className="w-3.5 h-3.5 text-primary" />
-              Mensaje *
-            </Label>
-            <Textarea
-              id="content"
-              placeholder="Escribe el contenido del mensaje..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="bg-background border-input focus:ring-primary min-h-[100px] resize-none"
-              disabled={isDisabled}
-            />
-          </div>
+					{/* CAMPOS DE TELÉFONO Y NOMBRE */}
+					<section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<section className="space-y-2">
+							<Label htmlFor="phone" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+								<Phone className="w-3.5 h-3.5 text-primary" />
+								Teléfono *
+							</Label>
 
-          <Button
-            type="submit"
-            disabled={isDisabled}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar a la lista
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  );
+							<Input
+								id="phone"
+								type="tel"
+								placeholder="+57 300 123 4567"
+								value={phone}
+								onChange={(e) => setPhone(e.target.value)}
+								className="bg-background border-input"
+								required
+							/>
+						</section>
+
+						<section className="space-y-2">
+							<Label htmlFor="name" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+								<User className="w-3.5 h-3.5 text-muted-foreground" />
+								Nombre (opcional)
+							</Label>
+							<Input
+								id="name"
+								type="text"
+								placeholder="Nombre"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								className="bg-background border-input"
+							/>
+						</section>
+					</section>
+
+					{/* SOLO MENSAJE MANUAL */}
+					<section className="space-y-2">
+						<Label htmlFor="content" className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+							<MessageSquare className="w-3.5 h-3.5 text-primary" />
+							Mensaje *
+						</Label>
+
+						<Textarea
+							id="content"
+							placeholder="Escribe el contenido del mensaje..."
+							value={content}
+							onChange={(e) => setContent(e.target.value)}
+							className="bg-background border-input min-h-[100px] resize-none"
+						/>
+					</section>
+
+					<Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+						<Plus className="w-4 h-4 mr-2" />
+						Agregar a la lista
+					</Button>
+				</form>
+			</CardContent>
+		</Card>
+	);
 };

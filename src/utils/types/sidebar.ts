@@ -3,6 +3,7 @@ import {
 	LayoutDashboard,
 	MessageCircle,
 	Send,
+	Target,
 	Upload,
 	type LucideIcon,
 } from "lucide-react";
@@ -30,5 +31,10 @@ export const sidebarDataItems: PropsNavMain = {
 		{ title: "Cargar de archivos", url: "/users/upload", icon: Upload },
 		{ title: "Historial general", url: "/users/history", icon: History },
 		{ title: "Enviar mensajes", url: "/users/send", icon: Send },
+		{
+			title: "Enviar mensajes Directos",
+			url: "/users/sendDirect",
+			icon: Target,
+		},
 	],
 };

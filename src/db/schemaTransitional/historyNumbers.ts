@@ -10,7 +10,6 @@ export const MessageHistory = sqliteTable(
 		templateId: text("templateId").references(() => Templates.id, {
 			onDelete: "set null",
 		}),
-		// Dirección del mensaje
 		direction: text("direction", {
 			enum: ["inbound", "outbound"],
 		}).notNull(),
@@ -31,16 +30,12 @@ export const MessageHistory = sqliteTable(
 				"button",
 			],
 		}).notNull(),
-		// ID único de WhatsApp para tracking
 		whatsappMessageId: text("whatsappMessageId").unique(),
-		// Información del contacto
 		phone: text("phone").notNull(),
-		contactName: text("contactName"), // del webhook Contact.profile.name
-		// Contenido del mensaje
+		contactName: text("contactName"),
 		content: text("content"),
 		mediaUrl: text("mediaUrl"),
 		mediaType: text("mediaType"),
-		// Estado del mensaje (tracking completo)
 		status: text("status", {
 			enum: ["pending", "sent", "delivered", "read", "failed"],
 		}),
@@ -54,7 +49,7 @@ export const MessageHistory = sqliteTable(
 		conversationWindowExpiry: text("conversationWindowExpiry"),
 		// Contexto de negocio
 		messageContext: text("messageContext", {
-			enum: ["mass_invitation", "follow_up", "onboarding", "support"],
+			enum: ["follow_up", "onboarding", "support"],
 		}),
 		// Información de conversación de WhatsApp
 		conversationId: text("conversationId"),

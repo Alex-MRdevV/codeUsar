@@ -1,3 +1,4 @@
+import { insertMessageFromWebhook } from "@/lib/drizzle/historyNumbers";
 import type { APIRoute } from "astro";
 
 const verifyToken = import.meta.env.META_VERIFY_TOKEN;
@@ -15,12 +16,22 @@ export const GET: APIRoute = async ({ url }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-	const body = await request.json();
+	try {
+		const body = await request.json();
+		const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
+		console.log(`\n\nWebhook received ${timestamp}\n`);
+		console.log(JSON.stringify(body, null, 2));
 
-	const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
-	console.log(`\n\nWebhook received ${timestamp}\n`);
-	console.log(JSON.stringify(body, null, 2));
+		// Procesar el webhook de forma asíncrona sin bloquear la respuesta
+		insertMessageFromWebhook(body).catch((error) => {
+			console.error("Error processing webhook:", error);
+			// Aquí podrías implementar un sistema de reintentos o logging a un servicio externo
+		});
 
-	// Meta exige responder 200 OK inmediatamente
-	return new Response(null, { status: 200 });
+		return new Response(null, { status: 200 });
+	} catch (error) {
+		console.error("Error parsing webhook body:", error);
+		// Aún así responder 200 para evitar reintentos de Meta
+		return new Response(null, { status: 200 });
+	}
 };

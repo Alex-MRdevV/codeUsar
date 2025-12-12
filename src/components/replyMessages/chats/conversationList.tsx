@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input"
-import type { ConversationsListProps } from "@/utils/types/chats"
+import { getStatusColor, type ConversationsListProps } from "@/utils/types/chats"
 import { Search } from "lucide-react"
 
 export const ConversationsList = ({ conversations, selectedId, onSelectConversation }: ConversationsListProps) => {
@@ -9,31 +9,16 @@ export const ConversationsList = ({ conversations, selectedId, onSelectConversat
 		return dateB - dateA
 	})
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case "active":
-				return "bg-green-500/10 text-green-600 dark:text-green-400"
-			case "contacted":
-				return "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-			case "inactive":
-				return "bg-gray-500/10 text-gray-600 dark:text-gray-400"
-			case "new":
-				return "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-			default:
-				return "bg-gray-500/10 text-gray-600 dark:text-gray-400"
-		}
-	}
-
 	return (
 		<>
-			<div className="p-4 border-b border-border sticky top-0 bg-card">
+			<section className="p-4 border-b border-border sticky top-0 bg-card">
 				<div className="relative">
 					<Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
 					<Input placeholder="Buscar conversaciones..." className="pl-9 bg-background border-border" />
 				</div>
-			</div>
+			</section>
 
-			<div className="flex-1 overflow-y-auto">
+			<article className="flex-1 overflow-y-auto">
 				{sorted.map((conversation) => (
 					<button
 						key={conversation.id}
@@ -63,7 +48,7 @@ export const ConversationsList = ({ conversations, selectedId, onSelectConversat
 						</p>
 					</button>
 				))}
-			</div>
+			</article>
 		</>
 	)
 }

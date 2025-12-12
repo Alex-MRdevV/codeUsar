@@ -1,7 +1,7 @@
-import type { Conversation, MessageUsar } from "@/utils/types/chats"
+import type { Conversation, Message } from "@/utils/types/chats"
 import { useMemo, type SetStateAction, type Dispatch } from "react"
 
-export const ReplyMessagesClientsContainer = (conversations: Conversation[]) => {
+export const ReplyMessagesClientsContainer = (conversations: Conversation[], setConversations: Dispatch<SetStateAction<Conversation[] | null>>, setSelectedConversation: Dispatch<SetStateAction<Conversation | null>>) => {
 	const globalMetrics = useMemo(() => {
 		const allMessages = conversations.flatMap((c) => c.messages)
 		const deliveredMessages = allMessages.filter((m) => ["delivered", "read"].includes(m.status as string)).length
@@ -20,7 +20,37 @@ export const ReplyMessagesClientsContainer = (conversations: Conversation[]) => 
 		}
 	}, [conversations])
 
+	const handleSendReply = (conversationId: string, content: string) => {
+		const newMessage: Message = {
+			id: Date.now().toString(),
+			content,
+			direction: "outbound",
+			status: "sent",
+			timestamp: new Date().toISOString(),
+			whatsappMessageId: "",
+
+		}
+
+		setConversations(
+			conversations.map((c) =>
+				c.id === conversationId
+					? { ...c, messages: [...c.messages, newMessage], lastMessageDate: new Date().toISOString() }
+					: c,
+			),
+		)
+
+		const updated = conversations.find((c) => c.id === conversationId)
+		if (updated) {
+			setSelectedConversation({
+				...updated,
+				messages: [...updated.messages, newMessage],
+				lastMessageDate: new Date().toISOString(),
+			})
+		}
+	}
+
 	return {
-		globalMetrics
+		globalMetrics,
+		handleSendReply
 	}
 }

@@ -5,7 +5,7 @@ config({ path: ".env" });
 
 export default defineConfig({
 	schema: "./src/db/schemaTransitional/",
-	out: "./migrations",
+	out: "./src/db/migrations/",
 	dialect: "turso",
 	dbCredentials: {
 		url: process.env.DATABASE_URL!,

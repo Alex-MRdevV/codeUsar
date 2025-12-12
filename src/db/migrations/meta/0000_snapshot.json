@@ -1,81 +1,113 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "id": "4d49c84d-119b-4765-a0ca-0d3a4306364f",
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "44a1f62c-0a86-4748-be17-52f096d8fcc9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "Clients": {
-      "name": "Clients",
+    "clientesEnRuta": {
+      "name": "clientesEnRuta",
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(100)",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "phoneNumber": {
+          "name": "phoneNumber",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cashless": {
-          "name": "cashless",
-          "type": "enum('Si','No')",
+        "horaInicial": {
+          "name": "horaInicial",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "'No'"
+          "autoincrement": false
+        },
+        "horaFinal": {
+          "name": "horaFinal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tipoMensaje": {
+          "name": "tipoMensaje",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {
-        "idx_phone_client": {
-          "name": "idx_phone_client",
-          "columns": [
-            "phone"
-          ],
-          "isUnique": false
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "Clients_id": {
-          "name": "Clients_id",
-          "columns": [
-            "id"
-          ]
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "clientsMensajes": {
+      "name": "clientsMensajes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "phoneNumber": {
+          "name": "phoneNumber",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipoMensaje": {
+          "name": "tipoMensaje",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {
-        "phone_check": {
-          "name": "phone_check",
-          "value": "`Clients`.`phone` = 10"
-        }
-      }
+      "checkConstraints": {}
     },
     "HistoryGeneral": {
       "name": "HistoryGeneral",
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(100)",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
         "messagesSend": {
           "name": "messagesSend",
-          "type": "int",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "messagesAlcanzados": {
+          "name": "messagesAlcanzados",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -83,14 +115,14 @@
         },
         "templateId": {
           "name": "templateId",
-          "type": "varchar(100)",
+          "type": "text(100)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -121,184 +153,232 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "HistoryGeneral_id": {
-          "name": "HistoryGeneral_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {
+      "checkConstraints": {
         "messagesSend_positive": {
           "name": "messagesSend_positive",
-          "value": "`HistoryGeneral`.`messagesSend` >= 0"
+          "value": "\"HistoryGeneral\".\"messagesSend\" >= 0"
         }
       }
     },
-    "Interviewer": {
-      "name": "Interviewer",
+    "MessageHistory": {
+      "name": "MessageHistory",
       "columns": {
         "id": {
           "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "idx_interviewer_email": {
-          "name": "idx_interviewer_email",
-          "columns": [
-            "email"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "Interviewer_id": {
-          "name": "Interviewer_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "Interviewer_email_unique": {
-          "name": "Interviewer_email_unique",
-          "columns": [
-            "email"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "Orders": {
-      "name": "Orders",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "clientId": {
-          "name": "clientId",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "orderNumber": {
-          "name": "orderNumber",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum('Rechazado','Confirmado','Pendiente','Aplazado')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'Pendiente'"
-        },
-        "rejectionCode": {
-          "name": "rejectionCode",
-          "type": "enum('ZP','Z6','ZR','ZH','ZL','Z4','99','ZS','ZE','Z3','16','10','MC','MT')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "orderDate": {
-          "name": "orderDate",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
+        "templateId": {
+          "name": "templateId",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
+        "direction": {
+          "name": "direction",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "notNull": true,
+          "autoincrement": false
         },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
+        "messageType": {
+          "name": "messageType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "whatsappMessageId": {
+          "name": "whatsappMessageId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contactName": {
+          "name": "contactName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mediaUrl": {
+          "name": "mediaUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mediaType": {
+          "name": "mediaType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "failureReason": {
+          "name": "failureReason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sentAt": {
+          "name": "sentAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deliveredAt": {
+          "name": "deliveredAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "readAt": {
+          "name": "readAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "failedAt": {
+          "name": "failedAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "conversationWindowExpiry": {
+          "name": "conversationWindowExpiry",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "messageContext": {
+          "name": "messageContext",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "conversationId": {
+          "name": "conversationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "conversationOrigin": {
+          "name": "conversationOrigin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {
-        "idx_order_status": {
-          "name": "idx_order_status",
+        "MessageHistory_whatsappMessageId_unique": {
+          "name": "MessageHistory_whatsappMessageId_unique",
+          "columns": [
+            "whatsappMessageId"
+          ],
+          "isUnique": true
+        },
+        "idx_message_context": {
+          "name": "idx_message_context",
+          "columns": [
+            "messageContext"
+          ],
+          "isUnique": false
+        },
+        "idx_message_timestamp": {
+          "name": "idx_message_timestamp",
+          "columns": [
+            "timestamp"
+          ],
+          "isUnique": false
+        },
+        "idx_whatsapp_message_id": {
+          "name": "idx_whatsapp_message_id",
+          "columns": [
+            "whatsappMessageId"
+          ],
+          "isUnique": false
+        },
+        "idx_message_direction": {
+          "name": "idx_message_direction",
+          "columns": [
+            "direction"
+          ],
+          "isUnique": false
+        },
+        "idx_message_status": {
+          "name": "idx_message_status",
           "columns": [
             "status"
           ],
           "isUnique": false
         },
-        "idx_order_date": {
-          "name": "idx_order_date",
+        "idx_phone": {
+          "name": "idx_phone",
           "columns": [
-            "orderDate"
-          ],
-          "isUnique": false
-        },
-        "idx_order_number": {
-          "name": "idx_order_number",
-          "columns": [
-            "orderNumber"
+            "phone"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "Orders_clientId_Clients_id_fk": {
-          "name": "Orders_clientId_Clients_id_fk",
-          "tableFrom": "Orders",
-          "tableTo": "Clients",
+        "MessageHistory_templateId_Templates_id_fk": {
+          "name": "MessageHistory_templateId_Templates_id_fk",
+          "tableFrom": "MessageHistory",
+          "tableTo": "Templates",
           "columnsFrom": [
-            "clientId"
+            "templateId"
           ],
           "columnsTo": [
             "id"
@@ -307,163 +387,52 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "Orders_id": {
-          "name": "Orders_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "Orders_orderNumber_unique": {
-          "name": "Orders_orderNumber_unique",
-          "columns": [
-            "orderNumber"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "OrdersItems": {
-      "name": "OrdersItems",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "orderId": {
-          "name": "orderId",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "nameProduct": {
-          "name": "nameProduct",
-          "type": "varchar(191)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "idx_order_nameProduct": {
-          "name": "idx_order_nameProduct",
-          "columns": [
-            "nameProduct"
-          ],
-          "isUnique": false
-        },
-        "idx_order_orderId": {
-          "name": "idx_order_orderId",
-          "columns": [
-            "orderId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "OrdersItems_orderId_Orders_id_fk": {
-          "name": "OrdersItems_orderId_Orders_id_fk",
-          "tableFrom": "OrdersItems",
-          "tableTo": "Orders",
-          "columnsFrom": [
-            "orderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "OrdersItems_id": {
-          "name": "OrdersItems_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "checkConstraints": {}
     },
     "Templates": {
       "name": "Templates",
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(100)",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'es_CO'"
+        },
         "icon": {
           "name": "icon",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "color": {
           "name": "color",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "metaTemplateId": {
-          "name": "metaTemplateId",
-          "type": "varchar(191)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "metaStatus": {
           "name": "metaStatus",
-          "type": "enum('PENDING','APPROVED','REJECTED')",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -471,74 +440,72 @@
         },
         "headerType": {
           "name": "headerType",
-          "type": "enum('TEXT','IMAGE','VIDEO','DOCUMENT','NONE')",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": "'NONE'"
         },
-        "headerText": {
-          "name": "headerText",
+        "header_text": {
+          "name": "header_text",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "bodyText": {
-          "name": "bodyText",
+        "body_text": {
+          "name": "body_text",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "footerText": {
-          "name": "footerText",
-          "type": "varchar(60)",
+        "footer_text": {
+          "name": "footer_text",
+          "type": "text(60)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "variables": {
           "name": "variables",
-          "type": "json",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "buttons": {
           "name": "buttons",
-          "type": "json",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "dailyMessageCount": {
-          "name": "dailyMessageCount",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch() * 1000)"
         },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "onUpdate": true,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "( DATETIME('now','localtime'))"
         }
       },
       "indexes": {
+        "Templates_name_unique": {
+          "name": "Templates_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        },
         "idx_template_status": {
           "name": "idx_template_status",
           "columns": [
@@ -555,33 +522,80 @@
         }
       },
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "Templates_id": {
-          "name": "Templates_id",
-          "columns": [
-            "id"
-          ]
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "User": {
+      "name": "User",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(100)",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "( DATETIME('now','localtime'))"
         }
       },
-      "uniqueConstraints": {
-        "Templates_name_unique": {
-          "name": "Templates_name_unique",
+      "indexes": {
+        "User_email_unique": {
+          "name": "User_email_unique",
           "columns": [
-            "name"
-          ]
+            "email"
+          ],
+          "isUnique": true
+        },
+        "idx_user_email": {
+          "name": "idx_user_email",
+          "columns": [
+            "email"
+          ],
+          "isUnique": false
         }
       },
-      "checkConstraint": {}
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
   "views": {},
+  "enums": {},
   "_meta": {
     "schemas": {},
     "tables": {},
     "columns": {}
   },
   "internal": {
-    "tables": {},
     "indexes": {}
   }
 }

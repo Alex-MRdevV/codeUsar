@@ -14,77 +14,18 @@ export type MessageContext =
 	| "onboarding"
 	| "support";
 
-export interface Client {
-	id: string;
-	phoneNumber: string;
-	name: string | null;
-	conversationStatus: ConversationStatus;
-	firstContactDate: string | null;
-	lastMessageDate: string | null;
-	lastResponseDate: string | null;
-	totalMessagesSent: number;
-	totalMessagesReceived: number;
-	tags: string[] | null;
-	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
-}
-
 export interface Message {
 	id: string;
-	clientId: string;
-	templateId: string | null;
-	direction: MessageDirection;
-	messageType: MessageType;
-	whatsappMessageId: string | null;
-	phone: string;
-	content: string | null;
-	mediaUrl: string | null;
-	mediaType: MediaType | null;
-	status: MessageStatus | null;
-	failureReason: string | null;
-	conversationWindowExpiry: string | null;
-	messageContext: MessageContext | null;
-	metadata: {
-		templateVariables?: Record<string, string>;
-		responseToMessageId?: string;
-		automated?: boolean;
-	} | null;
+	content: string;
+	direction: "inbound" | "outbound";
+	status: "pending" | "sent" | "delivered" | "read" | "failed";
 	timestamp: string;
+	whatsappMessageId: string;
 }
 
-export interface WindowStatus {
-	isActive: boolean;
-	isExpiring: boolean;
-	expiresAt: Date | null;
-	hoursRemaining: number | null;
-}
-
-export interface WindowIndicatorProps {
-	windowStatus: WindowStatus;
-	className?: string;
-	showLabel?: boolean;
-}
-
-export interface StatusBadgeProps {
-	status: ConversationStatus;
-	className?: string;
-}
-
-export interface MessageStatusIconProps {
-	status: MessageStatus | null;
-	className?: string;
-}
-
-export interface MessageBubbleProps {
-	message: Message;
-}
-
-export interface ChatViewProps {
-	client: Client | null;
-	messages: Message[];
-	onSendMessage: (content: string) => void;
-	onBack?: () => void;
+export interface MetricsByUserProps {
+	selectedConversation: Conversation | null;
+	handleSendReply: (conversationId: string, content: string) => void;
 }
 
 export interface GlobalMetricsProps {
@@ -98,15 +39,6 @@ export interface GlobalMetricsProps {
 	};
 }
 
-export interface MessageUsar {
-	id: string;
-	content: string;
-	direction: "inbound" | "outbound";
-	status: "pending" | "sent" | "delivered" | "read" | "failed";
-	timestamp: string;
-	whatsappMessageId: string;
-}
-
 export interface Conversation {
 	id: string;
 	phoneNumber: string;
@@ -117,6 +49,45 @@ export interface Conversation {
 	totalMessagesSent: number;
 	totalMessagesReceived: number;
 	messages: Message[];
+}
+
+export interface Notification {
+	id: string;
+	wa_account_id: string | null;
+	phone_number_id: string | null;
+	display_phone_number: string | null;
+	contact_name: string | null;
+	contact_wa_id: string | null;
+	message_from: string | null;
+	message_id: string | null;
+	message_timestamp: string | null;
+	message_type: string | null;
+	message_body: string | null;
+	is_read: boolean;
+	created_at: string;
+}
+
+export interface NotificationUsar {
+	id: string;
+	whatsappMessageId: string;
+	phone: string;
+	contactName: string | null;
+	messageType: string;
+	content: string | null;
+	timestamp: string;
+	isRead: boolean;
+	metadata: any;
+}
+
+export interface NotificationItemProps {
+	notification: NotificationUsar;
+	isSelected: boolean;
+	onClick: () => void;
+}
+
+export interface NotificationBellProps {
+	onViewAll?: () => void;
+	onSelectNotification?: (notification: NotificationUsar) => void;
 }
 
 export interface ConversationsListProps {
@@ -140,3 +111,49 @@ export interface HeaderReplyMessagesProps {
 		totalMessages: number;
 	};
 }
+
+export const getMessageStatusIcon = (status: string) => {
+	switch (status) {
+		case "read":
+			return "✓✓";
+		case "delivered":
+			return "✓";
+		case "sent":
+			return "⏱";
+		case "failed":
+			return "✕";
+		default:
+			return "";
+	}
+};
+
+export const getMessageStatusColor = (status: string, direction: string) => {
+	if (direction === "inbound") return "text-muted-foreground";
+	switch (status) {
+		case "read":
+			return "text-blue-600 dark:text-blue-400";
+		case "delivered":
+			return "text-gray-600 dark:text-gray-400";
+		case "sent":
+			return "text-gray-500 dark:text-gray-500";
+		case "failed":
+			return "text-red-600 dark:text-red-400";
+		default:
+			return "text-muted-foreground";
+	}
+};
+
+export const getStatusColor = (status: string) => {
+	switch (status) {
+		case "active":
+			return "bg-green-500/10 text-green-600 dark:text-green-400";
+		case "contacted":
+			return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+		case "inactive":
+			return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+		case "new":
+			return "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+		default:
+			return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+	}
+};

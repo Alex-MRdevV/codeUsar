@@ -1,0 +1,11 @@
+---
+import { ReplyMessagesView } from "@/components/replyMessages/view";
+import Layout from "@/layouts/LayoutUsers.astro";
+---
+
+<Layout
+	title="Responder Mensajes"
+	description="Automatiza la respuesta a mensajes entrantes de WhatsApp para mejorar la comunicación con tus clientes."
+>
+	<ReplyMessagesView client:visible />
+</Layout>

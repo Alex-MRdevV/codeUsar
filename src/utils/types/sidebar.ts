@@ -5,6 +5,7 @@ import {
 	Send,
 	Target,
 	Upload,
+	Reply,
 	type LucideIcon,
 } from "lucide-react";
 
@@ -28,8 +29,10 @@ export const appConfig = {
 export const sidebarDataItems: PropsNavMain = {
 	items: [
 		{ title: "Panel de control", url: "/users/", icon: LayoutDashboard },
-		{ title: "Cargar de archivos", url: "/users/upload", icon: Upload },
 		{ title: "Historial general", url: "/users/history", icon: History },
+		{ title: "Notificaciones", url: "/users/notifications", icon: Reply },
+		{ title: "Responder mensajes", url: "/users/reply", icon: Reply },
+		{ title: "Cargar de archivos", url: "/users/upload", icon: Upload },
 		{ title: "Enviar mensajes", url: "/users/send", icon: Send },
 		{
 			title: "Enviar mensajes Directos",

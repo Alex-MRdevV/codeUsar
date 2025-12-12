@@ -3,11 +3,26 @@ import { getRecentNotifications } from '@/utils/services/historyNumbers/allNotif
 import { markReadNotification } from '@/utils/services/historyNumbers/markRead';
 import type { NotificationUsar } from '@/utils/types/chats';
 import { useEffect, useState } from 'react';
+import { Realtime } from 'ably';
 
 export const useNotifications = () => {
 	const [notifications, setNotifications] = useState<NotificationUsar[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [ably, setAbly] = useState<Realtime | null>(null);
+
+	// Inicializar Ably
+	useEffect(() => {
+		const ablyClient = new Realtime({
+			key: import.meta.env.ACCESS_TOKEN_ABLY
+		});
+
+		setAbly(ablyClient);
+
+		return () => {
+			ablyClient.close();
+		};
+	}, []);
 
 	// Fetch initial notifications
 	useEffect(() => {
@@ -31,9 +46,15 @@ export const useNotifications = () => {
 		fetchNotifications();
 	}, []);
 
-	// Subscribe to new notifications via EventEmitter
+	// Subscribe a canal de Ably para notificaciones en tiempo real
 	useEffect(() => {
-		const unsubscribe = notificationEmitter.subscribe((newNotification) => {
+		if (!ably) return;
+
+		const channel = ably.channels.get('notifications');
+
+		const handleNewNotification = (message: any) => {
+			const newNotification = message.data;
+
 			setNotifications((prev) => {
 				// Evitar duplicados
 				const exists = prev.some((n) => n.id === newNotification.id);
@@ -42,10 +63,16 @@ export const useNotifications = () => {
 				const updated = [newNotification, ...prev];
 				return updated.slice(0, 10);
 			});
-		});
+		};
 
-		return unsubscribe;
-	}, []);
+		// Suscribirse al canal
+		channel.subscribe('new-notification', handleNewNotification);
+
+		// Cleanup
+		return () => {
+			channel.unsubscribe('new-notification', handleNewNotification);
+		};
+	}, [ably]);
 
 	// Marcar como leído
 	const markAsRead = async (id: string) => {
@@ -57,7 +84,7 @@ export const useNotifications = () => {
 				prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
 			);
 		} catch (err) {
-			console.error("Error marking as read:", err);
+			console.error('Error marking notification as read:', err);
 		}
 	};
 
@@ -75,7 +102,9 @@ export const useNotifications = () => {
 			setNotifications((prev) =>
 				prev.map((n) => ({ ...n, isRead: true }))
 			);
-		} catch (err) { }
+		} catch (err) {
+			console.error('Error marking all as read:', err);
+		}
 	};
 
 	const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -88,4 +117,4 @@ export const useNotifications = () => {
 		markAllAsRead,
 		unreadCount,
 	};
-}
+};

@@ -55,19 +55,19 @@ export interface Message {
 	context?: MessageContext;
 }
 
-export type MessageType = 
-	| "text" 
-	| "image" 
-	| "video" 
-	| "audio" 
-	| "document" 
-	| "location" 
-	| "contacts" 
-	| "sticker" 
-	| "reaction" 
-	| "interactive" 
-	| "button" 
-	| "order" 
+export type MessageType =
+	| "text"
+	| "image"
+	| "video"
+	| "audio"
+	| "document"
+	| "location"
+	| "contacts"
+	| "sticker"
+	| "reaction"
+	| "interactive"
+	| "button"
+	| "order"
 	| "system";
 
 export interface TextMessage {
@@ -207,10 +207,6 @@ export interface WebhookError {
 		details: string;
 	};
 }
-
-// ============================================
-// TIPOS PARA TU APLICACIÓN
-// ============================================
 
 export interface WebhookEvent {
 	id: string;

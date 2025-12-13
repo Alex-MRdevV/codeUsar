@@ -126,3 +126,4 @@ export function useBatchSender<T>(batchSize: number) {
 		reset,
 	};
 }
+

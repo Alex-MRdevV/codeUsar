@@ -51,22 +51,6 @@ export interface Conversation {
 	messages: Message[];
 }
 
-export interface Notification {
-	id: string;
-	wa_account_id: string | null;
-	phone_number_id: string | null;
-	display_phone_number: string | null;
-	contact_name: string | null;
-	contact_wa_id: string | null;
-	message_from: string | null;
-	message_id: string | null;
-	message_timestamp: string | null;
-	message_type: string | null;
-	message_body: string | null;
-	is_read: boolean;
-	created_at: string;
-}
-
 export interface NotificationUsar {
 	id: string;
 	whatsappMessageId: string;

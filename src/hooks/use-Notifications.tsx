@@ -1,9 +1,8 @@
-import { notificationEmitter } from '@/hooks/notificationEmitier';
 import { getRecentNotifications } from '@/utils/services/historyNumbers/allNotifications';
 import { markReadNotification } from '@/utils/services/historyNumbers/markRead';
 import type { NotificationUsar } from '@/utils/types/chats';
-import { useEffect, useState } from 'react';
 import { Realtime } from 'ably';
+import { useEffect, useState } from 'react';
 
 export const useNotifications = () => {
 	const [notifications, setNotifications] = useState<NotificationUsar[]>([]);
@@ -14,7 +13,8 @@ export const useNotifications = () => {
 	// Inicializar Ably
 	useEffect(() => {
 		const ablyClient = new Realtime({
-			key: import.meta.env.ACCESS_TOKEN_ABLY
+			authUrl: "/api/hooks/authAbly",
+			clientId: "SendFlow",
 		});
 
 		setAbly(ablyClient);
@@ -46,7 +46,6 @@ export const useNotifications = () => {
 		fetchNotifications();
 	}, []);
 
-	// Subscribe a canal de Ably para notificaciones en tiempo real
 	useEffect(() => {
 		if (!ably) return;
 
@@ -83,9 +82,7 @@ export const useNotifications = () => {
 			setNotifications((prev) =>
 				prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
 			);
-		} catch (err) {
-			console.error('Error marking notification as read:', err);
-		}
+		} catch (err) {}
 	};
 
 	// Marcar todas como leídas
@@ -102,9 +99,7 @@ export const useNotifications = () => {
 			setNotifications((prev) =>
 				prev.map((n) => ({ ...n, isRead: true }))
 			);
-		} catch (err) {
-			console.error('Error marking all as read:', err);
-		}
+		} catch (err) {}
 	};
 
 	const unreadCount = notifications.filter((n) => !n.isRead).length;

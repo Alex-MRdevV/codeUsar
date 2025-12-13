@@ -1,14 +1,16 @@
-import { markNotificationAsRead } from "@/lib/drizzle/historyNumbers";
+import {
+	getAllConversations,
+	getConversationMessages,
+} from "@/lib/drizzle/historyNumbers";
 import { res } from "@/utils/responseAstro";
 import type { APIRoute } from "astro";
 
-export const POST: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async () => {
 	try {
-		const jsonData = await request.json();
-		await markNotificationAsRead(jsonData.id);
+		const data = await getAllConversations();
 		return res(
 			{
-				message: "Notificación marcada como leída",
+				data: data,
 			},
 			{
 				status: 200,

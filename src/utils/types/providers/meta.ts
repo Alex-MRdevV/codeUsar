@@ -7,17 +7,6 @@ export interface ApiResponse {
 	error?: string;
 }
 
-export interface ReplyApiResponse {
-	message: string;
-	data?: {
-		messageId: string;
-		recipient: string;
-		status: string;
-	};
-	error?: string;
-	errorCode?: number;
-}
-
 export interface MessageResult {
 	recipient: string;
 	messageId?: string;
@@ -46,15 +35,18 @@ export interface SendMessageRequest {
 	buttonParams?: string[]; // URLs dinámicas
 }
 
-export interface ReplyMessageRequest {
-	messageType: "text" | "template";
-	replyToMessageId: string; // Obligatorio para replies
-	content?: string;
-	templateName?: string;
-	templateLanguage?: string;
-	templateParams?: Record<string, string>;
-	templateParamsPositional?: string[];
-	parameterFormat?: "positional" | "named";
+export interface SendFreeTextMessageRequest {
+	messageType: "text";
+	recipients: string[]; // Lista de números de teléfono
+	content: string; // El texto del mensaje (max 4096 caracteres)
+	previewUrl?: boolean; // Si true, genera preview de URLs
+}
+
+export interface ReplyFreeTextMessageRequest {
+  messageType: "text";
+  replyToMessageId: string; // ID del mensaje al que se responde
+  content: string; // El texto del mensaje (max 4096 caracteres)
+  previewUrl?: boolean; // Si true, genera preview de URLs
 }
 
 export interface MetaRequest {

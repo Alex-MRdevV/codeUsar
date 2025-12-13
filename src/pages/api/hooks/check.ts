@@ -20,12 +20,7 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
 	try {
 		const body = await request.json();
-
-		// Procesar el webhook de forma asíncrona sin bloquear la respuesta
-		processWebhookWithAbly(body).catch((error) => {
-			console.error("Error processing webhook:", error);
-			// Aquí podrías implementar un sistema de reintentos o logging a un servicio externo
-		});
+		processWebhookWithAbly(body);
 
 		return new Response(null, { status: 200 });
 	} catch (error) {
@@ -60,13 +55,8 @@ async function processWebhookWithAbly(body: any) {
 
 			const channel = ablyRest.channels.get("notifications");
 			await channel.publish("new-notification", notification);
-
-			console.log("✓ Notification published to Ably:", notification.id);
 		}
-
-		// Los cambios de estado no necesitan notificación en tiempo real
 	} catch (error) {
-		console.error("Error in processWebhookWithAbly:", error);
 		throw error;
 	}
 }

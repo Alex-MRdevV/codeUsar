@@ -2,7 +2,7 @@ import { db } from "@/db/db";
 import { MessageHistory } from "@/db/schemaTransitional/historyNumbers";
 import type { NotificationUsar } from "@/utils/types/chats";
 import { uuid } from "@/utils/uuid";
-import { and, count, desc, eq, gte, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export async function getAllConversations() {
 	// Obtener todos los números únicos con su información agregada
@@ -74,22 +74,6 @@ export async function getConversationMessages(phoneNumber: string) {
 		timestamp: msg.timestamp || "",
 		whatsappMessageId: msg.whatsappMessageId || "",
 	}));
-}
-
-export async function getConversationWithMessages(phoneNumber: string) {
-	const conversations = await getAllConversations();
-	const conversation = conversations.find((c) => c.phoneNumber === phoneNumber);
-
-	if (!conversation) {
-		return null;
-	}
-
-	const messages = await getConversationMessages(phoneNumber);
-
-	return {
-		...conversation,
-		messages,
-	};
 }
 
 export async function insertMessageFromWebhook(webhookData: any) {
@@ -236,15 +220,4 @@ export async function markNotificationAsRead(id: string): Promise<void> {
 			} as any,
 		})
 		.where(eq(MessageHistory.id, id));
-}
-
-export async function markMultipleAsRead(ids: string[]): Promise<void> {
-	for (const id of ids) {
-		await markNotificationAsRead(id);
-	}
-}
-
-export async function getUnreadCount(): Promise<number> {
-	const notifications = await getRecentNotifications(100); // Obtener más para contar
-	return notifications.filter((n) => !n.isRead).length;
 }

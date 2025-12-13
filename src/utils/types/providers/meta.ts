@@ -43,10 +43,11 @@ export interface SendFreeTextMessageRequest {
 }
 
 export interface ReplyFreeTextMessageRequest {
-  messageType: "text";
-  replyToMessageId: string; // ID del mensaje al que se responde
-  content: string; // El texto del mensaje (max 4096 caracteres)
-  previewUrl?: boolean; // Si true, genera preview de URLs
+	messageType: "text";
+	recipient: string;
+	replyToMessageId: string; // ID del mensaje al que se responde
+	content: string; // El texto del mensaje (max 4096 caracteres)
+	previewUrl?: boolean; // Si true, genera preview de URLs
 }
 
 export interface MetaRequest {

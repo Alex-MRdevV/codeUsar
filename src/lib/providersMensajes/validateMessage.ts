@@ -1,6 +1,7 @@
 import { res } from "@/utils/responseAstro";
 import type { SendMessageRequest } from "@/utils/types/providers/meta";
 
+
 export const validateSendMessageRequest = (data: SendMessageRequest) => {
 	// Validar destinatarios
 	if (!data.recipients?.length) {

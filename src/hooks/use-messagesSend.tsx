@@ -1,28 +1,22 @@
 import { useBatchSender } from "@/hooks/common/use-senderBatch";
 import { sendWhatsAppMessage } from "@/lib/providersMensajes/callApi/useApi";
 import type { FlyingMessage } from "@/utils/types/flyingCards";
-import type { ReplyFreeTextMessageRequest, SendFreeTextMessageRequest, SendMessageRequest } from "@/utils/types/providers/meta";
+import type { UseSendMessageProps } from "@/utils/types/send";
 import { uuid } from "@/utils/uuid";
 import { useState } from "react";
-import { toast } from "sonner";
 
-export interface UseSEndMessageProps {
-	buildPayload: (recipient: string) => SendMessageRequest | SendFreeTextMessageRequest | ReplyFreeTextMessageRequest
-	recipients: string[]
-}
-
-export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps) => {
+export const useSendMessage = ({ buildPayload, recipients }: UseSendMessageProps) => {
 	const [flyingMessages, setFlyingMessages] = useState<FlyingMessage[]>([])
-
 	const { isCancelled, sendInBatches, reset, cancel, completed, currentBatch, error, isPaused, isProcessing, pause, progress, resume, totalBatches } = useBatchSender<string>(20);
 
-	const createInitialFlyingMessages = (list: string[]) => {
+	const createFlyingMessage = (phone: string) => {
 		setFlyingMessages((prev) => [
 			...prev,
-			...list.map((phone) => ({
+			{
 				id: uuid.uuid,
 				recipient: phone,
-			})),
+				status: "sending" as const,
+			},
 		]);
 	};
 
@@ -30,7 +24,7 @@ export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps
 		setFlyingMessages((prev) =>
 			prev.map((m) =>
 				m.recipient === recipient && m.status === "sending"
-					? { ...m, status: "sent" }
+					? { ...m, status: "sent" as const }
 					: m
 			)
 		);
@@ -40,7 +34,7 @@ export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps
 		setFlyingMessages((prev) =>
 			prev.map((m) =>
 				m.recipient === recipient && m.status === "sending"
-					? { ...m, status: "error", errorCode: 500 }
+					? { ...m, status: "error" as const, errorCode: 500 }
 					: m
 			)
 		);
@@ -48,10 +42,7 @@ export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps
 
 	const handleSendMessages = async () => {
 		const recipientsList = recipients;
-		if (recipientsList.length === 0) {
-			toast.error("No hay destinatarios a quien enviar mensajes");
-			return;
-		}
+		if (recipientsList.length === 0) return;
 
 		try {
 			let successCount = 0;
@@ -61,10 +52,10 @@ export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps
 				recipientsList,
 				async (batch) => {
 					for (const phone of batch) {
+						createFlyingMessage(phone);
 						try {
 							const payload = buildPayload(phone);
 							//await sendWhatsAppMessage(payload);
-							createInitialFlyingMessages(recipientsList);
 							successCount++;
 							markFlyingSent(phone);
 						} catch (err) {
@@ -76,10 +67,26 @@ export const useSendMessage = ({ buildPayload, recipients }: UseSEndMessageProps
 				}
 			);
 		} catch (error) {
-			toast.error("Error crítico en el envío de mensajes");
 			return { shouldCleanState: false };
 		}
 	}
 
+	
 
+	return {
+		flyingMessages,
+		handleSendMessages,
+		isCancelled,
+		reset,
+		cancel,
+		completed,
+		currentBatch,
+		error,
+		isPaused,
+		isProcessing,
+		pause,
+		progress,
+		resume,
+		totalBatches,
+	}
 }

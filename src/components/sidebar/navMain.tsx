@@ -1,17 +1,18 @@
-import { Collapsible } from "@/components/ui/collapsible"
+import { Collapsible } from "@/components/ui/collapsible";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem
-} from "@/components/ui/sidebar"
-import type { PropsNavMain } from "@/utils/types/sidebar"
+} from "@/components/ui/sidebar";
+import type { PropsNavMain } from "@/utils/types/sidebar";
 
-export function NavMain({ items }: PropsNavMain) {
+export const NavMain = ({ items }: PropsNavMain) => {
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>Opciones</SidebarGroupLabel>
+
 			<SidebarMenu>
 				{items.map((item) => (
 					<Collapsible
@@ -21,8 +22,13 @@ export function NavMain({ items }: PropsNavMain) {
 					>
 						<SidebarMenuItem>
 							<SidebarMenuButton tooltip={item.title}>
-								{item.icon && <item.icon />}
-								<a href={item.url}>
+								{item.icon && (
+									<item.icon
+										className={item.color ?? "text-muted-foreground"}
+									/>
+								)}
+
+								<a href={item.url} className="flex items-center gap-2">
 									<span>{item.title}</span>
 								</a>
 							</SidebarMenuButton>
@@ -31,5 +37,5 @@ export function NavMain({ items }: PropsNavMain) {
 				))}
 			</SidebarMenu>
 		</SidebarGroup>
-	)
+	);
 }

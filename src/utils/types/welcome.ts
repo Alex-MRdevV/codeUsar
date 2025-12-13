@@ -1,9 +1,3 @@
-export interface UserStats {
-	totalMessagesSent: number;
-	totalTimeSavedHours: number;
-	totalContacts: number;
-}
-
 export interface WelcomeCardProps {
 	nombre: string;
 }

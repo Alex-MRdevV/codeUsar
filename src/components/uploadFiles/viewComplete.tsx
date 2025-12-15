@@ -40,7 +40,7 @@ export const ViewUploadComplete = () => {
 			if (file1) {
 				const [errorFile1] = await UploadPhonesRequestRechazados(
 					file1,
-					"pedidos_no_planeados"
+					"pedidos_no_planeados2"
 				);
 
 				if (errorFile1) {
@@ -62,7 +62,7 @@ export const ViewUploadComplete = () => {
 			if (file3) {
 				const [errorFile3] = await UploadPhonesRequestBavariaNow(
 					file3,
-					"confirmar_pedido"
+					"bavaria_now_confirmar"
 				);
 
 				if (errorFile3) {
@@ -72,7 +72,7 @@ export const ViewUploadComplete = () => {
 
 			if (file4) {
 				const [errorConsolidado] =
-					await UploadPhonesRequestRutas(file4, "confirmacion_de_pedido");
+					await UploadPhonesRequestRutas(file4, "pedidosEnRUTADOS");
 
 				if (errorConsolidado) {
 					hasError = true;

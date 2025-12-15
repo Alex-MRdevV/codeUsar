@@ -1,29 +1,18 @@
+import { NotificationCenter } from '@/components/replyMessages/notificationCenter';
 import type { NotificationUsar } from '@/utils/types/chats';
-import { useRef, useState } from 'react';
-import { NotificationCenter } from './notificationCenter';
-import { AppHeaderNotifications } from './notificationsHeader';
+import { useRef } from 'react';
 
 export const ReplyMessagesView = () => {
-	const [showCenter, setShowCenter] = useState(true);
-
 	// Usamos ref para que el header pueda seleccionar una notificación
 	const notificationCenterRef = useRef<{
 		selectNotification: (n: NotificationUsar) => void;
 	}>(null);
 
 	return (
-		<div className="min-h-screen bg-background flex flex-col">
-			<AppHeaderNotifications
-				onViewAllNotifications={() => setShowCenter(true)}
-				onSelectNotification={(notification) => {
-					setShowCenter(true);
-					notificationCenterRef.current?.selectNotification(notification);
-				}}
-			/>
-
+		<article className="min-h-screen bg-background flex flex-col">
 			{/* Main Content */}
 			<main className="flex-1 p-4 lg:p-8">
-				<div className="max-w-6xl mx-auto">
+				<section className="max-w-6xl mx-auto">
 
 					{/* Section Header */}
 					<div className="mb-6">
@@ -31,7 +20,7 @@ export const ReplyMessagesView = () => {
 							Centro de Notificaciones
 						</h1>
 						<p className="text-muted-foreground mt-1">
-							Recibe y visualiza notificaciones de WhatsApp en tiempo real
+							Recibe y visualiza notificaciones de WhatsApp
 						</p>
 					</div>
 
@@ -39,9 +28,8 @@ export const ReplyMessagesView = () => {
 					<div className="h-[calc(100vh-220px)]">
 						<NotificationCenter ref={notificationCenterRef} />
 					</div>
-
-				</div>
+				</section>
 			</main>
-		</div>
+		</article>
 	)
 };

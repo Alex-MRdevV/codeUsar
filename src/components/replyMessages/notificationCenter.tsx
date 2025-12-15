@@ -1,6 +1,6 @@
 import { NotificationDetail } from '@/components/replyMessages/notificationDetails';
 import { NotificationItem } from '@/components/replyMessages/notificationItems';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNotifications } from '@/hooks/use-Notifications';
 import type { NotificationUsar } from '@/utils/types/chats';
@@ -30,12 +30,12 @@ export const NotificationCenter = forwardRef((_, ref) => {
 	};
 
 	return (
-		<div className="h-full flex flex-col lg:flex-row gap-4">
+		<article className="h-full flex flex-col lg:flex-row gap-4">
 			{/* Notifications List */}
-			<div className="w-full lg:w-96 flex flex-col bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+			<section className="w-full lg:w-96 flex flex-col bg-card rounded-xl border border-border shadow-soft overflow-hidden">
 
 				{/* Header */}
-				<div className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
+				<article className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
 					<div className="flex items-center gap-3">
 						<div className="relative">
 							<Bell className="w-5 h-5 text-primary" />
@@ -48,11 +48,11 @@ export const NotificationCenter = forwardRef((_, ref) => {
 						<h2 className="font-display font-semibold text-foreground">Notificaciones</h2>
 					</div>
 
-					<span className="text-xs text-muted-foreground">Tiempo real activo</span>
-				</div>
+					<span className="text-xs text-muted-foreground">Tiempo "real" activo</span>
+				</article>
 
 				{/* List */}
-				<ScrollArea className="flex-1">
+				<ScrollArea className="flex-1 h-[400px]">
 					<div className="p-2 space-y-2">
 						{loading ? (
 							Array.from({ length: 5 }).map((_, i) => (
@@ -75,7 +75,7 @@ export const NotificationCenter = forwardRef((_, ref) => {
 								<Inbox className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
 								<p className="text-sm text-muted-foreground">No hay notificaciones</p>
 								<p className="text-xs text-muted-foreground mt-1">
-									Las nuevas aparecerán aquí en tiempo real
+									Las nuevas aparecerán aquí
 								</p>
 							</div>
 						) : (
@@ -90,18 +90,19 @@ export const NotificationCenter = forwardRef((_, ref) => {
 							))
 						)}
 					</div>
+					<ScrollBar orientation="vertical" />
 				</ScrollArea>
-			</div>
+			</section>
 
 			{/* Detail Panel */}
-			<div className="flex-1 min-h-[400px] lg:min-h-0">
+			<section className="flex-1 min-h-[400px] lg:min-h-0">
 				{selectedNotification ? (
 					<NotificationDetail
 						notification={selectedNotification}
 						onClose={() => setSelectedNotification(null)}
 					/>
 				) : (
-					<div className="h-full flex items-center justify-center bg-card rounded-xl border border-border shadow-soft">
+					<section className="h-full flex items-center justify-center bg-card rounded-xl border border-border shadow-soft">
 						<div className="text-center p-8">
 							<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
 								<MessageCircleIcon className="w-8 h-8 text-muted-foreground" />
@@ -113,10 +114,10 @@ export const NotificationCenter = forwardRef((_, ref) => {
 								Haz clic en una notificación para ver su contenido completo
 							</p>
 						</div>
-					</div>
+					</section>
 				)}
-			</div>
-		</div>
+			</section>
+		</article>
 	);
 });
 

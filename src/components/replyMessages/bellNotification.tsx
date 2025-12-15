@@ -1,13 +1,13 @@
 import { NotificationItem } from '@/components/replyMessages/notificationItems';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/use-Notifications';
 import { cn } from '@/lib/utils';
 import type { NotificationBellProps, NotificationUsar } from '@/utils/types/chats';
 import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-export const NotificationBell = ({ onViewAll, onSelectNotification }: NotificationBellProps) => {
+export const NotificationBell = ({ onSelectNotification }: NotificationBellProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const { notifications, unreadCount, markAsRead } = useNotifications();
@@ -32,7 +32,7 @@ export const NotificationBell = ({ onViewAll, onSelectNotification }: Notificati
 	};
 
 	return (
-		<div className="relative" ref={dropdownRef}>
+		<article className="relative" ref={dropdownRef}>
 			<Button
 				variant="ghost"
 				size="icon"
@@ -52,8 +52,7 @@ export const NotificationBell = ({ onViewAll, onSelectNotification }: Notificati
 
 			{/* Dropdown */}
 			{isOpen && (
-				<div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card rounded-xl border border-border shadow-soft z-50 overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
-					{/* Header */}
+				<section className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card rounded-xl border border-border shadow-soft z-50 overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
 					<div className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
 						<h3 className="font-display font-semibold text-foreground">Notificaciones</h3>
 						{unreadCount > 0 && (
@@ -64,11 +63,13 @@ export const NotificationBell = ({ onViewAll, onSelectNotification }: Notificati
 					</div>
 
 					{/* Notification List */}
-					<ScrollArea className="max-h-[400px]">
+					<ScrollArea className="h-[400px]">
 						{notifications.length === 0 ? (
 							<div className="p-8 text-center">
 								<Bell className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
-								<p className="text-sm text-muted-foreground">No hay notificaciones</p>
+								<p className="text-sm text-muted-foreground">
+									No hay notificaciones
+								</p>
 							</div>
 						) : (
 							<div className="p-2 space-y-1">
@@ -82,25 +83,10 @@ export const NotificationBell = ({ onViewAll, onSelectNotification }: Notificati
 								))}
 							</div>
 						)}
+						<ScrollBar orientation="vertical" />
 					</ScrollArea>
-
-					{/* Footer */}
-					{notifications.length > 0 && (
-						<div className="p-2 border-t border-border bg-secondary/20">
-							<Button
-								variant="ghost"
-								className="w-full text-primary hover:text-primary hover:bg-primary/10 font-medium"
-								onClick={() => {
-									onViewAll?.();
-									setIsOpen(false);
-								}}
-							>
-								Ver todas las notificaciones
-							</Button>
-						</div>
-					)}
-				</div>
+				</section>
 			)}
-		</div>
+		</article>
 	);
 }

@@ -2,13 +2,41 @@ import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import type { TemplateVars, UseSendMessagesLogicProps } from "@/utils/types/send";
 import { useMemo } from "react";
 
-export const useMessagesLogicTemplates = ({
-	currentTemplate,
-	dataClientesRuta,
-	dataMensajes,
-	selectedTemplate,
-	variableValues,
-}: UseSendMessagesLogicProps) => {
+export const useMessagesLogicTemplates = (
+	props: UseSendMessagesLogicProps | null
+) => {
+	// 🛑 estado neutro
+	if (!props) {
+		return {
+			recipients: [] as string[],
+			buildPayload: () => {
+				throw new Error("useMessagesLogicTemplates: props is null");
+			},
+			canSend: () => false,
+			getRecipientCount: () => 0,
+		};
+	}
+
+	const {
+		currentTemplate,
+		dataClientesRuta,
+		dataMensajes,
+		selectedTemplate,
+		variableValues,
+	} = props;
+
+	// 🗺️ MAPEO: nombre interno → nombre real de WhatsApp
+	const getWhatsAppTemplateName = (internalName: string): string => {
+		const templateMap: Record<string, string> = {
+			pedidosEnRUTADOS: "confirmacion_de_pedido",
+			// Agrega más mapeos aquí si tienes otros casos
+			// pedidos_no_planeados: "nombre_real_whatsapp",
+			// pedidos_retrasados: "otro_nombre_real",
+		};
+
+		return templateMap[internalName] || internalName;
+	};
+
 	// Recipients filtrados por plantilla
 	const recipients = useMemo(() => {
 		if (!currentTemplate) return [];
@@ -18,17 +46,16 @@ export const useMessagesLogicTemplates = ({
 			currentTemplate.name ??
 			"pedidosEnRUTADOS";
 
-		if (templateName === "") {
+		if (templateName === "pedidosEnRUTADOS") {
 			if (!Array.isArray(dataClientesRuta)) return [];
-
 			return dataClientesRuta
 				.filter((c) => c.tipoMensaje === "pedidosEnRUTADOS")
 				.map((c) => c.phoneNumber)
 				.filter(Boolean);
 		}
 
+		// Para otros templates - usar dataMensajes
 		if (!Array.isArray(dataMensajes)) return [];
-
 		return dataMensajes
 			.filter((msg) => msg.typeMessage === templateName)
 			.map((msg) => msg.phone)
@@ -45,7 +72,17 @@ export const useMessagesLogicTemplates = ({
 
 	const buildTemplateVars = (phoneNumber: string): TemplateVars => {
 		const messageData = getMessageData(phoneNumber);
-		if (!messageData) return {};
+		if (!messageData) {
+			// Si no hay messageData, buscar en clientData para pedidosEnRUTADOS
+			const clientData = getClientData(phoneNumber);
+			if (clientData) {
+				return {
+					"1": clientData.horaInicial ?? "6:00 am",
+					"2": clientData.horaFinal ?? "6:30 am",
+				};
+			}
+			return {};
+		}
 
 		const nombreCliente = messageData.name || "Cliente";
 
@@ -86,8 +123,12 @@ export const useMessagesLogicTemplates = ({
 	const buildPayload = (recipient: string): SendMessageRequest => {
 		if (!currentTemplate) throw new Error("No hay template seleccionado");
 
-		const templateNameToUse =
+		// 🔑 Obtener el nombre interno (puede ser metaTemplateName o name)
+		const internalTemplateName =
 			currentTemplate.metaTemplateName ?? currentTemplate.name;
+
+		// 🔄 Convertir al nombre real de WhatsApp
+		const templateNameToUse = getWhatsAppTemplateName(internalTemplateName);
 
 		const templateVarsConfig = currentTemplate.variables ?? {};
 		const paramsList = Array.isArray((templateVarsConfig as any).params)
@@ -114,7 +155,7 @@ export const useMessagesLogicTemplates = ({
 		return {
 			templateId: currentTemplate.id,
 			messageType: "template",
-			templateName: templateNameToUse,
+			templateName: templateNameToUse, // ✅ Ahora usa el nombre real de WhatsApp
 			templateLanguage: currentTemplate.language || "es_CO",
 			parameterFormat: "positional",
 			recipients: [
@@ -130,7 +171,7 @@ export const useMessagesLogicTemplates = ({
 
 	const canSend = (): boolean => {
 		if (!selectedTemplate) return false;
-		if (!dataMensajes) return false;
+		if (!dataMensajes && !dataClientesRuta) return false;
 		if (recipients.length === 0) return false;
 
 		if (currentTemplate?.variables && Object.keys(variableValues).length > 0) {

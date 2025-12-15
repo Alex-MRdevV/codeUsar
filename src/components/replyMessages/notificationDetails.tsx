@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { X, Phone, MessageCircle, Clock, User, FileJson } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import type { NotificationUsar } from '@/utils/types/chats';
 
 interface NotificationDetailProps {
@@ -10,7 +10,7 @@ interface NotificationDetailProps {
 	onClose: () => void;
 }
 
-export function NotificationDetail({ notification, onClose }: NotificationDetailProps) {
+export const NotificationDetail = ({ notification, onClose }: NotificationDetailProps) => {
 	const formattedDate = notification.timestamp
 		? format(new Date(notification.timestamp), "PPpp", { locale: es })
 		: "";
@@ -39,9 +39,8 @@ export function NotificationDetail({ notification, onClose }: NotificationDetail
 			</div>
 
 			{/* Content */}
-			<ScrollArea className="flex-1 p-4">
+			<ScrollArea className="flex-1 p-4 h-[400px]">
 				<div className="space-y-6">
-
 					{/* Message */}
 					{notification.content && (
 						<div className="space-y-2">
@@ -101,6 +100,7 @@ export function NotificationDetail({ notification, onClose }: NotificationDetail
 						</pre>
 					</div>
 				</div>
+				<ScrollBar orientation="vertical" />
 			</ScrollArea>
 		</div>
 	);

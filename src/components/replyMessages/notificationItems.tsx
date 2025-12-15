@@ -4,7 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageCircle, User } from 'lucide-react';
 
-export function NotificationItem({ notification, isSelected, onClick }: NotificationItemProps) {
+export const NotificationItem = ({ notification, isSelected, onClick }: NotificationItemProps) => {
 	const timeAgo = notification.timestamp
 		? formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true, locale: es })
 		: "";
@@ -33,7 +33,7 @@ export function NotificationItem({ notification, isSelected, onClick }: Notifica
 						: "bg-whatsapp-light hover:bg-accent"
 			)}
 		>
-			<div className="flex items-start gap-3">
+			<section className="flex items-start gap-3">
 				{/* Avatar */}
 				<div
 					className={cn(
@@ -50,7 +50,7 @@ export function NotificationItem({ notification, isSelected, onClick }: Notifica
 				</div>
 
 				{/* Content */}
-				<div className="flex-1 min-w-0">
+				<section className="flex-1 min-w-0">
 					<div className="flex items-center justify-between gap-2">
 						<h4
 							className={cn(
@@ -84,11 +84,11 @@ export function NotificationItem({ notification, isSelected, onClick }: Notifica
 
 						<span className="text-xs text-muted-foreground capitalize">{notification.messageType}</span>
 					</div>
-				</div>
+				</section>
 
 				{/* Unread dot */}
 				{!notification.isRead && <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 mt-1" />}
-			</div>
+			</section>
 		</button>
 	);
 }

@@ -6,9 +6,10 @@ import type { UseSendMessageProps } from "@/utils/types/send";
 import { uuid } from "@/utils/uuid";
 import { useState } from "react";
 
-export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseSendMessageProps) => {
+export const useSendMessage = ({ buildPayload, recipients, type }: UseSendMessageProps) => {
 	const [flyingMessages, setFlyingMessages] = useState<FlyingMessage[]>([]);
 	const [resultados, setResultados] = useState<ApiResponse | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const {
 		isCancelled,
@@ -60,7 +61,9 @@ export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseS
 	const handleSendMessages = async () => {
 		const recipientsList = recipients;
 		if (recipientsList.length === 0) return { shouldCleanState: false };
+
 		const results: ApiResponse[] = [];
+		setIsSubmitting(true);
 
 		try {
 			await sendInBatches(
@@ -70,10 +73,11 @@ export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseS
 						createFlyingMessage(phone);
 						try {
 							const payload = buildPayload(phone);
-							const [err, res] = await sendWhatsAppMessage(payload, alcance, type);
-							if (res) results.push(res)
+							console.log(payload)
+							const [err, res] = await sendWhatsAppMessage(payload, type);
+							if (res) results.push(res);
 							markFlyingSent(phone);
-						} catch (err) {
+						} catch {
 							markFlyingError(phone);
 						}
 					}
@@ -84,7 +88,7 @@ export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseS
 			setResultados({
 				message: "Resumen de resultados",
 				data: {
-					results: results.flatMap(r => r.data?.results ?? []),
+					results: results.flatMap((r) => r.data?.results ?? []),
 					summary: {
 						success: results.reduce(
 							(acc, r) => acc + (r.data?.summary.success ?? 0),
@@ -105,6 +109,8 @@ export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseS
 			return { shouldCleanState: true };
 		} catch (error) {
 			return { shouldCleanState: false };
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -121,6 +127,7 @@ export const useSendMessage = ({ buildPayload, recipients, alcance, type }: UseS
 	return {
 		flyingMessages,
 		resultados,
+		isSubmitting,
 		handleSendMessages,
 		isCancelled,
 		reset: resetAll,

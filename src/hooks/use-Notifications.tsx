@@ -1,30 +1,30 @@
 import { getRecentNotifications } from '@/utils/services/historyNumbers/allNotifications';
 import { markReadNotification } from '@/utils/services/historyNumbers/markRead';
 import type { NotificationUsar } from '@/utils/types/chats';
-import { Realtime } from 'ably';
-import { useEffect, useState } from 'react';
+import { Realtime, type Message } from 'ably';
+import { useEffect, useRef, useState } from 'react';
 
 export const useNotifications = () => {
 	const [notifications, setNotifications] = useState<NotificationUsar[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [ably, setAbly] = useState<Realtime | null>(null);
+	const ablyRef = useRef<Realtime | null>(null);
 
-	// Inicializar Ably
+	// Inicializar Ably (solo una vez)
 	useEffect(() => {
 		const ablyClient = new Realtime({
 			authUrl: "/api/hooks/authAbly",
 			clientId: "SendFlow",
 		});
 
-		setAbly(ablyClient);
+		ablyRef.current = ablyClient;
 
 		return () => {
 			ablyClient.close();
 		};
 	}, []);
 
-	// Fetch initial notifications
+	// Fetch inicial
 	useEffect(() => {
 		const fetchNotifications = async () => {
 			try {
@@ -34,9 +34,7 @@ export const useNotifications = () => {
 				}
 			} catch (err) {
 				setError(
-					err instanceof Error
-						? err.message
-						: "Error fetching notifications"
+					err instanceof Error ? err.message : "Error fetching notifications"
 				);
 			} finally {
 				setLoading(false);
@@ -46,60 +44,86 @@ export const useNotifications = () => {
 		fetchNotifications();
 	}, []);
 
+	// Suscripción a actualizaciones de estado
 	useEffect(() => {
+		const ably = ablyRef.current;
 		if (!ably) return;
 
-		const channel = ably.channels.get('notifications');
+		const channel = ably.channels.get("notifications");
 
-		const handleNewNotification = (message: any) => {
-			const newNotification = message.data;
+		const handleStatusUpdate = (message: Message) => {
+			const { whatsappMessageId, status, timestamp } = message.data as {
+				whatsappMessageId: string;
+				status: "sent" | "delivered" | "read" | "failed";
+				timestamp: string;
+			};
+
+			setNotifications((prev) =>
+				prev.map((n) => {
+					// Buscar por whatsappMessageId
+					if (n.whatsappMessageId !== whatsappMessageId) return n;
+
+					// Actualizar el estado
+					return {
+						...n,
+						isRead: status === "read" ? true : n.isRead,
+						metadata: {
+							...n.metadata,
+							status,
+							...(status === "sent" && { sentAt: timestamp }),
+							...(status === "delivered" && { deliveredAt: timestamp }),
+							...(status === "read" && { readAt: timestamp }),
+							...(status === "failed" && { failedAt: timestamp }),
+						},
+					};
+				})
+			);
+		};
+
+		channel.subscribe("message-status-update", handleStatusUpdate);
+
+		return () => {
+			channel.unsubscribe("message-status-update", handleStatusUpdate);
+		};
+	}, []);
+
+	// Suscripción a nuevos mensajes
+	useEffect(() => {
+		const ably = ablyRef.current;
+		if (!ably) return;
+
+		const channel = ably.channels.get("notifications");
+
+		const handleNewMessage = (message: Message) => {
+			const newNotification = message.data as NotificationUsar;
+			console.log("Nuevo mensaje:", newNotification);
 
 			setNotifications((prev) => {
 				// Evitar duplicados
-				const exists = prev.some((n) => n.id === newNotification.id);
-				if (exists) return prev;
-
-				const updated = [newNotification, ...prev];
-				return updated.slice(0, 10);
+				if (prev.some((n) => n.whatsappMessageId === newNotification.whatsappMessageId)) {
+					return prev;
+				}
+				return [newNotification, ...prev].slice(0, 10);
 			});
 		};
 
-		// Suscribirse al canal
-		channel.subscribe('new-notification', handleNewNotification);
+		channel.subscribe("new-message", handleNewMessage);
 
-		// Cleanup
 		return () => {
-			channel.unsubscribe('new-notification', handleNewNotification);
+			channel.unsubscribe("new-message", handleNewMessage);
 		};
-	}, [ably]);
+	}, []);
 
-	// Marcar como leído
+	// Marcar una como leída manualmente (desde tu UI)
 	const markAsRead = async (id: string) => {
 		try {
 			await markReadNotification(id);
-
-			// Actualizar estado local
 			setNotifications((prev) =>
 				prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
 			);
-		} catch (err) {}
-	};
-
-	// Marcar todas como leídas
-	const markAllAsRead = async () => {
-		try {
-			const unreadIds = notifications
-				.filter((n) => !n.isRead)
-				.map((n) => n.id);
-
-			for (const id of unreadIds) {
-				await markReadNotification(id);
-			}
-
-			setNotifications((prev) =>
-				prev.map((n) => ({ ...n, isRead: true }))
-			);
-		} catch (err) {}
+		} catch (err) {
+			console.error("Error marking as read:", err);
+		}
 	};
 
 	const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -109,7 +133,6 @@ export const useNotifications = () => {
 		loading,
 		error,
 		markAsRead,
-		markAllAsRead,
 		unreadCount,
 	};
 };

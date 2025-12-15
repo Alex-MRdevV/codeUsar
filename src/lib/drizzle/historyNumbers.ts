@@ -85,33 +85,35 @@ export async function insertMessageFromWebhook(webhookData: any) {
 	if (value.messages && value.messages.length > 0) {
 		const message = value.messages[0];
 
-		await db.insert(MessageHistory).values({
-			id: uuid.uuid,
-			whatsappMessageId: message.id,
-			phone: message.from,
-			contactName: value.contacts?.[0]?.profile?.name,
-			direction: "inbound",
-			messageType: message.type,
-			content: message.text?.body || message.caption || null,
-			mediaUrl:
-				message.image?.id ||
-				message.video?.id ||
-				message.document?.id ||
-				message.audio?.id ||
-				null,
-			mediaType:
-				message.type === "image" ||
-				message.type === "video" ||
-				message.type === "document" ||
-				message.type === "audio"
-					? message.type
+		try {
+			await db.insert(MessageHistory).values({
+				id: uuid.uuid,
+				whatsappMessageId: message.id,
+				phone: message.from,
+				contactName: value.contacts?.[0]?.profile?.name || null,
+				direction: "inbound",
+				messageType: message.type,
+				content: message.text?.body || message.caption || null,
+				mediaUrl:
+					message.image?.id ||
+					message.video?.id ||
+					message.document?.id ||
+					message.audio?.id ||
+					null,
+				mediaType:
+					message.type === "image" ||
+					message.type === "video" ||
+					message.type === "document" ||
+					message.type === "audio"
+						? message.type
+						: null,
+				status: "delivered",
+				timestamp: new Date(parseInt(message.timestamp) * 1000).toISOString(),
+				metadata: message.context?.id
+					? { responseToMessageId: message.context.id }
 					: null,
-			status: "delivered",
-			timestamp: new Date(parseInt(message.timestamp) * 1000).toISOString(),
-			metadata: {
-				responseToMessageId: message.context?.id,
-			},
-		});
+			});
+		} catch (error) {}
 	}
 
 	// Procesar cambios de estado

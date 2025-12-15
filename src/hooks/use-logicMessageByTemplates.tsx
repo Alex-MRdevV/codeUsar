@@ -5,7 +5,6 @@ import { useMemo } from "react";
 export const useMessagesLogicTemplates = (
 	props: UseSendMessagesLogicProps | null
 ) => {
-	// 🛑 estado neutro
 	if (!props) {
 		return {
 			recipients: [] as string[],
@@ -25,13 +24,10 @@ export const useMessagesLogicTemplates = (
 		variableValues,
 	} = props;
 
-	// 🗺️ MAPEO: nombre interno → nombre real de WhatsApp
 	const getWhatsAppTemplateName = (internalName: string): string => {
 		const templateMap: Record<string, string> = {
 			pedidosEnRUTADOS: "confirmacion_de_pedido",
-			// Agrega más mapeos aquí si tienes otros casos
-			// pedidos_no_planeados: "nombre_real_whatsapp",
-			// pedidos_retrasados: "otro_nombre_real",
+			"bavaria_now_confirmar": "confirmar_pedidos_bavaria"
 		};
 
 		return templateMap[internalName] || internalName;
@@ -126,8 +122,6 @@ export const useMessagesLogicTemplates = (
 		// 🔑 Obtener el nombre interno (puede ser metaTemplateName o name)
 		const internalTemplateName =
 			currentTemplate.metaTemplateName ?? currentTemplate.name;
-
-		// 🔄 Convertir al nombre real de WhatsApp
 		const templateNameToUse = getWhatsAppTemplateName(internalTemplateName);
 
 		const templateVarsConfig = currentTemplate.variables ?? {};
@@ -155,7 +149,7 @@ export const useMessagesLogicTemplates = (
 		return {
 			templateId: currentTemplate.id,
 			messageType: "template",
-			templateName: templateNameToUse, // ✅ Ahora usa el nombre real de WhatsApp
+			templateName: templateNameToUse,
 			templateLanguage: currentTemplate.language || "es_CO",
 			parameterFormat: "positional",
 			recipients: [

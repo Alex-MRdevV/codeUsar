@@ -1,43 +1,6 @@
-import type { FlyingMessage } from "@/utils/types/flyingCards";
 import type { Template } from "@/utils/types/templates";
 import type { Dispatch, SetStateAction } from "react";
-
-export interface clientsInRuta {
-	phoneNumber: string;
-	horaInicial: string;
-	horaFinal: string;
-	tipoMensaje: "confirmacion_de_pedido";
-}
-
-export interface ClientsInRutaResponse {
-	data: clientsInRuta[];
-}
-
-export interface dataUsar {
-	name: string;
-	phone: string;
-	typeMessage:
-		| "pedidos_no_planeados"
-		| "pedidos_retrasados"
-		| "confirmar_pedido"
-		| "bavaria_now_confirmar"
-		| "pedidos_in_ruta"
-		| "confirmacion_de_pedido";
-}
-
-export interface ExcelRow {
-	Nombre: string;
-	Celular: string;
-	[key: string]: unknown;
-}
-
-export interface ExcelRowRutas {
-	Nombre: string;
-	Celular: string;
-	"Hora inicial": string;
-	"Hora Final": string;
-	[key: string]: unknown;
-}
+import type { clientesEnRuta, dataUsar } from "./send";
 
 export interface Message {
 	id: string;
@@ -64,25 +27,6 @@ export interface AddMessageFormContainerProps {
 		| "Viajes En piso";
 }
 
-export interface AddMessageFormProps {
-	templates: Template[];
-	currentTemplate: Template | null;
-	selectedTemplate: string;
-	handleTemplateChange: (templateId: string) => void;
-	hasVariables: boolean | undefined;
-	variableValues: Record<string, string>;
-	handleVariableChange: (varName: string, value: string) => void;
-	content: string;
-	setContent: Dispatch<SetStateAction<string>>;
-	name: string;
-	setName: Dispatch<SetStateAction<string>>;
-	setPhone: Dispatch<SetStateAction<string>>;
-	phone: string;
-	addManualMessage: () => void;
-	addClientToRuta: () => void;
-	addDataMessageTemplates: () => void;
-}
-
 export interface MessageListProps {
 	messages: Message[];
 	onRemove: (id: string) => void;
@@ -97,32 +41,15 @@ export const getTargetStatusForTemplate = (templateName: string) => {
 			return "Reasignados";
 		case "bavaria_now_confirmar":
 			return "Para confirmar";
-		case "confirmacion_de_pedido":
+		case "pedidosEnRUTADOS":
 			return "enRuta";
 		default:
 			return "enRuta";
 	}
 };
 
-export interface SendViewComponentProps {
-	setShowCreateModal: Dispatch<SetStateAction<boolean>>;
-	resultados: any;
-	handleNewSend: () => void;
-	selectedTemplate: string;
-	templates: Template[];
-	dataMensajes: dataUsar[] | null;
-	handleTemplateChange: (templateId: string) => void;
-	getRecipientCount: () => number;
+export interface PreviewSendComponentProps {
 	hasVars: boolean;
-	getTargetStatusForTemplate: (
-		templateName: string
-	) =>
-		| "aplazado"
-		| "Reasignados"
-		| "Para confirmar"
-		| "enRuta"
-		| "Viajes En piso";
-	currentTemplate: Template | null;
 	vars: {
 		format: "named" | "positional";
 		params: Array<{
@@ -134,24 +61,29 @@ export interface SendViewComponentProps {
 	} | null;
 	variableValues: Record<string, string>;
 	setVariableValues: Dispatch<SetStateAction<Record<string, string>>>;
-	showCreateModal: boolean;
 	canSend: () => boolean;
 	handleSendMessage: () => Promise<void>;
 	isSubmitting: boolean;
 	recipients: string[];
-	handleCreateTemplate: (newTemplate: Template) => Promise<void>;
-	dataClientesRuta: clientsInRuta[];
-	progress: number;
-	isProcessing: boolean;
-	completed: boolean;
-	currentBatch: number;
-	totalBatches: number;
-	error: string | null;
-	isCancelled: boolean;
-	isPaused: boolean;
-	cancel: () => void;
-	pause: () => void;
-	resume: () => void;
-	reset: () => void;
-	flyingMessages: FlyingMessage[];
+	dataClientesRuta: clientesEnRuta[];
+	selectedTemplate: string;
+}
+
+export interface ContentForSendProps {
+	resultados: any;
+	handleNewSend: () => void;
+	handleTemplateChange: (templateId: string) => void;
+	selectedTemplate: string;
+	templates: Template[];
+	currentTemplate: Template | null;
+	dataMensajes: dataUsar[] | null;
+	getRecipientCount: () => number;
+	getTargetStatusForTemplate: (
+		templateName: string
+	) =>
+		| "aplazado"
+		| "Reasignados"
+		| "Para confirmar"
+		| "enRuta"
+		| "Viajes En piso";
 }

@@ -70,7 +70,6 @@ export interface NotificationItemProps {
 }
 
 export interface NotificationBellProps {
-	onViewAll?: () => void;
 	onSelectNotification?: (notification: NotificationUsar) => void;
 }
 

@@ -1,9 +1,17 @@
 import Logo from "@/assets/logo.webp";
+import { NotificationBell } from "@/components/replyMessages/bellNotification";
 import { SwitchTheme } from "@/components/switchTheme";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { NotificationUsar } from '@/utils/types/chats';
+import { useRef, useState } from "react";
 
 export const HeaderAuthenticated = () => {
+	const [showCenter, setShowCenter] = useState(true);
+	const notificationCenterRef = useRef<{
+		selectNotification: (n: NotificationUsar) => void;
+	}>(null);
+
 	return (
 		<header className="flex h-16 shrink-0 items-center gap-2 transition-all ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-16 fixed z-20 w-full backdrop-blur-md bg-sky-600/80 dark:bg-slate-900/80 border-b border-sky-700/50 dark:border-slate-700/50 shadow-sm">
 			<nav className="w-full px-4 lg:px-6 py-2.5">
@@ -30,6 +38,12 @@ export const HeaderAuthenticated = () => {
 						</a>
 					</span>
 					<section className="flex items-center gap-2 md:gap-3 -mr-2">
+						<NotificationBell
+							onSelectNotification={(notification) => {
+								setShowCenter(true);
+								notificationCenterRef.current?.selectNotification(notification);
+							}}
+						/>
 						<div className="hidden md:flex items-center gap-1">
 							<a
 								href="/users/"

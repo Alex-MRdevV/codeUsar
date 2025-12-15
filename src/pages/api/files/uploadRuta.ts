@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
 					phoneNumber: validatedRow.Celular,
 					horaInicial: validatedRow["Hora inicial"],
 					horaFinal: validatedRow["Hora Final"],
-					tipoMensaje: "confirmacion_de_pedido",
+					tipoMensaje: "pedidosEnRUTADOS",
 				});
 				savedRecords.push(record);
 			} catch (error) {

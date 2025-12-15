@@ -1,4 +1,4 @@
-import type { dataUsar } from "@/utils/types/messages";
+import type { dataUsar } from "@/utils/types/send";
 
 export const UploadPhonesRequestReasignados = async (
 	file: File,

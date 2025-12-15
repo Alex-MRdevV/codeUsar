@@ -10,18 +10,16 @@ export const sendWhatsAppMessage = async (
 		| SendMessageRequest
 		| SendFreeTextMessageRequest
 		| ReplyFreeTextMessageRequest,
-	alcance: "Masivo" | "individual",
 	type: "template" | "text"
 ): Promise<[Error | null, ApiResponse | null]> => {
 	try {
-		const response = await fetch("/api/meta/messagesSend", {
+		const response = await fetch("/api/meta/sendMessages", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
 				messageData: messageData,
-				alcance: alcance,
 				type: type,
 			}),
 		});

@@ -1,4 +1,4 @@
-import type { dataUsar } from "@/utils/types/messages";
+import { type dataUsar } from "@/utils/types/send";
 
 export const allDataClientesMensajes = async (): Promise<dataUsar[]> => {
 	try {

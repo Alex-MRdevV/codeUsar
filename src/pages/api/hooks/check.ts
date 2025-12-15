@@ -1,6 +1,10 @@
 import { insertMessageFromWebhook } from "@/lib/drizzle/historyNumbers";
-import type { APIRoute } from "astro";
+import { res } from "@/utils/responseAstro";
 import Ably from "ably";
+import type { APIRoute } from "astro";
+
+export const runtime = "nodejs";
+export const prerender = false;
 
 const verifyToken = import.meta.env.META_VERIFY_TOKEN;
 const ablyRest = new Ably.Rest({ key: import.meta.env.ACCESS_TOKEN_ABLY });
@@ -11,21 +15,20 @@ export const GET: APIRoute = async ({ url }) => {
 	const token = url.searchParams.get("hub.verify_token");
 
 	if (mode === "subscribe" && token === verifyToken) {
-		return new Response(challenge, { status: 200 });
+		return res(challenge, { status: 200 });
 	}
 
-	return new Response(null, { status: 403 });
+	return res(null, { status: 403 });
 };
 
 export const POST: APIRoute = async ({ request }) => {
 	try {
 		const body = await request.json();
-		processWebhookWithAbly(body);
-
-		return new Response(null, { status: 200 });
+		await processWebhookWithAbly(body);
+		return res(null, { status: 200 });
 	} catch (error) {
-		// Aún así responder 200 para evitar reintentos de Meta
-		return new Response(null, { status: 200 });
+		console.log(error);
+		return res(null, { status: 200 });
 	}
 };
 
@@ -34,27 +37,44 @@ async function processWebhookWithAbly(body: any) {
 		const entry = body.entry?.[0];
 		const change = entry?.changes?.[0];
 		const value = change?.value;
-
-		// 1. Guardar en base de datos (tu función existente)
 		await insertMessageFromWebhook(body);
 
-		// 2. Si es un mensaje entrante, publicarlo en Ably
-		if (value?.messages && value.messages.length > 0) {
-			const message = value.messages[0];
+		const channel = ablyRest.channels.get("notifications");
 
-			// Construir la notificación que se enviará a Ably
+		// Manejar nuevos mensajes entrantes
+		if (value?.messages?.length > 0) {
+			const message = value.messages[0];
 			const notification = {
+				type: "message",
 				id: message.id,
+				whatsappMessageId: message.id,
 				phone: message.from,
 				contactName: value.contacts?.[0]?.profile?.name || "Unknown",
 				messageType: message.type,
 				content: message.text?.body || message.caption || "",
 				timestamp: new Date(parseInt(message.timestamp) * 1000).toISOString(),
 				isRead: false,
+				direction: "inbound",
 			};
 
-			const channel = ablyRest.channels.get("notifications");
-			await channel.publish("new-notification", notification);
+			// Publicar nuevo mensaje
+			await channel.publish("new-message", notification);
+		}
+
+		// Manejar actualizaciones de estado (sent, delivered, read, failed)
+		if (value?.statuses?.length > 0) {
+			const status = value.statuses[0];
+
+			const statusNotification = {
+				type: "status",
+				whatsappMessageId: status.id,
+				phone: status.recipient_id,
+				status: status.status,
+				timestamp: new Date(parseInt(status.timestamp) * 1000).toISOString(),
+			};
+
+			// Publicar actualización de estado
+			await channel.publish("message-status-update", statusNotification);
 		}
 	} catch (error) {
 		throw error;

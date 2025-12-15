@@ -1,6 +1,6 @@
-import type { clientsInRuta } from "@/utils/types/messages";
+import type { clientesEnRuta } from "@/utils/types/send";
 
-export const allDataRuta = async (): Promise<clientsInRuta[]> => {
+export const allDataRuta = async (): Promise<clientesEnRuta[]> => {
 	try {
 		const response = await fetch("/api/data/allDataRuta", {
 			method: "GET",

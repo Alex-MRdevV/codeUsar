@@ -1,4 +1,4 @@
-import type { ExcelRow } from "@/utils/types/messages";
+import type { ExcelRow } from "@/utils/types/files";
 
 export function validateRow(row: unknown): ExcelRow | null {
 	if (!row || typeof row !== "object") {

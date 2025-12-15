@@ -1,8 +1,8 @@
-import type { dataUsar } from "@/utils/types/messages";
+import type { dataUsar } from "@/utils/types/send";
 
 export const UploadPhonesRequestRutas = async (
 	file: File,
-	status: "confirmacion_de_pedido"
+	status: "pedidosEnRUTADOS"
 ): Promise<[Error, null] | [null, dataUsar[]]> => {
 	try {
 		const formData = new FormData();

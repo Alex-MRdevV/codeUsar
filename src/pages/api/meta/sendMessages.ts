@@ -1,7 +1,6 @@
 import { sendMessagesToAPI } from "@/lib/providersMensajes/apiMeta/send";
 import { validateSendMessageRequest } from "@/lib/providersMensajes/validateMessage";
 import { res } from "@/utils/responseAstro";
-import type { SendMessageRequest } from "@/utils/types/providers/meta";
 import { trackMessagesSent } from "@/utils/utilitiesSendMessages";
 import type { APIRoute } from "astro";
 
@@ -17,24 +16,38 @@ export const POST: APIRoute = async ({ request }) => {
 		);
 	}
 
-	let jsonData: SendMessageRequest;
 	try {
-		jsonData = await request.json();
-	} catch (error) {
-		return res(
-			{ message: "JSON inválido en el cuerpo de la solicitud" },
-			{ status: 400 }
-		);
-	}
+		const body = await request.json();
+		const { messageData, type } = body;
 
-	// Validaciones del request
-	const validationError = validateSendMessageRequest(jsonData);
-	if (validationError) return validationError;
+		// Validar que existan los campos necesarios
+		if (!messageData || !type) {
+			return res(
+				{ message: "messageData y type son requeridos en el body" },
+				{ status: 400 }
+			);
+		}
 
-	try {
+		// Validar que type sea válido
+		if (type !== "template" && type !== "text") {
+			return res(
+				{ message: "type debe ser 'template' o 'text'" },
+				{ status: 400 }
+			);
+		}
+
+		// Validaciones del messageData
+		const validationError = validateSendMessageRequest(messageData, type);
+		if (validationError) {
+			return res(
+				{ message: validationError.message },
+				{ status: validationError.status }
+			);
+		}
+
 		// Enviar mensajes
 		const [error, result] = await sendMessagesToAPI(
-			jsonData,
+			messageData,
 			ACCESS_TOKEN,
 			PHONE_NUMBER_ID,
 			20 // batchSize explícito
@@ -70,16 +83,16 @@ export const POST: APIRoute = async ({ request }) => {
 
 		const successfulMessages =
 			result?.results.filter((item) => item.status !== "error").length || 0;
-
 		const deliveredMessages =
 			result?.results.filter((item) => item.status === "success").length || 0;
+
 		if (successfulMessages > 0) {
 			// Trackear con el templateId si está disponible
 			await trackMessagesSent(
-				jsonData.templateId || null,
+				messageData.templateId || null,
 				successfulMessages,
 				deliveredMessages,
-				jsonData.templateName as string
+				messageData.templateName as string
 			);
 		}
 

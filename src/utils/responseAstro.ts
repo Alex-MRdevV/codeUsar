@@ -1,19 +1,39 @@
-export const res = (
-	body: string | Record<string, unknown> | Array<unknown> | null,
+export const res = <T = unknown>(
+	body: T | BodyInit | null,
 	{
 		status = 200,
 		statusText,
-		headers = new Headers({ "Content-Type": "application/json" }),
-	}: { status?: number; statusText?: string; headers?: Headers }
+		headers,
+		raw = false,
+	}: {
+		status?: number;
+		statusText?: string;
+		headers?: Headers;
+		raw?: boolean;
+	}
 ) => {
-	const responseBody =
-		body && typeof body === "object"
-			? JSON.stringify(body)
-			: (body as BodyInit);
+	let responseBody: BodyInit | null = null;
 
-	if (status === 204) {
-		return new Response(null, { status, statusText, headers });
+	if (status !== 204 && body !== null) {
+		if (raw) {
+			responseBody = body as BodyInit;
+		} else if (
+			typeof body === "object" &&
+			!(body instanceof ArrayBuffer) &&
+			!(body instanceof Blob) &&
+			!(body instanceof FormData)
+		) {
+			responseBody = JSON.stringify(body);
+		} else {
+			responseBody = body as BodyInit;
+		}
 	}
 
-	return new Response(responseBody, { status, statusText, headers });
+	return new Response(responseBody, {
+		status,
+		statusText,
+		headers:
+			headers ??
+			(!raw ? new Headers({ "Content-Type": "application/json" }) : undefined),
+	});
 };

@@ -12,14 +12,9 @@ export const GET: APIRoute = async () => {
 			clientId: "SendFlow",
 		});
 
-		return res(
-			{
-				token: tokenRequest,
-			},
-			{
-				status: 200,
-			}
-		);
+		return res(tokenRequest, {
+			status: 200,
+		});
 	} catch (error) {
 		return res(
 			{

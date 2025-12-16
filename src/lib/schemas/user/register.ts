@@ -1,5 +1,4 @@
 import * as v from "valibot";
-import { roles } from "@/utils/types/user";
 
 // Esquema base sin refinamiento
 const baseSchema = v.object({
@@ -11,7 +10,6 @@ const baseSchema = v.object({
 		v.string("El email debe ser un texto"),
 		v.email("Debe ser un correo válido")
 	),
-	role: v.picklist(roles, "Seleccione un rol válido."),
 	password: v.pipe(
 		v.string("La contraseña no puede ser null"),
 		v.minLength(8, "La contraseña debe tener al menos 8 caracteres"),

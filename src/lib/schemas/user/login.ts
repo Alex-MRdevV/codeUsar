@@ -1,4 +1,3 @@
-import { roles } from "@/utils/types/user";
 import * as v from "valibot";
 
 export const loginSchema = v.object({
@@ -17,7 +16,6 @@ export const loginSchema = v.object({
 			"La contraseña debe contener letras mayúsculas, minúsculas, números y caracteres especiales (@,_,$,etc)"
 		)
 	),
-	role: v.picklist(roles, "Seleccione un rol válido."),
 });
 
 export type LoginInput = v.InferOutput<typeof loginSchema>;

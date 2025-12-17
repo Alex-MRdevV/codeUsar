@@ -14,3 +14,4 @@ export const clientesEnRuta = sqliteTable("clientesEnRuta", {
 	horaFinal: text("horaFinal"),
 	tipoMensaje: text("tipoMensaje"),
 });
+		

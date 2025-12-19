@@ -27,7 +27,8 @@ export const useMessagesLogicTemplates = (
 	const getWhatsAppTemplateName = (internalName: string): string => {
 		const templateMap: Record<string, string> = {
 			pedidosEnRUTADOS: "confirmacion_de_pedido",
-			"bavaria_now_confirmar": "confirmar_pedidos_bavaria"
+			"bavaria_now_confirmar": "confirmar_pedidos_bavaria",
+			"pedidos_retrasados": "pedidos_retrasados"
 		};
 
 		return templateMap[internalName] || internalName;
@@ -87,7 +88,7 @@ export const useMessagesLogicTemplates = (
 			case "pedidos_retrasados":
 			case "bavaria_now_confirmar":
 				return {
-					"2": nombreCliente,
+					"1": nombreCliente,
 				};
 
 			case "pedidosEnRUTADOS": {

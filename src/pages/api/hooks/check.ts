@@ -24,6 +24,7 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
 	try {
 		const body = await request.json();
+		console.log(body);
 		await processWebhookWithAbly(body);
 		return res(null, { status: 200 });
 	} catch (error) {
@@ -37,6 +38,9 @@ async function processWebhookWithAbly(body: any) {
 		const entry = body.entry?.[0];
 		const change = entry?.changes?.[0];
 		const value = change?.value;
+		console.log("El entry es: " + entry);
+		console.log("El change es: " + change);
+		console.log("El value es: " + value);
 		await insertMessageFromWebhook(body);
 
 		const channel = ablyRest.channels.get("notifications");

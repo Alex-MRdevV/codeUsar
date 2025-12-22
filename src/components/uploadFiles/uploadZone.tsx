@@ -44,7 +44,7 @@ export const FileUploadZone = ({ label, onFileChange, file }: FileUploadZoneProp
 			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 			'text/csv'
 		];
-		const validExtensions = ['.xlsx', '.xls', '.csv'];
+		const validExtensions = ['.xlsx', '.xls', '.csv', 'xlsm'];
 
 		return validTypes.includes(file.type) ||
 			validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
@@ -78,7 +78,7 @@ export const FileUploadZone = ({ label, onFileChange, file }: FileUploadZoneProp
 					<input
 						ref={inputRef}
 						type="file"
-						accept=".xlsx,.xls,.csv"
+						accept=".xlsx,.xls,.csv, .xlsm"
 						onChange={handleFileInput}
 						className="hidden"
 					/>

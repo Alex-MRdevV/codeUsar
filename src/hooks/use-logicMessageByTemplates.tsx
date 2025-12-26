@@ -84,7 +84,7 @@ export const useMessagesLogicTemplates = (
 		const nombreCliente = messageData.name || "Cliente";
 
 		switch (messageData.typeMessage) {
-			case "pedidos_no_planeados":
+			case "pedidos_no_planeados2":
 			case "pedidos_retrasados":
 			case "bavaria_now_confirmar":
 				return {

@@ -15,18 +15,6 @@ export interface MessageCardProps {
 	index: number;
 }
 
-export interface AddMessageFormContainerProps {
-	templates: Template[];
-	getTargetStatusForTemplate: (
-		templateName: string
-	) =>
-		| "aplazado"
-		| "Reasignados"
-		| "Para confirmar"
-		| "enRuta"
-		| "Viajes En piso";
-}
-
 export interface MessageListProps {
 	messages: Message[];
 	onRemove: (id: string) => void;
@@ -35,14 +23,14 @@ export interface MessageListProps {
 // Mapea plantillas a estados
 export const getTargetStatusForTemplate = (templateName: string) => {
 	switch (templateName) {
-		case "pedidos_no_planeados":
-			return "aplazado";
+		case "pedidos_no_planeados2":
+			return "No planeados";
 		case "pedidos_retrasados":
-			return "Reasignados";
+			return "Aplazados";
 		case "bavaria_now_confirmar":
 			return "Para confirmar";
 		case "pedidosEnRUTADOS":
-			return "enRuta";
+			return "En ruta";
 		default:
 			return "enRuta";
 	}

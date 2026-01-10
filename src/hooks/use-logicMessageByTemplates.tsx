@@ -35,6 +35,12 @@ export const useMessagesLogicTemplates = (
 		return templateMap[internalName] || internalName;
 	};
 
+	// Templates que tienen parámetros en el HEADER
+	const templatesWithHeaderParams = [
+		"bavaria_now_confirmar",
+		"cambio_frecuencia"
+	];
+
 	// Recipients filtrados por plantilla
 	const recipients = useMemo(() => {
 		if (!currentTemplate) return [];
@@ -146,8 +152,8 @@ export const useMessagesLogicTemplates = (
 			? varsToPositionalArray(resolvedVars, paramsList)
 			: Object.values(resolvedVars);
 
-		const needsHeaderParams =
-			templateNameToUse === "bavaria_now_confirmar";
+		// Verificar si este template necesita headerParams
+		const needsHeaderParams = templatesWithHeaderParams.includes(templateNameToUse);
 
 		return {
 			templateId: currentTemplate.id,

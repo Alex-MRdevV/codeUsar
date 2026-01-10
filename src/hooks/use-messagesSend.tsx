@@ -101,8 +101,9 @@ export const useSendMessage = ({ buildPayload, recipients, type }: UseSendMessag
 						createFlyingMessage(phone);
 						try {
 							const payload = buildPayload(phone);
+							console.log(payload)
 							const [err, res] = await sendWhatsAppMessage(payload, type);
-
+							console.log(err)
 							if (res) {
 								// Agregar resultado inmediatamente
 								resultsRef.current.push(res);

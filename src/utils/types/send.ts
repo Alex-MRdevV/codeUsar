@@ -32,7 +32,8 @@ export interface dataUsar {
 		| "pedidos_no_planeados2"
 		| "pedidos_retrasados"
 		| "bavaria_now_confirmar"
-		| "pedidosEnRUTADOS";
+		| "pedidosEnRUTADOS"
+		| "cambio_frecuencia";
 }
 
 export type MessageData =

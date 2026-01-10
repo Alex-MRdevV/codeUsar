@@ -28,7 +28,8 @@ export const useMessagesLogicTemplates = (
 		const templateMap: Record<string, string> = {
 			pedidosEnRUTADOS: "confirmacion_de_pedido",
 			"bavaria_now_confirmar": "confirmar_pedidos_bavaria",
-			"pedidos_retrasados": "pedidos_retrasados"
+			"pedidos_retrasados": "pedidos_retrasados",
+			"cambio_frecuencia": "cambio_frecuencia"
 		};
 
 		return templateMap[internalName] || internalName;
@@ -87,6 +88,7 @@ export const useMessagesLogicTemplates = (
 			case "pedidos_no_planeados2":
 			case "pedidos_retrasados":
 			case "bavaria_now_confirmar":
+			case "cambio_frecuencia":
 				return {
 					"1": nombreCliente,
 				};

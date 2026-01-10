@@ -10,6 +10,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
+		console.log("❌ Error 401: Variables de entorno no definidas");
 		return res(
 			{ message: "Las variables de entorno no están definidas" },
 			{ status: 401 }
@@ -18,10 +19,16 @@ export const POST: APIRoute = async ({ request }) => {
 
 	try {
 		const body = await request.json();
+		console.log("📥 Body recibido:", JSON.stringify(body, null, 2));
+
 		const { messageData, type } = body;
 
 		// Validar que existan los campos necesarios
 		if (!messageData || !type) {
+			console.log("❌ Error 400: Campos faltantes", {
+				hasMessageData: !!messageData,
+				hasType: !!type
+			});
 			return res(
 				{ message: "messageData y type son requeridos en el body" },
 				{ status: 400 }
@@ -30,6 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 		// Validar que type sea válido
 		if (type !== "template" && type !== "text") {
+			console.log("❌ Error 400: Type inválido", { type });
 			return res(
 				{ message: "type debe ser 'template' o 'text'" },
 				{ status: 400 }
@@ -39,11 +47,14 @@ export const POST: APIRoute = async ({ request }) => {
 		// Validaciones del messageData
 		const validationError = validateSendMessageRequest(messageData, type);
 		if (validationError) {
+			console.log("❌ Error de validación:", validationError);
 			return res(
 				{ message: validationError.message },
 				{ status: validationError.status }
 			);
 		}
+
+		console.log("✅ Validaciones pasadas. Enviando mensajes...");
 
 		// Enviar mensajes
 		const [error, result] = await sendMessagesToAPI(
@@ -54,6 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
 		);
 
 		if (error) {
+			console.log("❌ Error 500: Error al enviar mensajes", error);
 			return res(
 				{
 					message: "Error al enviar mensajes",
@@ -63,10 +75,18 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
+		console.log("📊 Resultados del envío:", {
+			totalResults: result?.results.length,
+			results: result?.results
+		});
+
 		// Verificar si hubo errores en los resultados
 		const hasErrors = result?.results.some((item) => item.status === "error");
 
 		if (hasErrors && result?.results.every((item) => item.status === "error")) {
+			console.log("❌ Error 400: Todos los mensajes fallaron", {
+				results: result?.results
+			});
 			return res(
 				{
 					message: "Error al enviar mensajes",
@@ -85,6 +105,12 @@ export const POST: APIRoute = async ({ request }) => {
 			result?.results.filter((item) => item.status !== "error").length || 0;
 		const deliveredMessages =
 			result?.results.filter((item) => item.status === "success").length || 0;
+
+		console.log("📈 Resumen de envío:", {
+			successfulMessages,
+			deliveredMessages,
+			hasErrors
+		});
 
 		if (successfulMessages > 0) {
 			// Trackear con el templateId si está disponible
@@ -113,6 +139,10 @@ export const POST: APIRoute = async ({ request }) => {
 			{ status: 200 }
 		);
 	} catch (error) {
+		console.log("❌ Error 500: Error interno del servidor", {
+			error: (error as Error).message,
+			stack: (error as Error).stack
+		});
 		return res(
 			{
 				message: "Error interno del servidor",

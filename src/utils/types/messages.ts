@@ -29,6 +29,8 @@ export const getTargetStatusForTemplate = (templateName: string) => {
 			return "Aplazados";
 		case "bavaria_now_confirmar":
 			return "Para confirmar";
+		case "cambio_frecuencia":
+			return "Cambio de frecuencia";
 		case "pedidosEnRUTADOS":
 			return "En ruta";
 		default:
@@ -73,5 +75,6 @@ export interface ContentForSendProps {
 		| "Reasignados"
 		| "Para confirmar"
 		| "enRuta"
-		| "Viajes En piso";
+		| "Cambio de frecuencia"
+		| "En Ruta";
 }

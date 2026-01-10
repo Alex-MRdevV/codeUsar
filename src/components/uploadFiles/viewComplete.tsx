@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadZone } from "@/components/uploadFiles/uploadZone";
 import { UploadPhonesRequestBavariaNow } from "@/utils/services/files/addMensajeBavariaNow";
+import { UploadPhonesRequestFrecuencia } from "@/utils/services/files/addMensajesReasignados";
 import { UploadPhonesRequestRechazados } from "@/utils/services/files/addMensajesRechazados";
 import { UploadPhonesRequestRutas } from "@/utils/services/files/addMensajesRuta";
 import { UploadPhonesRequestReasignados } from "@/utils/services/files/addReasinagdos";
@@ -14,6 +15,7 @@ export const ViewUploadComplete = () => {
 	const [file2, setFile2] = useState<File | null>(null);
 	const [file3, setFile3] = useState<File | null>(null);
 	const [file4, setFile4] = useState<File | null>(null);
+	const [file5, setFile5] = useState<File | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleReset = () => {
@@ -21,13 +23,14 @@ export const ViewUploadComplete = () => {
 		setFile2(null);
 		setFile3(null);
 		setFile4(null);
+		setFile5(null);
 		toast.info("Formulario reiniciado");
 	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (!file1 && !file2 && !file3 && !file4) {
+		if (!file1 && !file2 && !file3 && !file4 && !file5) {
 			toast.error("Por favor, sube al menos un archivo Excel");
 			return;
 		}
@@ -79,6 +82,15 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
+			if (file5) {
+				const [errorConsolidado] =
+					await UploadPhonesRequestFrecuencia(file5, "cambio_frecuencia");
+
+				if (errorConsolidado) {
+					hasError = true;
+				}
+			}
+
 			if (hasError) {
 				setIsLoading(false);
 				return;
@@ -122,6 +134,11 @@ export const ViewUploadComplete = () => {
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-6">
 							<FileUploadZone
+								label="Archivo para los cambios de frecuencias (Opcional)"
+								file={file5}
+								onFileChange={setFile5}
+							/>
+							<FileUploadZone
 								label="Archivo para los pedidos no planeados (Opcional)"
 								file={file1}
 								onFileChange={setFile1}
@@ -145,7 +162,7 @@ export const ViewUploadComplete = () => {
 								<Button
 									type="submit"
 									className="flex-1"
-									disabled={(!file1 && !file2 && !file3 && !file4) || isLoading}
+									disabled={(!file1 && !file2 && !file3 && !file4 && !file5) || isLoading}
 								>
 									{isLoading ? (
 										<>

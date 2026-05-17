@@ -33,7 +33,8 @@ export interface dataUsar {
 		| "pedidos_retrasados"
 		| "bavaria_now_confirmar"
 		| "pedidosEnRUTADOS"
-		| "cambio_frecuencia";
+		| "cambio_frecuencia"
+		| "lunes_aplazados";
 }
 
 export type MessageData =

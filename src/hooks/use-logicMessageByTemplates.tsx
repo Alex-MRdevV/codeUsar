@@ -29,7 +29,8 @@ export const useMessagesLogicTemplates = (
 			pedidosEnRUTADOS: "confirmacion_de_pedido",
 			"bavaria_now_confirmar": "confirmar_pedidos_bavaria",
 			"pedidos_retrasados": "pedidos_retrasados",
-			"cambio_frecuencia": "cambio_frecuencia"
+			"cambio_frecuencia": "cambio_frecuencia",
+			"lunes_aplazados": "lunes_aplazados"
 		};
 
 		return templateMap[internalName] || internalName;
@@ -98,6 +99,9 @@ export const useMessagesLogicTemplates = (
 				return {
 					"1": nombreCliente,
 				};
+
+			case "lunes_aplazados":
+				return {};
 
 			case "pedidosEnRUTADOS": {
 				const clientData = getClientData(phoneNumber);

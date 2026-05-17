@@ -6,6 +6,7 @@ import { UploadPhonesRequestFrecuencia } from "@/utils/services/files/addMensaje
 import { UploadPhonesRequestRechazados } from "@/utils/services/files/addMensajesRechazados";
 import { UploadPhonesRequestRutas } from "@/utils/services/files/addMensajesRuta";
 import { UploadPhonesRequestReasignados } from "@/utils/services/files/addReasinagdos";
+import { UploadPhonesRequestLunesAplazados } from "@/utils/services/files/addLunesAplazados";
 import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export const ViewUploadComplete = () => {
 	const [file3, setFile3] = useState<File | null>(null);
 	const [file4, setFile4] = useState<File | null>(null);
 	const [file5, setFile5] = useState<File | null>(null);
+	const [file6, setFile6] = useState<File | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleReset = () => {
@@ -24,13 +26,14 @@ export const ViewUploadComplete = () => {
 		setFile3(null);
 		setFile4(null);
 		setFile5(null);
+		setFile6(null);
 		toast.info("Formulario reiniciado");
 	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (!file1 && !file2 && !file3 && !file4 && !file5) {
+		if (!file1 && !file2 && !file3 && !file4 && !file5 && !file6) {
 			toast.error("Por favor, sube al menos un archivo Excel");
 			return;
 		}
@@ -91,6 +94,17 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
+			if (file6) {
+				const [errorFile6] = await UploadPhonesRequestLunesAplazados(
+					file6,
+					"lunes_aplazados"
+				);
+
+				if (errorFile6) {
+					hasError = true;
+				}
+			}
+
 			if (hasError) {
 				setIsLoading(false);
 				return;
@@ -101,6 +115,8 @@ export const ViewUploadComplete = () => {
 			setFile2(null);
 			setFile3(null);
 			setFile4(null);
+			setFile5(null);
+			setFile6(null);
 		} catch (error) {
 			toast.error("Error inesperado al procesar los archivos");
 		} finally {
@@ -158,11 +174,16 @@ export const ViewUploadComplete = () => {
 								file={file4}
 								onFileChange={setFile4}
 							/>
+							<FileUploadZone
+								label="Archivo para los pedidos con Lunes Aplazados (Opcional)"
+								file={file6}
+								onFileChange={setFile6}
+							/>
 							<section className="flex gap-3 pt-4">
 								<Button
 									type="submit"
 									className="flex-1"
-									disabled={(!file1 && !file2 && !file3 && !file4 && !file5) || isLoading}
+									disabled={(!file1 && !file2 && !file3 && !file4 && !file5 && !file6) || isLoading}
 								>
 									{isLoading ? (
 										<>

@@ -28,8 +28,12 @@ export const useMessagesLogicTemplates = (
 	const getWhatsAppTemplateName = (internalName: string): string => {
 		const templateMap: Record<string, string> = {
 			pedidosenrutados: "en_ruta",
+			pedidosEnRUTADOS: "confirmacion_de_pedido",
+			bavaria_now_confirmar: "confirmar_pedidos_bavaria",
 			pedidos_retrasados: "pedidos_retrasados",
-			pedidos_no_planeados2: "pedidos_no_planeados2"
+			pedidos_no_planeados2: "pedidos_no_planeados2",
+			cambio_frecuencia: "cambio_frecuencia",
+			lunes_aplazados: "lunes_aplazados",
 		};
 
 		return templateMap[internalName] || internalName;
@@ -98,9 +102,11 @@ export const useMessagesLogicTemplates = (
 		switch (messageData.typeMessage) {
 			case "pedidos_no_planeados2":
 			case "pedidos_retrasados":
+			case "lunes_aplazados":
 				return {};
 
-			case "pedidosenrutados": {
+			case "pedidosenrutados":
+			case "pedidosEnRUTADOS": {
 				const clientData = getClientData(phoneNumber);
 				return {
 					"1": clientData?.horaInicial ?? "6:00 am",

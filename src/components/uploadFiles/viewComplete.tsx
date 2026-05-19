@@ -4,6 +4,7 @@ import { FileUploadZone } from "@/components/uploadFiles/uploadZone";
 import { UploadPhonesRequestRechazados } from "@/utils/services/files/addMensajesRechazados";
 import { UploadPhonesRequestRutas } from "@/utils/services/files/addMensajesRuta";
 import { UploadPhonesRequestReasignados } from "@/utils/services/files/addReasinagdos";
+import { UploadPhonesRequestLunesAplazados } from "@/utils/services/files/addLunesAplazados";
 import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,19 +13,21 @@ export const ViewUploadComplete = () => {
 	const [fileNoPlaneados, setFileNoPlaneados] = useState<File | null>(null);
 	const [fileRetrasados, setFileRetrasados] = useState<File | null>(null);
 	const [fileEnRuta, setFileEnRuta] = useState<File | null>(null);
+	const [fileLunesAplazados, setFileLunesAplazados] = useState<File | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleReset = () => {
 		setFileNoPlaneados(null);
 		setFileRetrasados(null);
 		setFileEnRuta(null);
+		setFileLunesAplazados(null);
 		toast.info("Formulario reiniciado");
 	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (!fileNoPlaneados && !fileRetrasados && !fileEnRuta) {
+		if (!fileNoPlaneados && !fileRetrasados && !fileEnRuta && !fileLunesAplazados) {
 			toast.error("Por favor, sube al menos un archivo Excel");
 			return;
 		}
@@ -65,6 +68,17 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
+			if (fileLunesAplazados) {
+				const [errorFile6] = await UploadPhonesRequestLunesAplazados(
+					fileLunesAplazados,
+					"lunes_aplazados"
+				);
+
+				if (errorFile6) {
+					hasError = true;
+				}
+			}
+
 			if (hasError) {
 				setIsLoading(false);
 				return;
@@ -74,6 +88,7 @@ export const ViewUploadComplete = () => {
 			setFileNoPlaneados(null);
 			setFileRetrasados(null);
 			setFileEnRuta(null);
+			setFileLunesAplazados(null);
 		} catch (error) {
 			toast.error("Error inesperado al procesar los archivos");
 		} finally {
@@ -121,11 +136,16 @@ export const ViewUploadComplete = () => {
 								file={fileEnRuta}
 								onFileChange={setFileEnRuta}
 							/>
+							<FileUploadZone
+								label="Archivo para los pedidos con Lunes Aplazados (Opcional)"
+								file={fileLunesAplazados}
+								onFileChange={setFileLunesAplazados}
+							/>
 							<section className="flex gap-3 pt-4">
 								<Button
 									type="submit"
 									className="flex-1"
-									disabled={(!fileNoPlaneados && !fileRetrasados && !fileEnRuta) || isLoading}
+									disabled={(!fileNoPlaneados && !fileRetrasados && !fileEnRuta && !fileLunesAplazados) || isLoading}
 								>
 									{isLoading ? (
 										<>

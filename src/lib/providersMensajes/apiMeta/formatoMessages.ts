@@ -155,7 +155,7 @@ export const buildTemplateMessage = (
 		template: {
 			name: request.templateName!,
 			language: {
-				code: request.templateLanguage || "es",
+				code: request.templateLanguage || "es_CO",
 			},
 			...(components.length > 0 && { components }),
 		},

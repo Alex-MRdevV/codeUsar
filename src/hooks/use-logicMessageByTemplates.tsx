@@ -22,38 +22,40 @@ export const useMessagesLogicTemplates = (
 		dataMensajes,
 		selectedTemplate,
 		variableValues,
+		manualMessages,
 	} = props;
 
 	const getWhatsAppTemplateName = (internalName: string): string => {
 		const templateMap: Record<string, string> = {
-			pedidosEnRUTADOS: "confirmacion_de_pedido",
-			"bavaria_now_confirmar": "confirmar_pedidos_bavaria",
-			"pedidos_retrasados": "pedidos_retrasados",
-			"cambio_frecuencia": "cambio_frecuencia"
+			pedidosenrutados: "en_ruta",
+			pedidos_retrasados: "pedidos_retrasados",
+			pedidos_no_planeados2: "pedidos_no_planeados2"
 		};
 
 		return templateMap[internalName] || internalName;
 	};
 
 	// Templates que tienen parámetros en el HEADER
-	const templatesWithHeaderParams = [
-		"bavaria_now_confirmar",
-		"cambio_frecuencia"
-	];
+	const templatesWithHeaderParams: string[] = [];
 
-	// Recipients filtrados por plantilla
+	// Recipients filtrados por plantilla o manuales
 	const recipients = useMemo(() => {
+		if (!selectedTemplate) {
+			if (!Array.isArray(manualMessages)) return [];
+			return manualMessages.map((m) => m.phone).filter(Boolean);
+		}
+
 		if (!currentTemplate) return [];
 
 		const templateName =
 			currentTemplate.metaTemplateName ??
 			currentTemplate.name ??
-			"pedidosEnRUTADOS";
+			"pedidosenrutados";
 
-		if (templateName === "pedidosEnRUTADOS") {
+		if (templateName === "pedidosenrutados") {
 			if (!Array.isArray(dataClientesRuta)) return [];
 			return dataClientesRuta
-				.filter((c) => c.tipoMensaje === "pedidosEnRUTADOS")
+				.filter((c) => c.tipoMensaje === "pedidosenrutados")
 				.map((c) => c.phoneNumber)
 				.filter(Boolean);
 		}
@@ -64,7 +66,7 @@ export const useMessagesLogicTemplates = (
 			.filter((msg) => msg.typeMessage === templateName)
 			.map((msg) => msg.phone)
 			.filter(Boolean);
-	}, [dataMensajes, dataClientesRuta, currentTemplate]);
+	}, [dataMensajes, dataClientesRuta, currentTemplate, selectedTemplate, manualMessages]);
 
 	const getMessageData = (phoneNumber: string) => {
 		return dataMensajes?.find((msg) => msg.phone === phoneNumber) || null;
@@ -75,9 +77,12 @@ export const useMessagesLogicTemplates = (
 	};
 
 	const buildTemplateVars = (phoneNumber: string): TemplateVars => {
+		if (!currentTemplate?.variables?.params || currentTemplate.variables.params.length === 0) {
+			return {};
+		}
 		const messageData = getMessageData(phoneNumber);
 		if (!messageData) {
-			// Si no hay messageData, buscar en clientData para pedidosEnRUTADOS
+			// Si no hay messageData, buscar en clientData para pedidosenrutados
 			const clientData = getClientData(phoneNumber);
 			if (clientData) {
 				return {
@@ -93,13 +98,9 @@ export const useMessagesLogicTemplates = (
 		switch (messageData.typeMessage) {
 			case "pedidos_no_planeados2":
 			case "pedidos_retrasados":
-			case "bavaria_now_confirmar":
-			case "cambio_frecuencia":
-				return {
-					"1": nombreCliente,
-				};
+				return {};
 
-			case "pedidosEnRUTADOS": {
+			case "pedidosenrutados": {
 				const clientData = getClientData(phoneNumber);
 				return {
 					"1": clientData?.horaInicial ?? "6:00 am",
@@ -125,7 +126,16 @@ export const useMessagesLogicTemplates = (
 			.map((p) => vars[p.name] ?? "");
 	};
 
-	const buildPayload = (recipient: string): SendMessageRequest => {
+	const buildPayload = (recipient: string): any => {
+		if (!selectedTemplate) {
+			const msg = manualMessages?.find((m) => m.phone === recipient);
+			return {
+				messageType: "text",
+				recipients: [recipient],
+				content: msg?.content || "",
+			};
+		}
+
 		if (!currentTemplate) throw new Error("No hay template seleccionado");
 
 		// 🔑 Obtener el nombre interno (puede ser metaTemplateName o name)
@@ -173,7 +183,9 @@ export const useMessagesLogicTemplates = (
 	};
 
 	const canSend = (): boolean => {
-		if (!selectedTemplate) return false;
+		if (!selectedTemplate) {
+			return Array.isArray(manualMessages) && manualMessages.length > 0;
+		}
 		if (!dataMensajes && !dataClientesRuta) return false;
 		if (recipients.length === 0) return false;
 

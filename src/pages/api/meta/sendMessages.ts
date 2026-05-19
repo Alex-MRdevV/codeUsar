@@ -8,9 +8,16 @@ export const POST: APIRoute = async ({ request }) => {
 	const PHONE_NUMBER_ID = import.meta.env.WHATSAPP_PHONE_ID;
 	const ACCESS_TOKEN = import.meta.env.WHATSAPP_ACCESS_TOKEN;
 
+	console.log(" PHONE_NUMBER_ID:", PHONE_NUMBER_ID);
+	console.log(
+		" ACCESS_TOKEN:",
+		ACCESS_TOKEN ? "EXISTE ✅" : "NO EXISTE ❌"
+	);
+
 	// Validar variables de entorno
 	if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
-		console.log("❌ Error 401: Variables de entorno no definidas");
+		console.error("❌ Variables de entorno faltantes");
+
 		return res(
 			{ message: "Las variables de entorno no están definidas" },
 			{ status: 401 }
@@ -19,25 +26,31 @@ export const POST: APIRoute = async ({ request }) => {
 
 	try {
 		const body = await request.json();
-		console.log("📥 Body recibido:", JSON.stringify(body, null, 2));
+
+		console.log("📥 BODY RECIBIDO:", JSON.stringify(body, null, 2));
 
 		const { messageData, type } = body;
 
 		// Validar que existan los campos necesarios
 		if (!messageData || !type) {
-			console.log("❌ Error 400: Campos faltantes", {
-				hasMessageData: !!messageData,
-				hasType: !!type
-			});
+			console.error("❌ messageData o type faltantes");
+
 			return res(
 				{ message: "messageData y type son requeridos en el body" },
 				{ status: 400 }
 			);
 		}
 
+		console.log("📌 TYPE:", type);
+		console.log(
+			"📌 messageData:",
+			JSON.stringify(messageData, null, 2)
+		);
+
 		// Validar que type sea válido
 		if (type !== "template" && type !== "text") {
-			console.log("❌ Error 400: Type inválido", { type });
+			console.error("❌ Type inválido:", type);
+
 			return res(
 				{ message: "type debe ser 'template' o 'text'" },
 				{ status: 400 }
@@ -46,26 +59,33 @@ export const POST: APIRoute = async ({ request }) => {
 
 		// Validaciones del messageData
 		const validationError = validateSendMessageRequest(messageData, type);
+
 		if (validationError) {
-			console.log("❌ Error de validación:", validationError);
+			console.error("❌ Error validando messageData:", validationError);
+
 			return res(
 				{ message: validationError.message },
 				{ status: validationError.status }
 			);
 		}
 
-		console.log("✅ Validaciones pasadas. Enviando mensajes...");
+		console.log("🚀 Enviando mensajes a Meta...");
 
 		// Enviar mensajes
 		const [error, result] = await sendMessagesToAPI(
 			messageData,
 			ACCESS_TOKEN,
 			PHONE_NUMBER_ID,
-			20 // batchSize explícito
+			20
 		);
 
+		console.log("📤 RESULTADO API:");
+		console.log(JSON.stringify(result, null, 2));
+
 		if (error) {
-			console.log("❌ Error 500: Error al enviar mensajes", error);
+			console.error("❌ ERROR sendMessagesToAPI:");
+			console.error(error);
+
 			return res(
 				{
 					message: "Error al enviar mensajes",
@@ -75,18 +95,20 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		console.log("📊 Resultados del envío:", {
-			totalResults: result?.results.length,
-			results: result?.results
-		});
-
 		// Verificar si hubo errores en los resultados
-		const hasErrors = result?.results.some((item) => item.status === "error");
+		const hasErrors = result?.results.some(
+			(item) => item.status === "error"
+		);
 
-		if (hasErrors && result?.results.every((item) => item.status === "error")) {
-			console.log("❌ Error 400: Todos los mensajes fallaron", {
-				results: result?.results
-			});
+		console.log("📊 hasErrors:", hasErrors);
+
+		if (
+			hasErrors &&
+			result?.results.every((item) => item.status === "error")
+		) {
+			console.error("❌ Todos los mensajes fallaron");
+			console.error(JSON.stringify(result.results, null, 2));
+
 			return res(
 				{
 					message: "Error al enviar mensajes",
@@ -103,22 +125,21 @@ export const POST: APIRoute = async ({ request }) => {
 
 		const successfulMessages =
 			result?.results.filter((item) => item.status !== "error").length || 0;
+
 		const deliveredMessages =
 			result?.results.filter((item) => item.status === "success").length || 0;
 
-		console.log("📈 Resumen de envío:", {
-			successfulMessages,
-			deliveredMessages,
-			hasErrors
-		});
+		console.log("✅ successfulMessages:", successfulMessages);
+		console.log("✅ deliveredMessages:", deliveredMessages);
 
 		if (successfulMessages > 0) {
-			// Trackear con el templateId si está disponible
+			console.log("📈 Trackeando mensajes enviados...");
+
 			await trackMessagesSent(
 				messageData.templateId || null,
 				successfulMessages,
 				deliveredMessages,
-				messageData.templateName as string
+				(messageData.templateName as string) || "texto_libre"
 			);
 		}
 
@@ -132,17 +153,18 @@ export const POST: APIRoute = async ({ request }) => {
 					summary: {
 						total: result?.results.length || 0,
 						successful: successfulMessages,
-						failed: (result?.results.length || 0) - successfulMessages,
+						failed:
+							(result?.results.length || 0) -
+							successfulMessages,
 					},
 				},
 			},
 			{ status: 200 }
 		);
 	} catch (error) {
-		console.log("❌ Error 500: Error interno del servidor", {
-			error: (error as Error).message,
-			stack: (error as Error).stack
-		});
+		console.error("🔥 ERROR GENERAL:");
+		console.error(error);
+
 		return res(
 			{
 				message: "Error interno del servidor",

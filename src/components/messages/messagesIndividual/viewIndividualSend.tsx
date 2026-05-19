@@ -58,13 +58,14 @@ export const SendMessagesView = () => {
 		selectedTemplate,
 		variableValues,
 		dataClientesRuta,
-		dataMensajes
+		dataMensajes,
+		manualMessages
 	});
 
 	const { cancel, completed, currentBatch, error, flyingMessages, handleSendMessages, isCancelled, isPaused, isProcessing, pause, progress, reset, resetResultados, resultados, resume, totalBatches, isSubmitting } = useSendMessage({
 		buildPayload,
 		recipients,
-		type: "template"
+		type: isManual ? "text" : "template"
 	})
 
 	const uiMessages = useMemo(() => {
@@ -100,6 +101,7 @@ export const SendMessagesView = () => {
 			resetResultados();
 			setSelectedTemplate("");
 			setVariableValues({});
+			setManualMessages([]);
 			reset();
 		}
 	};
@@ -111,7 +113,7 @@ export const SendMessagesView = () => {
 			phoneNumber: phone,
 			horaInicial: horaInicial || new Date().toISOString(),
 			horaFinal: horaFinal || "",
-			tipoMensaje: "pedidosEnRUTADOS",
+			tipoMensaje: "pedidosenrutados",
 			__id: uuid.uuid,
 		};
 

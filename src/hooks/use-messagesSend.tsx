@@ -109,9 +109,10 @@ export const useSendMessage = ({ buildPayload, recipients, type }: UseSendMessag
 								resultsRef.current.push(res);
 								// Actualizar estado después de cada mensaje exitoso
 								updateResultados();
+								markFlyingSent(phone);
+							} else {
+								markFlyingError(phone);
 							}
-
-							markFlyingSent(phone);
 						} catch (error) {
 							markFlyingError(phone);
 						}

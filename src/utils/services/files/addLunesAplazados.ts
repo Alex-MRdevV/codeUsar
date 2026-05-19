@@ -1,15 +1,15 @@
 import type { dataUsar } from "@/utils/types/send";
 
-export const UploadPhonesRequestRutas = async (
+export const UploadPhonesRequestLunesAplazados = async (
 	file: File,
-	status: "pedidosenrutados"
+	status: "lunes_aplazados"
 ): Promise<[Error, null] | [null, dataUsar[]]> => {
 	try {
 		const formData = new FormData();
 		formData.append("file", file);
 		formData.append("status", status);
 
-		const response = await fetch(`/api/files/uploadRuta`, {
+		const response = await fetch(`/api/files/uploadLunesAplazados`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",

@@ -21,19 +21,16 @@ export interface clientesEnRuta {
 	phoneNumber: string;
 	horaInicial: string;
 	horaFinal: string;
-	tipoMensaje: "pedidosEnRUTADOS";
+	tipoMensaje: "pedidosenrutados";
 }
 
 export interface dataUsar {
 	name: string;
 	phone: string;
 	typeMessage:
-		| "pedidos_no_planeados"
 		| "pedidos_no_planeados2"
 		| "pedidos_retrasados"
-		| "bavaria_now_confirmar"
-		| "pedidosEnRUTADOS"
-		| "cambio_frecuencia";
+		| "pedidosenrutados";
 }
 
 export type MessageData =
@@ -52,6 +49,7 @@ export interface UseSendMessagesLogicProps {
 	dataMensajes: dataUsar[] | null;
 	selectedTemplate: string;
 	variableValues: Record<string, string>;
+	manualMessages?: Message[];
 }
 
 export interface UseSendMessageProps {

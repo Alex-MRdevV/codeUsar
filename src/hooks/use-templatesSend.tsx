@@ -27,16 +27,16 @@ export const useSendTemplates = () => {
 
 	const currentTemplate = useMemo(
 		() => data?.find((t) => t.id === selectedTemplate) || null,
-		[selectedTemplate] // Solo depende de selectedTemplate, no de data
+		[selectedTemplate , data] // Solo depende de selectedTemplate, no de data
 	);
 
 	const vars = currentTemplate?.variables ?? null;
 	const hasVars = Array.isArray(vars?.params) && vars.params.length > 0;
 
 	const handleTemplateChange = (templateId: string) => {
-		setSelectedTemplate(templateId);
+		setSelectedTemplate(templateId === "manual" ? "" : templateId);
 		setVariableValues({});
-		setIsTemplateMode(true);
+		setIsTemplateMode(templateId !== "manual");
 	};
 
 	const handleNewSend = () => {
@@ -44,7 +44,8 @@ export const useSendTemplates = () => {
 		setVariableValues({});
 		setIsTemplateMode(false);
 	};
-
+console.log("DATA:", data);
+console.log("CURRENT:", currentTemplate);
 	return {
 		currentTemplate,
 		selectedTemplate,

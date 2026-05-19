@@ -27,11 +27,7 @@ export const getTargetStatusForTemplate = (templateName: string) => {
 			return "No planeados";
 		case "pedidos_retrasados":
 			return "Aplazados";
-		case "bavaria_now_confirmar":
-			return "Para confirmar";
-		case "cambio_frecuencia":
-			return "Cambio de frecuencia";
-		case "pedidosEnRUTADOS":
+		case "pedidosenrutados":
 			return "En ruta";
 		default:
 			return "enRuta";
@@ -68,13 +64,42 @@ export interface ContentForSendProps {
 	currentTemplate: Template | null;
 	dataMensajes: dataUsar[] | null;
 	getRecipientCount: () => number;
-	getTargetStatusForTemplate: (
-		templateName: string
-	) =>
-		| "aplazado"
-		| "Reasignados"
-		| "Para confirmar"
-		| "enRuta"
-		| "Cambio de frecuencia"
-		| "En Ruta";
+	getTargetStatusForTemplate: (templateName: string) => string;
+}
+
+export interface SendViewComponentProps {
+	canSend: () => boolean;
+	currentTemplate: Template | null;
+	dataClientesRuta: clientesEnRuta[];
+	dataMensajes: dataUsar[] | null;
+	getRecipientCount: () => number;
+	getTargetStatusForTemplate: (templateName: string) => string;
+	handleCreateTemplate: () => void;
+	handleNewSend: () => void;
+	handleSendMessage: () => void;
+	handleTemplateChange: (templateId: string) => void;
+	hasVars: boolean;
+	isSubmitting: boolean;
+	recipients: string[];
+	resultados: any;
+	selectedTemplate: string;
+	setShowCreateModal: Dispatch<SetStateAction<boolean>>;
+	setVariableValues: Dispatch<SetStateAction<Record<string, string>>>;
+	showCreateModal: boolean;
+	templates: Template[];
+	variableValues: Record<string, string>;
+	vars: any;
+	cancel: () => void;
+	completed: boolean;
+	currentBatch: number;
+	error: string | null;
+	isCancelled: boolean;
+	isPaused: boolean;
+	isProcessing: boolean;
+	pause: () => void;
+	progress: number;
+	reset: () => void;
+	resume: () => void;
+	totalBatches: number;
+	flyingMessages: any[];
 }

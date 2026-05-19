@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadZone } from "@/components/uploadFiles/uploadZone";
-import { UploadPhonesRequestBavariaNow } from "@/utils/services/files/addMensajeBavariaNow";
-import { UploadPhonesRequestFrecuencia } from "@/utils/services/files/addMensajesReasignados";
 import { UploadPhonesRequestRechazados } from "@/utils/services/files/addMensajesRechazados";
 import { UploadPhonesRequestRutas } from "@/utils/services/files/addMensajesRuta";
 import { UploadPhonesRequestReasignados } from "@/utils/services/files/addReasinagdos";
@@ -11,26 +9,22 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export const ViewUploadComplete = () => {
-	const [file1, setFile1] = useState<File | null>(null);
-	const [file2, setFile2] = useState<File | null>(null);
-	const [file3, setFile3] = useState<File | null>(null);
-	const [file4, setFile4] = useState<File | null>(null);
-	const [file5, setFile5] = useState<File | null>(null);
+	const [fileNoPlaneados, setFileNoPlaneados] = useState<File | null>(null);
+	const [fileRetrasados, setFileRetrasados] = useState<File | null>(null);
+	const [fileEnRuta, setFileEnRuta] = useState<File | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleReset = () => {
-		setFile1(null);
-		setFile2(null);
-		setFile3(null);
-		setFile4(null);
-		setFile5(null);
+		setFileNoPlaneados(null);
+		setFileRetrasados(null);
+		setFileEnRuta(null);
 		toast.info("Formulario reiniciado");
 	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (!file1 && !file2 && !file3 && !file4 && !file5) {
+		if (!fileNoPlaneados && !fileRetrasados && !fileEnRuta) {
 			toast.error("Por favor, sube al menos un archivo Excel");
 			return;
 		}
@@ -40,9 +34,9 @@ export const ViewUploadComplete = () => {
 		try {
 			let hasError = false;
 
-			if (file1) {
+			if (fileNoPlaneados) {
 				const [errorFile1] = await UploadPhonesRequestRechazados(
-					file1,
+					fileNoPlaneados,
 					"pedidos_no_planeados2"
 				);
 
@@ -51,9 +45,9 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
-			if (file2) {
+			if (fileRetrasados) {
 				const [errorFile2] = await UploadPhonesRequestReasignados(
-					file2,
+					fileRetrasados,
 					"pedidos_retrasados"
 				);
 
@@ -62,29 +56,9 @@ export const ViewUploadComplete = () => {
 				}
 			}
 
-			if (file3) {
-				const [errorFile3] = await UploadPhonesRequestBavariaNow(
-					file3,
-					"bavaria_now_confirmar"
-				);
-
-				if (errorFile3) {
-					hasError = true;
-				}
-			}
-
-			if (file4) {
+			if (fileEnRuta) {
 				const [errorConsolidado] =
-					await UploadPhonesRequestRutas(file4, "pedidosEnRUTADOS");
-
-				if (errorConsolidado) {
-					hasError = true;
-				}
-			}
-
-			if (file5) {
-				const [errorConsolidado] =
-					await UploadPhonesRequestFrecuencia(file5, "cambio_frecuencia");
+					await UploadPhonesRequestRutas(fileEnRuta, "pedidosenrutados");
 
 				if (errorConsolidado) {
 					hasError = true;
@@ -97,10 +71,9 @@ export const ViewUploadComplete = () => {
 			}
 
 			toast.success("¡Proceso completado con éxito!");
-			setFile1(null);
-			setFile2(null);
-			setFile3(null);
-			setFile4(null);
+			setFileNoPlaneados(null);
+			setFileRetrasados(null);
+			setFileEnRuta(null);
 		} catch (error) {
 			toast.error("Error inesperado al procesar los archivos");
 		} finally {
@@ -134,35 +107,25 @@ export const ViewUploadComplete = () => {
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-6">
 							<FileUploadZone
-								label="Archivo para los cambios de frecuencias (Opcional)"
-								file={file5}
-								onFileChange={setFile5}
-							/>
-							<FileUploadZone
 								label="Archivo para los pedidos no planeados (Opcional)"
-								file={file1}
-								onFileChange={setFile1}
+								file={fileNoPlaneados}
+								onFileChange={setFileNoPlaneados}
 							/>
 							<FileUploadZone
-								label="Archivo para los pedidos re-asignados (Opcional)"
-								file={file2}
-								onFileChange={setFile2}
-							/>
-							<FileUploadZone
-								label="Archivo para la promoción de BavariaNow (Opcional)"
-								file={file3}
-								onFileChange={setFile3}
+								label="Archivo para los pedidos retrasados (Opcional)"
+								file={fileRetrasados}
+								onFileChange={setFileRetrasados}
 							/>
 							<FileUploadZone
 								label="Archivo Consolidado para los clientes en ruta (Opcional)"
-								file={file4}
-								onFileChange={setFile4}
+								file={fileEnRuta}
+								onFileChange={setFileEnRuta}
 							/>
 							<section className="flex gap-3 pt-4">
 								<Button
 									type="submit"
 									className="flex-1"
-									disabled={(!file1 && !file2 && !file3 && !file4 && !file5) || isLoading}
+									disabled={(!fileNoPlaneados && !fileRetrasados && !fileEnRuta) || isLoading}
 								>
 									{isLoading ? (
 										<>

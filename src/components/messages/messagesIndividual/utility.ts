@@ -12,13 +12,10 @@ export const buildTemplateVars = (
 	const nombreCliente = messageData.name || "Cliente";
 
 	switch (messageData.typeMessage) {
-		case "pedidos_no_planeados":
+		case "pedidos_no_planeados2":
 		case "pedidos_retrasados":
-		case "bavaria_now_confirmar":
-			return {
-				"2": nombreCliente,
-			};
-		case "pedidosEnRUTADOS": {
+			return {};
+		case "pedidosenrutados": {
 			const clientData = dataClientesRuta?.find(
 				(client) => client.phoneNumber === phoneNumber
 			);

@@ -27,7 +27,7 @@ export const AddMessageFormComponent = (props: AddMessageFormProps) => {
 		setContent
 	} = props;
 
-	const isRutaTemplate = currentTemplate?.metaTemplateName === "pedidosEnRUTADOS";
+	const isRutaTemplate = currentTemplate?.metaTemplateName === "pedidosenrutados";
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();

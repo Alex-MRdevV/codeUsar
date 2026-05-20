@@ -23,10 +23,15 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-		const sheetName = workbook.SheetNames[1];
+		
+		// Intentar usar la hoja en el índice 1 (NO PLAN), de lo contrario usar la primera hoja disponible
+		let sheetName = workbook.SheetNames[1];
+		if (!sheetName || !workbook.Sheets[sheetName]) {
+			sheetName = workbook.SheetNames[0];
+		}
 
 		// Verificar que la hoja exista
-		if (!workbook.Sheets[sheetName]) {
+		if (!sheetName || !workbook.Sheets[sheetName]) {
 			return res(
 				{ message: `No se encontró la hoja correspondiente` },
 				{ status: 400 }

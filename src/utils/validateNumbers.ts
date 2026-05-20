@@ -8,7 +8,13 @@ export function validateRow(row: unknown): ExcelRow | null {
 	const validRow = row as Record<string, unknown>;
 
 	// Buscar nombre (flexible con diferentes variaciones)
-	const nombre = validRow.Nombre || validRow.nombre || validRow.NOMBRE;
+	const nombre =
+		validRow.Nombre ||
+		validRow.nombre ||
+		validRow.NOMBRE ||
+		validRow["Nombre 3"] ||
+		validRow["nombre 3"] ||
+		validRow["NOMBRE 3"];
 
 	// Buscar teléfono (flexible con diferentes variaciones)
 	const celular =
@@ -18,7 +24,11 @@ export function validateRow(row: unknown): ExcelRow | null {
 		validRow.Telefono ||
 		validRow.telefono ||
 		validRow.TELEFONO ||
-		validRow.phoneNumber;
+		validRow.phoneNumber ||
+		validRow["Teléfono 1"] ||
+		validRow["telefono 1"] ||
+		validRow["TELÉFONO 1"] ||
+		validRow["Telefono 1"];
 
 	if (!nombre || !celular) return null;
 

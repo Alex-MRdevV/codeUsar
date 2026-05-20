@@ -15,10 +15,16 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
-		const sheetName = workbook.SheetNames[0];
+		// Intentar buscar por nombre "EN RUTA", o de lo contrario usar la primera hoja disponible
+		let sheetName = workbook.SheetNames.find(
+			(name) => name.toLowerCase() === "en ruta"
+		);
+		if (!sheetName || !workbook.Sheets[sheetName]) {
+			sheetName = workbook.SheetNames[0];
+		}
 
 		// Verificar que la hoja exista
-		if (!workbook.Sheets[sheetName]) {
+		if (!sheetName || !workbook.Sheets[sheetName]) {
 			return res(
 				{ message: `No se encontró la hoja correspondiente` },
 				{ status: 400 }

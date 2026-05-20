@@ -24,8 +24,13 @@ export const POST: APIRoute = async ({ request }) => {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
 		
-		// Intentar usar la hoja en el índice 1 (NO PLAN), de lo contrario usar la primera hoja disponible
-		let sheetName = workbook.SheetNames[1];
+		// Intentar buscar por nombre "NO PLAN", luego por índice 1 (segunda hoja), o finalmente usar la primera hoja disponible
+		let sheetName = workbook.SheetNames.find(
+			(name) => name.toLowerCase() === "no plan"
+		);
+		if (!sheetName || !workbook.Sheets[sheetName]) {
+			sheetName = workbook.SheetNames[1];
+		}
 		if (!sheetName || !workbook.Sheets[sheetName]) {
 			sheetName = workbook.SheetNames[0];
 		}

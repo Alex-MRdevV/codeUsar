@@ -24,8 +24,8 @@ export const POST: APIRoute = async ({ request }) => {
 		const buffer = await file.arrayBuffer();
 		const workbook = XLSX.read(buffer, { type: "buffer" });
 		
-		// Intentar usar la hoja en el índice 4 (BASE CLIENTES), de lo contrario usar la primera hoja disponible
-		let sheetName = workbook.SheetNames[4];
+		// Intentar usar la hoja en el índice 2 (APLAZADOS / tercera hoja), de lo contrario usar la primera hoja disponible
+		let sheetName = workbook.SheetNames[2];
 		if (!sheetName || !workbook.Sheets[sheetName]) {
 			sheetName = workbook.SheetNames[0];
 		}
